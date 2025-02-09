@@ -3,11 +3,14 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+// 窗口管理
 function createWindow() {
-  // Create the browser window.
+  // 使用BrowserWindow创建窗口.
   const mainWindow = new BrowserWindow({
-    width: 900,
+    width: 1000,
     height: 670,
+    frame: false, // 隐藏顶部导航区域
+    transparent: true, // 设置背景为透明
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -17,10 +20,13 @@ function createWindow() {
     }
   })
 
+  // 生命周期控制
+  // ready-to-show事件，当窗口准备好显示时触发，延迟显示窗口优化体验
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
 
+  // 拦截新窗口创建，强制用系统浏览器打开外部链接
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -49,8 +55,18 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  // IPC通信控制
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  ipcMain.on('close-window', () => {
+    app.quit();
+  });
+
+  ipcMain.on('minimize-window', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    window.minimize();
+  });
 
   createWindow()
 
