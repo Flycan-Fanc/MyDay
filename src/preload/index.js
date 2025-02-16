@@ -5,7 +5,8 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   windowControls:{
     closeWindow: () => ipcRenderer.send('close-window'),
-    minimizeWindow: () => ipcRenderer.send('minimize-window')
+    minimizeWindow: () => ipcRenderer.send('minimize-window'),
+    enlargeWindow: (w,h)=> ipcRenderer.send('enlarge-window',[w,h])
   }
 }
 

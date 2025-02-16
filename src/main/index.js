@@ -7,16 +7,20 @@ import icon from '../../resources/icon.png?asset'
 function createWindow() {
   // 使用BrowserWindow创建窗口.
   const mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 670,
-    frame: false, // 隐藏顶部导航区域
+    // width: 1000,
+    // height: 670, //登录页的值
+    width:1300,
+    height:800, //主页面
+    // frame: false, // 关闭默认窗口框架，隐藏顶部导航区域
     transparent: true, // 设置背景为透明
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      scrollBounce: false, // 禁用滚动反弹效果
+      scrollbarOverlayStyle: 'none' // 隐藏滚动条
     }
   })
 
@@ -66,6 +70,11 @@ app.whenReady().then(() => {
   ipcMain.on('minimize-window', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     window.minimize();
+  });
+
+  ipcMain.on('enlarge-window', (event,args) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    window.setSize(args[0],args[1]);
   });
 
   createWindow()

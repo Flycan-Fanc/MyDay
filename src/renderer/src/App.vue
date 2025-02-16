@@ -2,6 +2,8 @@
 //
 // const ipcHandle = () => window.electron.ipcRenderer.send('ping')
 import Login from './pages/Login.vue'
+import Layout from './pages/Layout.vue'
+import Editor from './components/Editor.vue'
 </script>
 
 <template>
@@ -21,5 +23,11 @@ import Login from './pages/Login.vue'
 <!--    </div>-->
 <!--  </div>-->
 <!--  <Versions />-->
-  <Login></Login>
+  <Layout></Layout>
 </template>
+<style>
+* {
+  margin:0;
+  padding:0;
+}
+</style>
