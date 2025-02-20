@@ -49,13 +49,15 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" />
     </div>
     <div id="content">
-      <Today></Today>
+      <DiaryEditor></DiaryEditor>
     </div>
   </div>
 </template>
 
 <script>
 import Today from '../pages/Today.vue'
+import OneWeek from "./OneWeek.vue";
+import DiaryEditor from "./DiaryEditor.vue";
 export default {
   name: "Layout",
   created(){
@@ -63,7 +65,7 @@ export default {
     const windowControls = window.api.windowControls;
     windowControls.enlargeWindow(1200,675);
   },
-  components:{Today}
+  components:{Today,OneWeek,DiaryEditor}
 }
 
 

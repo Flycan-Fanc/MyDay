@@ -3,14 +3,14 @@
     v-model="content"
     :toolbars="toolbarConfig"
     v-bind="editorConfig"
-    style="height: 400px"
+    style="height:450px;width:95%"
     @change="handleChange"
     @imgAdd="$imgAdd"
     @imgDel="$imgDel"
   />
 </template>
 
-<script setup>
+<script>
 import { ref } from 'vue';
 const content = ref('## 欢迎使用mavon-editor\n输入内容...');
 
@@ -29,9 +29,9 @@ const toolbarConfig = {
   imagelink: true, // 图片链接
   code: true, // code
   table: true, // 表格
-  fullscreen: true, // 全屏编辑
-  readmodel: true, // 沉浸式阅读
-  htmlcode: true, // 展示html源码
+  fullscreen: false, // 全屏编辑
+  readmodel: false, // 沉浸式阅读
+  htmlcode: false, // 展示html源码
   help: true, // 帮助
   /* 1.3.5 */
   undo: true, // 上一步
@@ -84,6 +84,10 @@ function $imgAdd(pos, $file){
      */
     $vm.$img2Url(pos, url);
   })
+}
+
+export default {
+  name: 'Editor',
 }
 
 </script>
