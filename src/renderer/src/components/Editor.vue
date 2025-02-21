@@ -44,7 +44,9 @@ export default {
          */
         $vm.$img2Url(pos, url);
       })
-    }
+    },
+    // 图片删除
+    $imgDel(pos) {}
   }
 }
 // 工具栏配置
