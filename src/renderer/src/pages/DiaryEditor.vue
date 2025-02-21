@@ -49,6 +49,8 @@ export default {
 }
 #editor{
   margin-top: 30px;
+  height: 75vh;
+  width:95%;
 }
 </style>
 

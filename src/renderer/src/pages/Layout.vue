@@ -183,7 +183,7 @@ li.selected {
 }
 #window-action img {
   width: 25px;
-  padding-left:15px;
+  padding-left:20px;
   padding-top: 10px;
 }
 #window-action :nth-last-child(1) {

@@ -12,6 +12,7 @@ function createWindow() {
     width:1300,
     height:800, //主页面
     // frame: false, // 关闭默认窗口框架，隐藏顶部导航区域
+    frame:true,
     transparent: true, // 设置背景为透明
     show: false,
     autoHideMenuBar: true,
@@ -62,16 +63,16 @@ app.whenReady().then(() => {
   // IPC通信控制
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-
+  // 关闭窗口API
   ipcMain.on('close-window', () => {
     app.quit();
   });
-
+  // 最小化窗口API
   ipcMain.on('minimize-window', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     window.minimize();
   });
-
+  // 更改窗口尺寸API
   ipcMain.on('enlarge-window', (event,args) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     window.setSize(args[0],args[1]);
