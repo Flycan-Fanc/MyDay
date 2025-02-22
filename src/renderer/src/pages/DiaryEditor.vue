@@ -30,7 +30,7 @@ export default {
   display:flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 50px;
+  padding-top: 45px;
 }
 .calendar-area{
   align-self: flex-start;
@@ -49,7 +49,7 @@ export default {
 }
 #editor{
   margin-top: 30px;
-  height: 75vh;
+  height: 85vh;
   width:95%;
 }
 </style>
