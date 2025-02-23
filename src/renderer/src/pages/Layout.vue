@@ -49,7 +49,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" />
     </div>
     <div id="content">
-      <Diary></Diary>
+      <Inspiration></Inspiration>
     </div>
   </div>
 </template>
@@ -59,6 +59,7 @@ import Today from '../pages/Today.vue'
 import OneWeek from "./OneWeek.vue";
 import DiaryEditor from "./DiaryEditor.vue";
 import Diary from "./Diary.vue";
+import Inspiration from "./Inspiration.vue";
 export default {
   name: "Layout",
   created(){
@@ -70,7 +71,8 @@ export default {
     Today,
     OneWeek,
     DiaryEditor,
-    Diary
+    Diary,
+    Inspiration,
   }
 }
 
