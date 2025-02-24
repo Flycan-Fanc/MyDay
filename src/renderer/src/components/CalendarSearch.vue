@@ -1,28 +1,25 @@
 <template>
   <div id="CalenderWeather-container">
     <div class="calender-area">
-      <img
-        src="../assets/icon/ic_tools_calendar.png"
-        alt="calender"
-        class="calender"
-      />
-<!--      <VDatePicker v-model="date" mode="date" />后续使用日历组件-->
+      <img src="../assets/icon/ic_tools_calendar.png" alt="calender" class="calender" />
+      <!--      <VDatePicker v-model="date" mode="date" />后续使用日历组件-->
     </div>
     <div class="date-area">2024.12.7</div>
     <div class="search-area selected">
       <img src="../assets/icon/ic_tools_search.png" alt="" class="searchImg" />
-      <input type="text" class="search" placeholder="查找：输入日记标题" />
+      <input type="text" class="search" :placeholder="`查找:输入${from}标题`" />
     </div>
   </div>
 </template>
 
 <script>
-
 export default {
-    name: 'CalendarSearch',
+  name: 'CalendarSearch',
+  props:['from'],
+  mounted(){
+    console.log(this.from)
+  }
 }
-
-
 </script>
 
 <style scoped>
@@ -95,4 +92,3 @@ export default {
   height: 200px;
 }
 </style>
-

@@ -44,9 +44,9 @@
       </div>
     </div>
     <div id="window-action">
-      <img src="../assets/icon/ic_action_minus.png" alt="" />
-      <img src="../assets/icon/ic_action_expand.png" alt="" />
-      <img src="../assets/icon/ic_action_cancel.png" alt="" />
+      <img src="../assets/icon/ic_action_minus.png" alt="" @click="minimizeWindow()"/>
+      <img :src="windowImg" alt="窗口变化" @click="changeWindowSize()"/>
+      <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
       <Inspiration></Inspiration>
@@ -60,11 +60,12 @@ import OneWeek from "./OneWeek.vue";
 import DiaryEditor from "./DiaryEditor.vue";
 import Diary from "./Diary.vue";
 import Inspiration from "./Inspiration.vue";
+import expandWindowImg from "../assets/icon/ic_action_expand.png";
+import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
+const windowControls = window.api.windowControls;
 export default {
   name: "Layout",
   created(){
-    console.log("layout created")
-    const windowControls = window.api.windowControls;
     windowControls.enlargeWindow(1200,675);
   },
   components:{
@@ -73,6 +74,32 @@ export default {
     DiaryEditor,
     Diary,
     Inspiration,
+  },
+  data(){
+    return{
+      windowImg:expandWindowImg,
+      isMaxWindow:false,
+    }
+  },
+  methods: {
+    minimizeWindow() {
+      windowControls.minimizeWindow();
+    },
+    closeWindow() {
+      // ToDo: 后续添加一些确认关闭窗口的提示
+      windowControls.closeWindow();
+    },
+    changeWindowSize() {
+      this.isMaxWindow = !this.isMaxWindow;
+      console.log(this.isMaxWindow)
+      if(!this.isMaxWindow){
+        windowControls.enlargeWindow(1200, 675);
+        this.windowImg = expandWindowImg;
+      } else{
+        windowControls.maximize();
+        this.windowImg = collapseWindowImg;
+      }
+    }
   }
 }
 
@@ -164,14 +191,22 @@ li.selected {
   font-weight: bold;
   vertical-align: top;
 }
+.person-area{
+  position:absolute;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  width:100%;
+  bottom: 10%;
+  background-color: orange;
+}
 .person-area .img-container {
   display: inline-block;
   width: 60px; /* 设置容器宽度 */
   height: 60px; /* 设置容器高度 */
   overflow: hidden; /* 隐藏超出容器的部分 */
   border-radius: 50%; /* 使容器呈现圆形 */
-  margin-left: 20%;
-  margin-right: 10px;
+  margin-right: 20px;
 }
 .person-area .img-container #avatar {
   height: 100%;
@@ -186,13 +221,19 @@ li.selected {
 }
 #window-action {
   position: absolute;
-  right: 0;
-  top: 0;
+  display:flex;
+  justify-content: flex-end;
+  align-items: center;
+  height:40px;
+  width: 100%;
+  -webkit-app-region: drag;
 }
 #window-action img {
   width: 25px;
   padding-left:20px;
   padding-top: 10px;
+  -webkit-app-region: no-drag;
+  -webkit-user-drag: none;
 }
 #window-action :nth-last-child(1) {
   margin-right: 10px;

@@ -1,7 +1,7 @@
 <template>
   <div id="inspiration">
     <div id="insHeader">
-      <span class="calendar-area"><CalendarSearch></CalendarSearch></span>
+      <span class="calendar-area"><CalendarSearch :from="from"></CalendarSearch></span>
       <span class="tools-area">
         <span>Select All</span>
         <span id="delete-SelectAll-Checkbox" class="someSelected">✔</span>
@@ -9,7 +9,9 @@
         <img src="../assets/icon/ic_tools_return.png" alt="返回" />
       </span>
     </div>
-    <InsList id="InsList"></InsList>
+    <div id="InsList-container">
+      <InsList id="InsList"></InsList>
+    </div>
     <NewBtn id="NewBtn"></NewBtn>
   </div>
 </template>
@@ -22,6 +24,19 @@ import NewBtn from "../components/NewBtn.vue";
 export default {
   name: 'Inspiration',
   components: { NewBtn, CalendarSearch,InsList },
+  data(){
+    return{
+      from:'灵感',
+    }
+  },
+  mounted(){
+    //鼠标滚动时页面横向滚动
+    document.querySelector('#InsList-container').addEventListener('wheel', function(event) {
+      let scrollLength = event.deltaY * 2;
+      console.log(scrollLength)
+      document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' });
+    })
+  },
 }
 </script>
 
@@ -75,7 +90,9 @@ export default {
   width: 95%;
   height: 82vh;
 }
-#InsList{
+#InsList-container{
+  display:flex;
+  align-items: center;
   height:100%;
 }
 #NewBtn{

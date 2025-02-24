@@ -6,7 +6,16 @@ const api = {
   windowControls:{
     closeWindow: () => ipcRenderer.send('close-window'),
     minimizeWindow: () => ipcRenderer.send('minimize-window'),
-    enlargeWindow: (w,h)=> ipcRenderer.send('enlarge-window',[w,h])
+    isMaximized: () => {
+      ipcRenderer.send("isMaximized");
+      return new Promise((resolve, reject) => {
+        ipcRenderer.once('isMaximized-reply', (event, isMaximized) => {
+          resolve(isMaximized);
+        });
+      });
+    },
+    maximize: ()=> ipcRenderer.send('maximize'),
+    enlargeWindow: (w,h)=> ipcRenderer.send('enlarge-window',[w,h]),
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div id="diary">
     <div id="diaryHeader">
-      <span class="calendar-area"><CalendarSearch></CalendarSearch></span>
+      <span class="calendar-area"><CalendarSearch :from="from"></CalendarSearch></span>
       <span class="tools-area">
         <span>Select All</span>
         <span id="delete-SelectAll-Checkbox" class="someSelected">✔</span>
@@ -18,7 +18,12 @@ import DiaryList from '../components/DiaryList.vue'
 import CalendarSearch from '../components/CalendarSearch.vue'
 export default {
   name: 'Diary',
-  components: { CalendarSearch, DiaryList }
+  components: { CalendarSearch, DiaryList },
+  data(){
+    return{
+      from:'日记',
+    }
+  },
 }
 </script>
 
