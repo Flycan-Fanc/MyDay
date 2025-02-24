@@ -1,5 +1,5 @@
 <template>
-    <div id="diary">
+    <div id="diaryEditor">
       <div id="diaryHeader">
         <span class="calendar-area"><CalendarWeather></CalendarWeather></span>
         <span class="tools-area">

@@ -49,7 +49,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
-      <Inspiration></Inspiration>
+      <InsEditor></InsEditor>
     </div>
   </div>
 </template>
@@ -60,9 +60,13 @@ import OneWeek from "./OneWeek.vue";
 import DiaryEditor from "./DiaryEditor.vue";
 import Diary from "./Diary.vue";
 import Inspiration from "./Inspiration.vue";
+import InsEditor from "./InsEditor.vue";
+
 import expandWindowImg from "../assets/icon/ic_action_expand.png";
 import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
+
 const windowControls = window.api.windowControls;
+
 export default {
   name: "Layout",
   created(){
@@ -74,6 +78,7 @@ export default {
     DiaryEditor,
     Diary,
     Inspiration,
+    InsEditor,
   },
   data(){
     return{
@@ -198,7 +203,6 @@ li.selected {
   align-items: center;
   width:100%;
   bottom: 10%;
-  background-color: orange;
 }
 .person-area .img-container {
   display: inline-block;
