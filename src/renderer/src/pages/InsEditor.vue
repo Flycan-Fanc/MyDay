@@ -108,10 +108,15 @@ export default {
       let randomColor = randomHexColor()
       console.log("this.selectedTag:"+JSON.stringify(Object.values(this.selectedTag)))
       console.log("this.curTag:"+this.curTag)
-      if(this.selectedTag.some(item=>item.label===this.curTag)){
-        //TODO: 弹框：标签已存在
+      if(this.curTag===''){
         ElMessage({
-          message: '不能添加重复标签',
+          message: '请选择标签',
+          type: 'warning',
+          duration:2000,
+        })
+      } else if(this.selectedTag.some(item=>item.label===this.curTag)){
+        ElMessage({
+          message: '不能重复添加标签',
           type: 'warning',
           duration:2000,
         })
