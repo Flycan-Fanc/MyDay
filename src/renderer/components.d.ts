@@ -17,6 +17,8 @@ declare module 'vue' {
     DiaryMini: typeof import('./src/components/DiaryMini.vue')['default']
     Editor: typeof import('./src/components/Editor.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
+    ElInput: typeof import('element-plus/es')['ElInput']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTag: typeof import('element-plus/es')['ElTag']

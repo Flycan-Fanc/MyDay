@@ -49,7 +49,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
-      <InsEditor></InsEditor>
+      <DiaryEditor></DiaryEditor>
     </div>
   </div>
 </template>
@@ -96,7 +96,6 @@ export default {
     },
     changeWindowSize() {
       this.isMaxWindow = !this.isMaxWindow;
-      console.log(this.isMaxWindow)
       if(!this.isMaxWindow){
         windowControls.enlargeWindow(1200, 675);
         this.windowImg = expandWindowImg;
@@ -238,6 +237,7 @@ li.selected {
   padding-top: 10px;
   -webkit-app-region: no-drag;
   -webkit-user-drag: none;
+  cursor:pointer;
 }
 #window-action :nth-last-child(1) {
   margin-right: 10px;

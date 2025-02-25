@@ -1,8 +1,8 @@
 <template>
   <mavon-editor
     v-model="content"
-    :toolbars="toolbarConfig"
-    v-bind="editorConfig"
+    :toolbars="config.toolbarConfig"
+    v-bind="config.editorConfig"
     @change="handleChange"
     @imgAdd="$imgAdd"
     @imgDel="$imgDel"
@@ -14,11 +14,18 @@ import { ref } from 'vue';
 
 export default {
   name: 'Editor',
+  props: {
+    config: {
+      type: Object,
+      required: true
+    }
+  },
+  mounted(){
+    console.log("editor:"+JSON.stringify(this.config));
+  },
   data() {
     return {
       content: '## 欢迎使用mavon-editor\n输入内容...',
-      toolbarConfig: toolbarConfig,
-      editorConfig: editorConfig
     }
   },
   methods: {
@@ -89,7 +96,7 @@ const editorConfig = ref({
   subfield: false,    // 双栏模式
   defaultOpen: 'edit', // 默认打开模式（edit/preview）
   toolbarsFlag: true, // 显示工具栏
-  navigation: true,   // 显示导航栏
+  navigation: false,   // 显示导航栏
   shortCut: false      // 启用快捷键
 })
 

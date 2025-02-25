@@ -9,7 +9,7 @@
     </div>
     <div id="editor-container">
       <div class="editor-box">
-        <Editor id="editor"></Editor>
+        <Editor id="editor" :config="config"></Editor>
       </div>
       <div class="info-box">
         <div class="cover-container">
@@ -52,6 +52,7 @@
           </div>
         </div>
       </div>
+      <el-button class="SaveBtn" type="primary">Save</el-button>
     </div>
   </div>
 </template>
@@ -61,6 +62,7 @@ import Editor from '../components/Editor.vue'
 import CalendarWeather from '../components/CalendarWeather.vue'
 import { ref } from 'vue'
 import { Check } from '@element-plus/icons-vue'
+import editorConfig from "../config/editorConfig";
 
 export default {
   name: 'InsEditor',
@@ -68,6 +70,7 @@ export default {
   data(){
     return{
       Check,
+      config:editorConfig.insConfig.editor,
       curTag:'',
       //用户拥有的标签
       tags:[
@@ -126,7 +129,7 @@ export default {
           label: this.curTag,
           color: randomColor,
         })
-        this.curTag = ''
+        //this.curTag = ''
       }
     },
     handleAddImg:function(){
@@ -160,6 +163,7 @@ export default {
   height: 40px;
 }
 #editor-container{
+  position:relative;
   display:flex;
   width:95%;
   height:78vh;
@@ -220,5 +224,11 @@ export default {
 .tags{
   margin:20px;
   align-self: center;
+}
+.SaveBtn{
+  position: absolute;
+  transform:scale(1.);
+  right: 3%;
+  bottom: 3%;
 }
 </style>
