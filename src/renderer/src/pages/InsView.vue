@@ -13,21 +13,19 @@
       </div>
       <div class="info-box">
         <div class="cover-container">
-          <span class="cover-box">请选择封面图片</span>
+          <span class="cover-box"><img src="../assets/background/plouzane-1758197.jpg" alt=""></span>
         </div>
         <div class="title-container">
-
+          灵感标题七个字
         </div>
         <div class="tag-container">
           <div class="tags">
             <el-tag
               v-for="tag in selectedTag"
               :key="tag.label"
-              closable
               :type="tag.type"
               :color="tag.color"
               effect="dark"
-              @close="handleClose(tag)"
               style="
                 margin-right: 5px;
                 margin-bottom: 5px;
@@ -40,6 +38,12 @@
             </el-tag>
           </div>
         </div>
+        <div class="tools-container">
+          <div class="tools-box">
+            <el-button class="EditBtn" type="primary" :icon="Edit" style="width:60px"></el-button>
+            <el-button class="DelBtn" type="danger" :icon="Delete" style="width:60px"></el-button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -48,10 +52,23 @@
 <script>
 import CalendarWeather from '../components/CalendarWeather.vue'
 import Editor from '../components/Editor.vue'
+import editorConfig from '../config/editorConfig'
+import {Edit,Delete} from '@element-plus/icons-vue'
 
 export default {
   name: 'InsView',
-  components: { Editor, CalendarWeather }
+  components: { Editor, CalendarWeather },
+  data(){
+    return {
+      Edit, Delete,
+      config: editorConfig.insConfig.view,
+      selectedTag: [
+        { label: '#工作', value: '#工作', color: '#67C23A' },
+        { label: '#学习', value: '#学习', color: '#909399' },
+        { label: '#娱乐', value: '#娱乐', color: '#E6A23C' },
+      ]
+    }
+  },
 }
 </script>
 
@@ -95,6 +112,7 @@ export default {
   border-radius:10px;
 }
 .info-box{
+  position:relative;
   flex:1;
   display:flex;
   flex-direction: column;
@@ -111,15 +129,24 @@ export default {
   align-items: center;
   width:75%;
   height:75%;
+  border-radius:10px;
   background-color: #ededed;
   font-size: 20px;
   color: rgba(94, 94, 94, 0.4)
+}
+.cover-box>img{
+  width:100%;
+  height:100%;
+  border-radius:10px;
 }
 .title-container{
   flex:1;
   display:flex;
   justify-content: center;
   align-items: flex-start;
+  color: #707070;
+  font-size: 20px;
+  font-weight:bold;
 }
 .title-container input{
   width: 80%;
@@ -139,5 +166,14 @@ export default {
 .tags{
   margin:20px;
   align-self: center;
+}
+.tools-container{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+.tools-container>.tools-box{
+  position:absolute;
+  bottom: 5%;
 }
 </style>

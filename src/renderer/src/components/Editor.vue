@@ -6,6 +6,8 @@
     @change="handleChange"
     @imgAdd="$imgAdd"
     @imgDel="$imgDel"
+    :style="{ borderRadius: '10px' }"
+    :boxShadow="false"
   />
 </template>
 

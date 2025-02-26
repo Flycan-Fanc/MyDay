@@ -49,7 +49,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
-      <DiaryEditor></DiaryEditor>
+      <DiaryView></DiaryView>
     </div>
   </div>
 </template>
@@ -61,6 +61,8 @@ import DiaryEditor from "./DiaryEditor.vue";
 import Diary from "./Diary.vue";
 import Inspiration from "./Inspiration.vue";
 import InsEditor from "./InsEditor.vue";
+import InsView from "./InsView.vue";
+import DiaryView from "./DiaryView.vue";
 
 import expandWindowImg from "../assets/icon/ic_action_expand.png";
 import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
@@ -79,6 +81,8 @@ export default {
     Diary,
     Inspiration,
     InsEditor,
+    InsView,
+    DiaryView,
   },
   data(){
     return{

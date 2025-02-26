@@ -227,7 +227,7 @@ export default {
 }
 .SaveBtn{
   position: absolute;
-  transform:scale(1.);
+  transform:scale(1.2);
   right: 3%;
   bottom: 3%;
 }
