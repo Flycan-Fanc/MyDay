@@ -25,39 +25,14 @@
             <img src="../assets/icon/ic_sidebar_ins.png" alt="" />
             <span>Inspiration</span>
           </li>
-          <li class="lable" id="tagsBtn" @click="dialogTagVisible = !dialogTagVisible">
+          <li class="lable" id="tagsBtn" @click="showTagDialog = !showTagDialog">
             <img src="../assets/icon/ic_sidebar_flag.png" alt="" />
             <span>Tags</span>
 <!--            <img src="../assets/icon/ic_action_add.png" alt="" class="createTagBtn">-->
           </li>
         </ul>
       </div>
-      <!-- 标签管理对话框 -->
-      <el-dialog
-        id="tagPage"
-        v-model="dialogTagVisible"
-        title="标签管理" width="500"
-        center align-center
-        :append-to-body="true"
-      >
-        <div id="userTags-area">
-          <div class="tag-editor">
-            <el-input v-model="tagInput" style="width: 160px" placeholder="添加标签" />
-            <div class="tagTool">
-              <el-button :icon="Select" type="primary"/>
-              <el-button :icon="CloseBold" type="danger"/>
-            </div>
-          </div>
-          <el-scrollbar class="userTagList-box" height="350px">
-            <div class="tagList" v-for="item in userTagList" :key="item.id">
-              <el-tag class="tag" :color="item.color" size="large" style="height:50px;margin-bottom: 10px;">{{item.name}}
-                <el-button :icon="Edit" size="small"></el-button>
-                <el-button :icon="Delete" size="small"></el-button>
-              </el-tag>
-            </div>
-          </el-scrollbar>
-        </div>
-      </el-dialog>
+      <UserTagManager v-model:showTagDialog.async="showTagDialog"></UserTagManager>
       <div class="person-area">
         <div class="img-container">
           <img src="../assets/avatar/useravatar.png" alt="" id="avatar" />
@@ -85,11 +60,12 @@ import Inspiration from "./Inspiration.vue";
 import InsEditor from "./InsEditor.vue";
 import InsView from "./InsView.vue";
 import DiaryView from "./DiaryView.vue";
+import UserTagManager from "../components/dialog/UserTagManager.vue";
 
 import expandWindowImg from "../assets/icon/ic_action_expand.png";
 import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
 
-import {Select,CloseBold,Edit,Delete} from "@element-plus/icons-vue";
+
 
 const windowControls = window.api.windowControls;
 
@@ -107,34 +83,20 @@ export default {
     InsEditor,
     InsView,
     DiaryView,
+    // dialog
+    UserTagManager,
   },
   data(){
     return{
       windowImg:expandWindowImg,
       isMaxWindow:false,
-      // icon
-      Select,
-      CloseBold,
-      Edit,
-      Delete,
-      // tag
-      dialogTagVisible:false,
-      tagInput:'',
-      userTagList:[
-        {id:1,name:"标签1",color:'#2da322'},
-        {id:2,name:"标签2",color:'#89eeff'},
-        {id:3,name:"标签3",color:'#D71CFF'},
-        {id:4,name:"标签4",color:'#71d2af'},
-        {id:5,name:"标签5",color:'#672882'},
-        {id:6,name:"标签6",color:'#968869'},
-        {id:7,name:"标签7",color:'#449ef8'},
-        {id:8,name:"标签8",color:'#FFD700'},
-        {id:9,name:"标签9",color:'#717892'},
-        {id:10,name:"标签10",color:'#456789'},
-        {id:11,name:"标签11",color:'#78eadc'},
-        {id:12,name:"标签12",color:'#121145'},
-        {id:13,name:"标签13",color:'#777777'}
-      ],
+      // dialog
+      showTagDialog:false,
+    }
+  },
+  watch:{
+    showTagDialog(val){
+      console.log("showTagDialog changed:"+val)
     }
   },
   methods: {
@@ -247,35 +209,8 @@ li.selected {
   font-weight: bold;
   vertical-align: top;
 }
-.createTagBtn{
-  visibility: hidden;
-}
-#tagPage{
-}
-#userTags-area{
-  display:flex;
-  flex-direction: column;
-}
-.tag-editor{
-  display:flex;
-  justify-content: center;
-  align-items: center;
-}
-.tagTool{
-  margin-left:15px;
-}
 #tagsBtn:hover .createTagBtn{
   visibility: visible;
-}
-.userTagList-box{
-  display:flex;
-  justify-content: center;
-  align-items: center;
-  margin-top:15px;
-  width:80%;
-}
-.userTagList-box .tag{
-  width:300px;
 }
 .person-area{
   position:absolute;

@@ -32,5 +32,6 @@ declare module 'vue' {
     NewBtn: typeof import('./src/components/NewBtn.vue')['default']
     PlanList: typeof import('./src/components/PlanList.vue')['default']
     RegisterForm: typeof import('./src/components/RegisterForm.vue')['default']
+    UserTagManager: typeof import('./src/components/dialog/UserTagManager.vue')['default']
   }
 }
