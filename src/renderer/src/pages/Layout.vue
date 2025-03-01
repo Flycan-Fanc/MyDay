@@ -33,12 +33,30 @@
         </ul>
       </div>
       <UserTagManager v-model:showTagDialog.async="showTagDialog"></UserTagManager>
+      <UserInfoManager v-model:showTagDialog.async="showTagDialog"></UserInfoManager>
       <div class="person-area">
-        <div class="img-container">
-          <img src="../assets/avatar/useravatar.png" alt="" id="avatar" />
+        <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
+          <div class="img-container">
+            <img src="../assets/avatar/useravatar.png" alt="" id="avatar" />
+          </div>
+          <span id="username" ref="buttonRef" v-click-outside="onClickOutside">Username</span>
         </div>
-        <span id="username">Username</span>
       </div>
+      <el-popover
+        ref="popoverRef"
+        :virtual-ref="buttonRef"
+        trigger="click"
+        virtual-triggering
+        width=150;
+        placement="right"
+        hide-after=0
+        >
+        <span style="display:flex;justify-content: center;align-items: center;font-size:0;">
+          <el-link>修改资料</el-link>
+          <el-divider direction="vertical" style="height:25px;"/>
+          <el-link>退出登录</el-link>
+        </span>
+      </el-popover>
     </div>
     <div id="window-action">
       <img src="../assets/icon/ic_action_minus.png" alt="" @click="minimizeWindow()"/>
@@ -61,10 +79,13 @@ import InsEditor from "./InsEditor.vue";
 import InsView from "./InsView.vue";
 import DiaryView from "./DiaryView.vue";
 import UserTagManager from "../components/dialog/UserTagManager.vue";
+import UserInfoManager from "../components/dialog/UserInfoManager.vue";
 
 import expandWindowImg from "../assets/icon/ic_action_expand.png";
 import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
 
+import { ref, unref } from 'vue'
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 
 const windowControls = window.api.windowControls;
@@ -73,6 +94,10 @@ export default {
   name: "Layout",
   created(){
     windowControls.enlargeWindow(1200,675);
+  },
+  mounted() {
+    this.buttonRef = this.$refs.buttonRef;
+    this.popoverRef = this.$refs.popoverRef;
   },
   components:{
     Today,
@@ -85,6 +110,7 @@ export default {
     DiaryView,
     // dialog
     UserTagManager,
+    UserInfoManager,
   },
   data(){
     return{
@@ -92,12 +118,17 @@ export default {
       isMaxWindow:false,
       // dialog
       showTagDialog:false,
+      buttonRef:ref(),
+      popoverRef:ref(),
     }
   },
   watch:{
     showTagDialog(val){
       console.log("showTagDialog changed:"+val)
     }
+  },
+  directives:{
+    clickOutside: vClickOutside,
   },
   methods: {
     minimizeWindow() {
@@ -116,6 +147,9 @@ export default {
         windowControls.maximize();
         this.windowImg = collapseWindowImg;
       }
+    },
+    onClickOutside(){
+      unref(this.popoverRef).popperRef?.delayHide?.()
     }
   }
 }
@@ -227,6 +261,7 @@ li.selected {
   overflow: hidden; /* 隐藏超出容器的部分 */
   border-radius: 50%; /* 使容器呈现圆形 */
   margin-right: 20px;
+  cursor:pointer;
 }
 .person-area .img-container #avatar {
   height: 100%;
@@ -238,6 +273,7 @@ li.selected {
   vertical-align: top;
   font-weight: bold;
   font-size: 15px;
+  cursor:pointer;
 }
 #window-action {
   position: absolute;

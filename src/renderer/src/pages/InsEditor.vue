@@ -44,7 +44,6 @@
               :type="tag.type"
               :color="tag.color"
               effect="dark"
-
               @close="handleClose(tag)"
               style="margin-right:5px;margin-bottom: 5px;color:#fff;font-weight: bold;border:none">
               {{ tag.value }}
