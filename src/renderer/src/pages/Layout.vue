@@ -33,7 +33,7 @@
         </ul>
       </div>
       <UserTagManager v-model:showTagDialog.async="showTagDialog"></UserTagManager>
-      <UserInfoManager v-model:showTagDialog.async="showTagDialog"></UserInfoManager>
+      <UserInfoManager v-model:showUserInfoDialog.async="showUserInfoDialog"></UserInfoManager>
       <div class="person-area">
         <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
           <div class="img-container">
@@ -52,7 +52,7 @@
         hide-after=0
         >
         <span style="display:flex;justify-content: center;align-items: center;font-size:0;">
-          <el-link>修改资料</el-link>
+          <el-link @click="showUserInfoDialog = !showUserInfoDialog">修改资料</el-link>
           <el-divider direction="vertical" style="height:25px;"/>
           <el-link>退出登录</el-link>
         </span>
@@ -118,6 +118,7 @@ export default {
       isMaxWindow:false,
       // dialog
       showTagDialog:false,
+      showUserInfoDialog:false,
       buttonRef:ref(),
       popoverRef:ref(),
     }
@@ -283,6 +284,7 @@ li.selected {
   height:40px;
   width: 100%;
   -webkit-app-region: drag;
+  cursor:pointer;
 }
 #window-action img {
   width: 25px;
@@ -290,7 +292,6 @@ li.selected {
   padding-top: 10px;
   -webkit-app-region: no-drag;
   -webkit-user-drag: none;
-  cursor:pointer;
 }
 #window-action :nth-last-child(1) {
   margin-right: 10px;

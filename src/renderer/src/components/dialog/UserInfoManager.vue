@@ -1,46 +1,84 @@
 <template>
   <!-- 标签管理对话框 -->
   <el-dialog
-    id="tagPage"
-    v-model:="dialogTagVisible"
-    title="标签管理"
-    width="500"
+    id="userInfoPage"
+    v-model="dialogUserInfoVisible"
+    title="个人信息"
+    width="350"
     center
     align-center
     :append-to-body="true"
-    :close="closeTagDialog"
+    :before-close="beforeCloseUserInfoDialog"
   >
-    <div id="userTags-area">
-      <div class="tag-editor">
-        <el-input v-model="tagInput" style="width: 160px" placeholder="添加标签" />
-        <el-button class="mt-4" style="width: 20%; margin-left: 10px" @click="">Add</el-button>
+    <div class="userInfo-Area">
+      <div class="basic-info">
+        <span class="avatar-box">
+          <el-upload
+            class="avatar-uploader"
+            action=""
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
+            <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar" alt=""/>
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+        </span>
+        <span class="info-box">
+          <span>用户名：{{ userInfo.userAccount }}</span>
+          <span>创建于：{{ userInfo.createTime }}</span>
+        </span>
       </div>
-      <div class="tagList-box">
-        <el-table :data="userTagData" style="width: 100%" max-height="250">
-          <el-table-column fixed prop="name" label="标签" align="center" width="150">
-            <template #default="scope">
-              <el-tag
-                :color="scope.row.color"
-                effect="dark"
-                style="border:none;font-weight:bold;cursor:pointer;"
-              >{{scope.row.name}}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column fixed="right" label="删除标签" align="center" min-width="120">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click.prevent="deleteRow(scope.$index)">
-                Remove
-              </el-button>
-            </template>
-          </el-table-column>
-          <el-table-column fixed="right" label="编辑标签" align="center" min-width="120">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click.prevent="editRow(scope.$index)">
-                Edit
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+      <el-divider style="margin:0;"/>
+      <div class="modify-info">
+        <span class="userName-info">
+          <span class="userName title">昵 称</span>
+          <span class="userName content" @click="changeUserName">
+            <span v-if="!userNameInputVisible">{{ userInfo.userName }}</span>
+            <el-input
+              ref="userName"
+              v-if="userNameInputVisible"
+              v-model="userInfo.userName"
+              :autofocus="false"
+              @blur="overChangeUserName"
+              style="width: 180px;"
+              placeholder="输入邮箱" />
+          </span>
+        </span>
+        <span class="email-info">
+          <span class="email title">邮 箱</span>
+          <span class="email content" @click="changeEmail">
+            <span v-if="!emailInputVisible">{{ userInfo.email }}</span>
+            <el-input
+              ref="email"
+              v-if="emailInputVisible"
+              v-model="userInfo.email"
+              :autofocus="false"
+              @blur="overChangeEmail"
+              style="width: 180px;"
+              placeholder="输入邮箱" />
+          </span>
+        </span>
+        <span class="userProfile-info">
+          <span class="userProfile title" >签 名</span>
+          <span class="userProfile content" @click="changeUserProfile">
+            <span v-if="!userProfileInputVisible">{{userInfo.userProfile}}</span>
+            <el-input
+              ref="userProfile"
+              v-if="userProfileInputVisible"
+              v-model="userInfo.userProfile"
+              :autofocus="false"
+              @blur="overChangeUserProfile"
+              style="width: 180px;"
+              placeholder="输入签名" />
+        </span>
+          </span>
+        <span class="password-info">
+          <span class="password title">密 码</span>
+          <span class="password content">
+            <el-button >修改密码</el-button>
+          </span>
+        </span>
       </div>
     </div>
   </el-dialog>
@@ -48,37 +86,115 @@
 
 <script>
 import { Select, CloseBold, Edit, Delete } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+
+import { Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+// TODO: 记录信息是否被修改，从而确定关闭dialog之前是否要弹出确认框
+// TODO: 修改用户信息
 export default {
-  name: 'UserTagManager',
+  name: 'UserInfoManager',
   props: {
-    showTagDialog: {
+    showUserInfoDialog: {
       type: Boolean,
       default: false
     }
   },
+  components:{
+    Plus,
+  },
+  mounted() {
+    console.log(this.userInfo.avatar)
+  },
   computed: {
-    dialogTagVisible: {
+    dialogUserInfoVisible: {
       get() {
-        console.log('get Show:' + this.showTagDialog)
-        return this.showTagDialog
+        console.log('get Show:' + this.showUserInfoDialog)
+        return this.showUserInfoDialog
       },
       set(val) {
-        console.log('set Show:' + this.showTagDialog)
-        this.$emit('update:showTagDialog', val)
+        console.log('set Show:' + this.showUserInfoDialog)
+        this.$emit('update:showUserInfoDialog', val)
       }
     }
   },
   methods: {
-    closeTagDialog() {
-      this.dialogTagVisible = false
+    // dialog
+    beforeCloseUserInfoDialog() {
+      if(this.anyInfoChanged){
+        ElMessageBox.confirm(
+          '确认要修改信息？',
+          '警告',
+          {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+            customStyle:'width:240px;'
+          }
+        )
+          .then(() => {
+            ElMessage({
+              type: 'success',
+              message: '修改成功',
+            });
+            // TODO: 修改信息的逻辑
+            this.dialogUserInfoVisible = false
+          })
+          .catch(() => {
+            ElMessage({
+              type: 'info',
+              message: '放弃修改',
+            });
+            // TODO: 取消修改信息的逻辑
+            this.dialogUserInfoVisible = false
+          })
+      } else{
+        this.dialogUserInfoVisible = false
+      }
     },
-    // tag 操作
-    deleteRow(index) {
-      this.userTagData.value.splice(index, 1)
+    // avatar
+    handleAvatarSuccess(res, file) {
+      this.userInfo.avatar = URL.createObjectURL(file.raw);
     },
-    editRow(index){
-      this.userTagData.value[index].name = this.tagInput
+    beforeAvatarUpload(file) {
+      const isJPG = file.type === 'image/jpeg';
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!');
+      }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!');
+      }
+      return isJPG && isLt2M;
+    },
+    // modifyInfo
+    changeUserName() {
+      this.userNameInputVisible = true;
+      this.$nextTick(() => {
+        this.$refs.userName.focus();
+      });
+    },
+    overChangeUserName() {
+      this.userNameInputVisible = false;
+    },
+    changeEmail() {
+      this.emailInputVisible = true;
+      this.$nextTick(() => {
+        this.$refs.email.focus();
+      });
+    },
+    overChangeEmail() {
+      this.emailInputVisible = false;
+    },
+    changeUserProfile() {
+      this.userProfileInputVisible = true;
+      this.$nextTick(() => {
+        this.$refs.userProfile.focus();
+      });
+    },
+    overChangeUserProfile() {
+      this.userProfileInputVisible = false;
     },
   },
   data() {
@@ -88,40 +204,104 @@ export default {
       CloseBold,
       Edit,
       Delete,
-      // tag
-      tagInput: '',
-      userTagData: [
-        { id: 1, name: '标签1', color: '#2da322' },
-        { id: 2, name: '标签2', color: '#89eeff' },
-        { id: 3, name: '标签3', color: '#D71CFF' },
-        { id: 4, name: '标签4', color: '#71d2af' },
-        { id: 5, name: '标签5', color: '#672882' },
-        { id: 6, name: '标签6', color: '#968869' },
-        { id: 7, name: '标签7', color: '#449ef8' },
-        { id: 8, name: '标签8', color: '#FFD700' },
-        { id: 9, name: '标签9', color: '#717892' },
-        { id: 10, name: '标签10', color: '#456789' },
-        { id: 11, name: '标签11', color: '#78eadc' },
-        { id: 12, name: '标签12', color: '#121145' },
-        { id: 13, name: '标签13', color: '#777777' }
-      ],
+      userInfo: {
+        userId: 12312321,
+        userAccount: 'Steve',
+        userPassword: '123456',
+        email: '1234567@gmail.com',
+        userName: 'Steve',
+        avatar: new URL('@/assets/test.png', import.meta.url).href,
+        userProfile: '计划、日记、灵感',
+        createTime: '2024.12.06'
+      },
+      anyInfoChanged:false,
+      emailInputVisible: false,
+      userProfileInputVisible: false,
+      userNameInputVisible:false,
     }
   }
 }
 </script>
 
 <style scoped>
-#userTags-area {
-  display: flex;
+.userInfo-Area{
+  display:flex;
   flex-direction: column;
-}
-.tag-editor {
-  display: flex;
-  justify-content: center;
   align-items: center;
+  height:400px;
+  width:100%;
 }
-.tagList-box{
+.basic-info{
+  flex:1;
   display:flex;
   justify-content: center;
+  align-items: center;
+  width:100%;
+}
+.avatar-box{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  width:120px;
+}
+.info-box{
+  box-sizing:border-box;
+  display:flex;
+  flex:1;
+  height:100px;
+  flex-direction:column;
+  justify-content: space-evenly;
+  align-items: flex-start;
+}
+.info-box span{
+  font-size:15px;
+  line-height:15px;
+  width:100%;
+}
+.modify-info{
+  flex: 3;
+  display:flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  width:100%;
+  height:100%;
+}
+.modify-info>span {
+  height:30px;
+  width:100%;
+  display:flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.modify-info .title{
+  flex:10;
+  display:flex;
+  justify-content: center;
+}
+.modify-info .content{
+  flex:17;
+}
+.avatar-uploader el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+}
+.avatar {
+  width: 60px;
+  height: 60px;
+  display: block;
 }
 </style>
