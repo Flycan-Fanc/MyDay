@@ -10,17 +10,17 @@
     :append-to-body="true"
     :before-close="beforeCloseUserInfoDialog"
   >
-    <div class="userInfo-Area">
+    <div id="userInfo-Area" v-if="!editPasswordVisible">
       <div class="basic-info">
         <span class="avatar-box">
           <el-upload
             class="avatar-uploader"
-            action=""
+            action="https://jsonplaceholder.typicode.com/posts/"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar" alt=""/>
+            <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar" alt="" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </span>
@@ -29,7 +29,7 @@
           <span>创建于：{{ userInfo.createTime }}</span>
         </span>
       </div>
-      <el-divider style="margin:0;"/>
+      <el-divider style="margin: 0" />
       <div class="modify-info">
         <span class="userName-info">
           <span class="userName title">昵 称</span>
@@ -41,8 +41,9 @@
               v-model="userInfo.userName"
               :autofocus="false"
               @blur="overChangeUserName"
-              style="width: 180px;"
-              placeholder="输入邮箱" />
+              style="width: 180px"
+              placeholder="输入邮箱"
+            />
           </span>
         </span>
         <span class="email-info">
@@ -55,30 +56,73 @@
               v-model="userInfo.email"
               :autofocus="false"
               @blur="overChangeEmail"
-              style="width: 180px;"
-              placeholder="输入邮箱" />
+              style="width: 180px"
+              placeholder="输入邮箱"
+            />
           </span>
         </span>
         <span class="userProfile-info">
-          <span class="userProfile title" >签 名</span>
+          <span class="userProfile title">签 名</span>
           <span class="userProfile content" @click="changeUserProfile">
-            <span v-if="!userProfileInputVisible">{{userInfo.userProfile}}</span>
+            <span v-if="!userProfileInputVisible">{{ userInfo.userProfile }}</span>
             <el-input
               ref="userProfile"
               v-if="userProfileInputVisible"
               v-model="userInfo.userProfile"
               :autofocus="false"
               @blur="overChangeUserProfile"
-              style="width: 180px;"
-              placeholder="输入签名" />
-        </span>
+              style="width: 180px"
+              placeholder="输入签名"
+            />
           </span>
+        </span>
         <span class="password-info">
           <span class="password title">密 码</span>
           <span class="password content">
-            <el-button >修改密码</el-button>
+            <el-button @click="handelEditPassword">修改密码</el-button>
           </span>
         </span>
+      </div>
+    </div>
+    <div id="passwordEdit-Area" v-if="editPasswordVisible">
+      <div class="passwordEdit-box">
+        <span class="oldPassword">
+          <span class="title">原 密 码</span>
+          <span class="content">
+            <el-input
+            v-model="password.oldPassword"
+            style="width: 180px"
+            type="password"
+            placeholder="请输入原密码"
+            show-password
+          /></span>
+        </span>
+        <span class="newPassword">
+          <span class="title">新 密 码</span>
+          <span class="content">
+            <el-input
+              v-model="password.newPassword"
+              style="width: 180px"
+              type="password"
+              placeholder="请输入新密码"
+              show-password
+            /></span>
+        </span>
+        <span class="confirmNewPassword">
+          <span class="title">确认新密码</span>
+          <span class="content">
+            <el-input
+              v-model="password.confirmNewPassword"
+              style="width: 180px"
+              type="password"
+              placeholder="请再次输入新密码"
+              show-password
+            /></span>
+        </span>
+      </div>
+      <div class="passwordEditSubmit-box">
+        <el-button @click="confirmEditPassword" style="width:80px;">确认</el-button>
+        <el-button @click="cancelEditPassword" style="width:80px;">取消</el-button>
       </div>
     </div>
   </el-dialog>
@@ -138,7 +182,7 @@ export default {
               message: '修改成功',
             });
             // TODO: 修改信息的逻辑
-            this.dialogUserInfoVisible = false
+            this.dialogUserInfoVisible = false;
           })
           .catch(() => {
             ElMessage({
@@ -146,11 +190,14 @@ export default {
               message: '放弃修改',
             });
             // TODO: 取消修改信息的逻辑
-            this.dialogUserInfoVisible = false
+            this.dialogUserInfoVisible = false;
           })
       } else{
-        this.dialogUserInfoVisible = false
+        this.dialogUserInfoVisible = false;
       }
+      setTimeout(()=>{
+        this.editPasswordVisible = false;
+      }, 500);
     },
     // avatar
     handleAvatarSuccess(res, file) {
@@ -196,6 +243,18 @@ export default {
     overChangeUserProfile() {
       this.userProfileInputVisible = false;
     },
+    // password edit
+    handelEditPassword(){
+      this.editPasswordVisible = true;
+    },
+    confirmEditPassword(){
+      // TODO:确认修改密码的逻辑
+      this.editPasswordVisible = false;
+    },
+    cancelEditPassword(){
+      // TODO:取消修改密码的逻辑
+      this.editPasswordVisible = false;
+    },
   },
   data() {
     return {
@@ -210,7 +269,7 @@ export default {
         userPassword: '123456',
         email: '1234567@gmail.com',
         userName: 'Steve',
-        avatar: new URL('@/assets/test.png', import.meta.url).href,
+        avatar: new URL('@renderer/assets/avatar/useravatar.png', import.meta.url).href,
         userProfile: '计划、日记、灵感',
         createTime: '2024.12.06'
       },
@@ -218,68 +277,75 @@ export default {
       emailInputVisible: false,
       userProfileInputVisible: false,
       userNameInputVisible:false,
+      // password edit
+      editPasswordVisible:false,
+      password:{
+        oldPassword:'',
+        newPassword:'',
+        confirmNewPassword:'',
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.userInfo-Area{
-  display:flex;
+#userInfo-Area,#passwordEdit-Area {
+  display: flex;
   flex-direction: column;
   align-items: center;
-  height:400px;
-  width:100%;
+  height: 400px;
+  width: 100%;
 }
-.basic-info{
-  flex:1;
-  display:flex;
+.basic-info {
+  flex: 1;
+  display: flex;
   justify-content: center;
   align-items: center;
-  width:100%;
+  width: 100%;
 }
-.avatar-box{
-  display:flex;
+.avatar-box {
+  display: flex;
   justify-content: center;
   align-items: center;
-  width:120px;
+  width: 120px;
 }
-.info-box{
-  box-sizing:border-box;
-  display:flex;
-  flex:1;
-  height:100px;
-  flex-direction:column;
+.info-box {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  height: 100px;
+  flex-direction: column;
   justify-content: space-evenly;
   align-items: flex-start;
 }
-.info-box span{
-  font-size:15px;
-  line-height:15px;
-  width:100%;
+.info-box span {
+  font-size: 15px;
+  line-height: 15px;
+  width: 100%;
 }
-.modify-info{
+.modify-info {
   flex: 3;
-  display:flex;
+  display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  width:100%;
-  height:100%;
+  width: 100%;
+  height: 100%;
 }
-.modify-info>span {
-  height:30px;
-  width:100%;
-  display:flex;
+.modify-info > span {
+  height: 30px;
+  width: 100%;
+  display: flex;
   justify-content: flex-start;
   align-items: center;
 }
-.modify-info .title{
-  flex:10;
-  display:flex;
+.modify-info .title {
+  flex: 10;
+  display: flex;
   justify-content: center;
 }
-.modify-info .content{
-  flex:17;
+.modify-info .content {
+  flex: 17;
 }
 .avatar-uploader el-upload {
   border: 1px dashed #d9d9d9;
@@ -289,7 +355,7 @@ export default {
   overflow: hidden;
 }
 .avatar-uploader el-upload:hover {
-  border-color: #409EFF;
+  border-color: #409eff;
 }
 .avatar-uploader-icon {
   font-size: 28px;
@@ -303,5 +369,35 @@ export default {
   width: 60px;
   height: 60px;
   display: block;
+}
+.passwordEdit-box{
+  flex:3;
+  display:flex;
+  width:100%;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top:30px;
+}
+.oldPassword, .newPassword, .confirmNewPassword{
+  display: flex;
+  width:100%;
+  margin-bottom: 20px;
+}
+.passwordEdit-box .title{
+  flex:1;
+  font-size: 15px;
+  line-height: 15px;
+  align-self: center;
+  margin-left:20px;
+}
+.passwordEdit-box .content{
+  flex:2;
+}
+.passwordEditSubmit-box{
+  flex:1;
+  display: flex;
+  width:100%;
+  justify-content: center;
 }
 </style>
