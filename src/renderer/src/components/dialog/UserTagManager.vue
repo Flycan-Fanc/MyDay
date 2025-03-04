@@ -8,7 +8,7 @@
     center
     align-center
     :append-to-body="true"
-    :close="closeTagDialog"
+    :close="closeUserTagDialog"
   >
     <div id="userTags-area">
       <div class="tag-editor">
@@ -70,7 +70,7 @@ export default {
     }
   },
   methods: {
-    closeTagDialog() {
+    closeUserTagDialog() {
       this.dialogTagVisible = false
     },
     // tag 操作

@@ -19,37 +19,38 @@
         <div class="title-container">
           <input type="text" placeholder="请填写标题">
         </div>
-        <div class="tag-container">
-          <span class="tagAdd">
-            <el-select
-              v-model="curTag"
-              placeholder="请选择标签"
-              size="large"
-              style="width: 210px;margin-right:10px;"
-            >
-              <el-option
-                v-for="item in tags"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-            <el-button type="primary" :icon="Check" circle @click="handleSelect()"/>
-          </span>
-          <div class="tags">
-            <el-tag
-              v-for="tag in selectedTag"
-              :key="tag.label"
-              closable
-              :type="tag.type"
-              :color="tag.color"
-              effect="dark"
-              @close="handleClose(tag)"
-              style="margin-right:5px;margin-bottom: 5px;color:#fff;font-weight: bold;border:none">
-              {{ tag.value }}
-            </el-tag>
-          </div>
-        </div>
+        <TagMini></TagMini>
+<!--        <div class="tag-container">-->
+<!--          <span class="tagAdd">-->
+<!--            <el-select-->
+<!--              v-model="curTag"-->
+<!--              placeholder="请选择标签"-->
+<!--              size="large"-->
+<!--              style="width: 210px;margin-right:10px;"-->
+<!--            >-->
+<!--              <el-option-->
+<!--                v-for="item in tags"-->
+<!--                :key="item.value"-->
+<!--                :label="item.label"-->
+<!--                :value="item.value"-->
+<!--              />-->
+<!--            </el-select>-->
+<!--            <el-button type="primary" :icon="Check" circle @click="handleSelect()"/>-->
+<!--          </span>-->
+<!--          <div class="tags">-->
+<!--            <el-tag-->
+<!--              v-for="tag in selectedTag"-->
+<!--              :key="tag.label"-->
+<!--              closable-->
+<!--              :type="tag.type"-->
+<!--              :color="tag.color"-->
+<!--              effect="dark"-->
+<!--              @close="handleClose(tag)"-->
+<!--              style="margin-right:5px;margin-bottom: 5px;color:#fff;font-weight: bold;border:none">-->
+<!--              {{ tag.value }}-->
+<!--            </el-tag>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
       <el-button class="SaveBtn" type="primary">Save</el-button>
     </div>
@@ -59,13 +60,14 @@
 <script>
 import Editor from '../components/Editor.vue'
 import CalendarWeather from '../components/CalendarWeather.vue'
+import TagMini from '../components/TagMini.vue'
 import { ref } from 'vue'
 import { Check } from '@element-plus/icons-vue'
 import editorConfig from "../config/editorConfig";
 
 export default {
   name: 'InsEditor',
-  components: { CalendarWeather, Editor },
+  components: { CalendarWeather, Editor,TagMini },
   data(){
     return{
       Check,
@@ -213,17 +215,7 @@ export default {
   border: none;
   font-size: 15px;
 }
-.tag-container{
-  flex:5;
-  display:flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-}
-.tags{
-  margin:20px;
-  align-self: center;
-}
+
 .SaveBtn{
   position: absolute;
   transform:scale(1.2);

@@ -64,7 +64,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
-      <DiaryEditor></DiaryEditor>
+      <Today></Today>
     </div>
   </div>
 </template>
@@ -86,6 +86,7 @@ import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
 
 import { ref, unref } from 'vue'
 import { ClickOutside as vClickOutside } from 'element-plus'
+import PlanList from "../components/PlanList.vue";
 
 
 const windowControls = window.api.windowControls;
@@ -100,6 +101,7 @@ export default {
     this.popoverRef = this.$refs.popoverRef;
   },
   components:{
+    PlanList,
     Today,
     OneWeek,
     DiaryEditor,
