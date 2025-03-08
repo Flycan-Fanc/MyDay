@@ -8,6 +8,14 @@
 import InsMini from './InsMini.vue'
 export default {
   name:'InsList',
+  mounted(){
+    //鼠标滚动时页面横向滚动
+    document.querySelector('#InsList').addEventListener('wheel', function(event) {
+      let scrollLength = event.deltaY * 2;
+      console.log(scrollLength)
+      document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' });
+    })
+  },
   components:{
     InsMini
   },
@@ -24,7 +32,7 @@ export default {
   grid-auto-flow: column;         /* 按列优先排列 */
   padding: 0 20px;               /* 两侧留白 */
   overflow-x:auto;
-  margin-top: 20px;
+  /*margin-top: 20px;*/
 }
 /* 自定义滚动条优化 */
 ::-webkit-scrollbar {

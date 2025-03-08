@@ -33,7 +33,7 @@ export default {
   margin-left: 30px;
   cursor: pointer;
   width: 240px;
-  height: 50px;
+  height: 40px;
   background-color: #fff;
   border-radius: 25px;
   box-shadow: -3px 4px 5px rgba(0, 0, 0, 0.4);

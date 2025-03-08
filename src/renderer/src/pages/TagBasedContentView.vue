@@ -16,7 +16,7 @@
       <Search :from="from"></Search>
     </div>
     <div class="content-show">
-      <PlanList v-if="from === '计划'"></PlanList>
+      <PlanList v-if="from === '计划'" class="plan-list"></PlanList>
       <InsList v-if="from === '灵感'"></InsList>
     </div>
   </div>
@@ -39,10 +39,26 @@ export default {
     // TODO: 后续tag需要从外面传进来
   },
   mounted(){
+    console.log("hhhhhh");
     document.querySelector('.tagName').style.color = this.tag.color;
+    if(this.from==='计划'){
+      document.querySelector('.planToggle').classList.add('active');
+      document.querySelector('.insToggle').classList.remove('active');
+    }else{
+      document.querySelector('.insToggle').classList.add('active');
+      document.querySelector('.planToggle').classList.remove('active');
+    }
   },
   updated(){
+    console.log("gggggg");
     document.querySelector('.tagName').style.color = this.tag.color;
+    if(this.from==='计划'){
+      document.querySelector('.planToggle').classList.add('active');
+      document.querySelector('.insToggle').classList.remove('active');
+    }else{
+      document.querySelector('.insToggle').classList.add('active');
+      document.querySelector('.planToggle').classList.remove('active');
+    }
   },
   data() {
     return {
@@ -74,23 +90,48 @@ export default {
 #tagBasedContentView {
   display:flex;
   flex-direction: column;
-  margin-top: 45px;
   width: 95%;
-  height: 82vh;
+  height:100vh;
 }
 .planInsToggle{
   display:flex;
-  height:100px;
+  height:40px;
+  width:100%;
+  margin-top:40px;
 }
-.planToggle{
-  height:100%;
-  flex: 2;
+.planToggle,.insToggle{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height:40px;
+  flex: 1;
   background-color: #fff;
   margin-right:10px;
+  border-radius: 10px;
+  transition: flex 0.2s ease-in-out;
 }
-.insToggle{
+.active {
+  flex: 2;
+}
+.search-box{
+  margin-top:15px;
+}
+.content-show{
+  margin-top:15px;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  height:75%;
+  width:100%;
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+.plan-list{
+  box-sizing: border-box;
   height:100%;
-  flex:1;
-  background-color: #fff;
+  padding-left: 5px;
+  padding-top: 5px;
+  overflow-y: hidden;
+  overflow-x:hidden;
 }
 </style>
