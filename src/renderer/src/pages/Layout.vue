@@ -64,7 +64,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
-      <TagBasedContentView></TagBasedContentView>
+      <ErrorPage></ErrorPage>
     </div>
   </div>
 </template>
@@ -81,6 +81,7 @@ import DiaryView from "./DiaryView.vue";
 import UserTagManager from "../components/dialog/UserTagManager.vue";
 import UserInfoManager from "../components/dialog/UserInfoManager.vue";
 import TagBasedContentView from "./TagBasedContentView.vue";
+import ErrorPage from "./ErrorPage.vue";
 
 import expandWindowImg from "../assets/icon/ic_action_expand.png";
 import collapseWindowImg from "../assets/icon/ic_action_collapse.png";
@@ -115,6 +116,7 @@ export default {
     // dialog
     UserTagManager,
     UserInfoManager,
+    ErrorPage
   },
   data(){
     return{
