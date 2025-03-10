@@ -43,20 +43,21 @@ body {
 }
 #AddPlan-container {
   display: flex;
-  width: 800px;
-  height: 120px;
+  align-items: center;
+  width: 95%;
+  height: 100px;
   background-color: rgba(255, 255, 255, 0.4);
   border-radius: 1em;
 }
 .data-area {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   width: 15%;
   height: 100%;
 }
 .data-area #week {
-  margin-top: 15px;
   margin-bottom: 5px;
   font-size: 14px;
 }
@@ -81,8 +82,9 @@ body {
   justify-self: center;
   align-self: center;
   font-size: 20px;
+  line-height: 20px;
   font-weight: 400;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .weather-area #weather-img {

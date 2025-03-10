@@ -1,32 +1,73 @@
 <template>
-  <div class="Plan-container top done">
+  <div class="Plan-container top" ref="plan-box">
     <div class="check">
       <input type="checkbox" name="plan-done" id="plan-done" />
     </div>
     <div class="plan">
-      <span id="tags">#工作</span>
-      <span id="plan-content">制作活动策划书</span>
+      <span id="tags">{{ plan.planTags[1].tagName }}</span>
+      <span id="plan-content">{{ plan.planContent }}</span>
     </div>
     <div class="tools">
-      <img src="../assets/icon/ic_action_tick.png" alt="" />
-      <img src="../assets/icon/ic_tools_top.png" alt="" />
-      <img src="../assets/icon/ic_tools_addTag.png" alt="" class="addTags" @click="showPlanTagDialog = !showPlanTagDialog"/>
-      <img src="../assets/icon/ic_tools_delete.png" alt="" />
+      <img src="../assets/icon/ic_action_tick.png" alt="" @click="handleDone"/>
+      <img src="../assets/icon/ic_tools_top.png" alt="" @click="handleTop" v-if="!plan.isDone"/>
+      <img
+        src="../assets/icon/ic_tools_addTag.png"
+        alt=""
+        class="addTags"
+        @click="showPlanTagDialog = !showPlanTagDialog"
+      />
+      <img src="../assets/icon/ic_tools_delete.png" alt="" @click="handleDelete"/>
     </div>
-    <img src="../assets/icon/ic_status_toped.png" alt="" id="status-toped" />
+    <img src="../assets/icon/ic_status_toped.png" alt="" id="status-toped" v-show="plan.isTop" />
     <PlanTagManager v-model:showPlanTagDialog.async="showPlanTagDialog"></PlanTagManager>
   </div>
 </template>
 
 <script>
-import PlanTagManager from "./dialog/PlanTagManager.vue";
+import PlanTagManager from './dialog/PlanTagManager.vue'
 
 export default {
   name: 'PlanMini',
   components: { PlanTagManager },
-  data(){
-    return{
-      showPlanTagDialog:false,
+  mounted(){
+    if(this.plan.isDone === 1){
+      this.$refs['plan-box'].classList.add('done')
+    }
+  },
+  methods: {
+    handleDone() {
+      console.log('dadsd')
+      this.plan.isDone = this.plan.isDone === 1 ? 0 : 1
+      if(this.plan.isDone === 1){
+        this.$refs['plan-box'].classList.add('done')
+      }else{
+        this.$refs['plan-box'].classList.remove('done')
+      }
+    },
+    handleTop() {
+      this.plan.isTop = this.plan.isTop === 1 ? 0 : 1
+    },
+    handleDelete() {
+      // TODO: 删除计划的逻辑
+    }
+  },
+  data() {
+    return {
+      showPlanTagDialog: false,
+      plan: {
+        planId: 1,
+        userId: 1,
+        planContent: '制作活动策划书',
+        planTags: [
+          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
+          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+        ],
+        isDone: 1,
+        isTop: 0,
+        startTime: '2023-04-01',
+        endTime: '2023-04-05'
+      }
     }
   }
 }
@@ -47,6 +88,12 @@ export default {
   background-color: #fff;
   box-shadow: 3px 3px 5px 0 rgba(0, 0, 0, 0.4);
   transform: translate(-3px, -3px);
+}
+.tools {
+  visibility: hidden;
+}
+.Plan-container:hover .tools {
+  visibility: visible;
 }
 .Plan-container.done {
   background-color: rgba(255, 255, 255, 0.4);
@@ -96,7 +143,7 @@ export default {
   width: 35px;
   height: 35px;
   margin-left: 10px;
-  cursor:pointer;
+  cursor: pointer;
 }
 #status-toped {
   position: absolute;

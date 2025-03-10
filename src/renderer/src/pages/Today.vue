@@ -11,7 +11,9 @@
           </div>
         </div>
         <AddPlan />
-        <PlanList id="PlanList"/>
+        <div class="list-area">
+          <PlanList id="PlanList"/>
+        </div>
     </div>
 </template>
 
@@ -73,11 +75,22 @@ export default {
 .deleteArea>img{
   width:35px;
 }
+.list-area{
+  margin-top:3vh;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  height:60%;
+  width:95%;
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
 #PlanList{
-  margin-top:25px;
+  box-sizing: border-box;
+  padding-top: 10px;
   padding-left:5px;
-  padding-top:5px;
-  height:55%;
+  padding-bottom: 10px;
+  height:100%;
   width:810px;
 }
 </style>

@@ -9,19 +9,19 @@
       </div>
       <div class="list-area">
         <ul class="page-selector">
-          <li class="lable selected" id="todayBtn">
+          <li class="lable selected" id="todayBtn" @click="routerPush('/today')">
             <img src="../assets/icon/ic_sidebar_today.png" alt="" />
             <span>Today</span>
           </li>
-          <li class="lable" id="oneWeekBtn">
+          <li class="lable" id="oneWeekBtn" @click="routerPush('/oneWeek')">
             <img src="../assets/icon/ic_sidebar_7days.png" alt="" />
             <span>7 Days</span>
           </li>
-          <li class="lable" id="diaryBtn">
+          <li class="lable" id="diaryBtn" @click="routerPush('/diary')">
             <img src="../assets/icon/ic_sidebar_diary.png" alt="" />
             <span>Diary</span>
           </li>
-          <li class="lable" id="insBtn">
+          <li class="lable" id="insBtn" @click="routerPush('/inspiration')">
             <img src="../assets/icon/ic_sidebar_ins.png" alt="" />
             <span>Inspiration</span>
           </li>
@@ -64,7 +64,7 @@
       <img src="../assets/icon/ic_action_cancel.png" alt="" @click="closeWindow()"/>
     </div>
     <div id="content">
-      <ErrorPage></ErrorPage>
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -157,6 +157,14 @@ export default {
     },
     onClickOutside(){
       unref(this.popoverRef).popperRef?.delayHide?.()
+    },
+    // router
+    routerPush(targetPath,...args){
+      if(args.length!==0){
+
+      }else{
+        this.$router.push({path:targetPath})
+      }
     }
   }
 }
