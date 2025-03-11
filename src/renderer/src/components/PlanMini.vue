@@ -4,8 +4,10 @@
       <input type="checkbox" name="plan-done" id="plan-done" />
     </div>
     <div class="plan">
-      <span id="tags">{{ plan.planTags[1].tagName }}</span>
-      <span id="plan-content">{{ plan.planContent }}</span>
+      <span id="tags">
+        <span v-for="item in plan.planTags" :style="{color:item.tagColor,marginRight:'5px'}">{{item.tagName}}</span>
+      </span>
+      <span id="plan-content"> {{plan.planContent}} </span>
     </div>
     <div class="tools">
       <img src="../assets/icon/ic_action_tick.png" alt="" @click="handleDone"/>
@@ -24,50 +26,73 @@
 </template>
 
 <script>
+import { toRaw } from 'vue';
 import PlanTagManager from './dialog/PlanTagManager.vue'
+import store from "../store/store";
 
 export default {
   name: 'PlanMini',
   components: { PlanTagManager },
+  props:{
+    planId:{
+      type: Number,
+      required:true,
+      // default:()=>{[]},
+    },
+  },
   mounted(){
     if(this.plan.isDone === 1){
       this.$refs['plan-box'].classList.add('done')
     }
   },
+  computed:{
+    plan(){
+      return store.state.planAbout.planData.filter(item=>item.planId===this.planId)[0]
+    }
+  },
   methods: {
     handleDone() {
-      console.log('dadsd')
       this.plan.isDone = this.plan.isDone === 1 ? 0 : 1
       if(this.plan.isDone === 1){
         this.$refs['plan-box'].classList.add('done')
       }else{
         this.$refs['plan-box'].classList.remove('done')
       }
+      this.plan.isTop = 0;
+      this.$store.dispatch('planAbout/changeTopStatus',{planId:this.plan.planId,isTop:0})
     },
     handleTop() {
       this.plan.isTop = this.plan.isTop === 1 ? 0 : 1
+      this.$store.dispatch('planAbout/changeTopStatus',{planId:this.plan.planId,isTop:this.plan.isTop})
+      // TODO: 置顶计划的逻辑
     },
     handleDelete() {
       // TODO: 删除计划的逻辑
+      this.$store.dispatch('planAbout/deletePlan',this.plan.planId)
     }
   },
+  // computed:{
+  //   rawPlanTags(){
+  //     return toRaw(this.plan.planTags);
+  //   },
+  // },
   data() {
     return {
       showPlanTagDialog: false,
-      plan: {
-        planId: 1,
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      }
+      // plan: {
+      //   planId: 1,
+      //   userId: 1,
+      //   planContent: '制作活动策划书',
+      //   planTags: [
+      //     { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
+      //     { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
+      //     { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+      //   ],
+      //   isDone: 1,
+      //   isTop: 0,
+      //   startTime: '2023-04-01',
+      //   endTime: '2023-04-05'
+      // }
     }
   }
 }

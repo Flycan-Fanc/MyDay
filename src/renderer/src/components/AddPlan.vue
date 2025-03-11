@@ -19,8 +19,10 @@
         <div class="addplan-area">
           <input
             id="planInput"
+            v-model="planInput"
             type="text"
             placeholder="添加你的计划，按下回车确认"
+            @keyup.enter="addPlan(planInput)"
           />
         </div>
       </div>
@@ -28,8 +30,21 @@
 </template>
 
 <script>
+import store from "../store/store";
+
 export default {
   name: 'AddPlan',
+  data(){
+    return{
+      planInput:''
+    }
+  },
+  methods:{
+    addPlan(planInput){
+      this.$store.dispatch('planAbout/addPlan',planInput)
+      this.planInput = ''
+    }
+  }
 }
 </script>
 

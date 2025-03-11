@@ -33,11 +33,9 @@ export default {
   computed: {
     dialogPlanTagVisible: {
       get() {
-        console.log('get Show:' + this.showPlanTagDialog)
         return this.showPlanTagDialog
       },
       set(val) {
-        console.log('set Show:' + this.showPlanTagDialog)
         this.$emit('update:showPlanTagDialog', val)
       }
     }

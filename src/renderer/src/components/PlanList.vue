@@ -1,29 +1,43 @@
 <template>
-    <div id="PlanList">
-      <PlanMini v-for="i in 20" :key="i"></PlanMini>
-    </div>
+  <div id="PlanList">
+    <PlanMini v-for="item in planData" :key="item.planId" :planId="item.planId"></PlanMini>
+  </div>
 </template>
 
 <script>
 import PlanMini from "./PlanMini.vue";
+import store from "../store/store";
 export default {
-    name: "PlanList",
-    components: {
-      PlanMini,
-    },
-    mounted() {
-      console.log("PlanList mounted");
-      const planList = document.querySelector("#PlanList");
-      planList.style.overflowY = "auto";
+  name: "PlanList",
+  components: {
+    PlanMini,
+  },
+  mounted() {
+    const planList = document.querySelector("#PlanList");
+    planList.style.overflowY = "auto";
 
-      const planContainers = planList.querySelectorAll("#Plan-container");
-      planContainers.forEach((container) => {
-        container.style.overflowY = "auto";
-      });
+    const planContainers = planList.querySelectorAll("#Plan-container");
+    planContainers.forEach((container) => {
+      container.style.overflowY = "auto";
+    });
+  },
+  beforeUpdate() {
+    console.log("updated")
+  },
+  methods:{
+    handleDone(){
+
     },
+
+  },
+  data(){
+  },
+  computed:{
+    planData(){
+      return store.getters["planAbout/sortedPlanList"]
+    }
+  }
 }
-
-
 </script>
 
 <style scoped>
@@ -50,6 +64,4 @@ body {
   border: 2px solid transparent;
   background-clip: content-box;
 }
-
 </style>
-

@@ -6,6 +6,16 @@ import Plan from '../../models/Plan'
 
 import {nanoid} from 'nanoid'
 
+const planApi = {
+  sortPlanList(planList){
+    let newPlanList = [];
+    let topPlans = planList.filter(item=>item.isTop===1)
+    let normalPlans = planList.filter(item=>item.isTop===0 && item.isDone===0)
+    let donePlans = planList.filter(item=>item.isDone===1)
+    return newPlanList = [...topPlans,...normalPlans,...donePlans]
+  }
+}
+
 const planAbout = {
   namespaced:true,
   state:{
@@ -81,20 +91,6 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 5,
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
         planId: 6,
         userId: 1,
         planContent: '制作活动策划书',
@@ -110,6 +106,20 @@ const planAbout = {
       },
       {
         planId: 7,
+        userId: 1,
+        planContent: '制作活动策划书',
+        planTags: [
+          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
+          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+        ],
+        isDone: 1,
+        isTop: 0,
+        startTime: '2023-04-01',
+        endTime: '2023-04-05'
+      },
+      {
+        planId: 8,
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
@@ -162,15 +172,29 @@ const planAbout = {
     /**
      * 删除计划
      */
-    deletePlan(){},
+    deletePlan(context,value){
+      let index = context.state.planData.findIndex(item=>item.planId === value)
+      context.commit('deletePlan',index)
+    },
+    /**
+     * 批量删除计划
+     */
+    deletePlanBatch(context,value){
+      let newPlanList = context.state.planData.filter(item=>item.isDone === 0)
+      context.commit('deletePlanBatch',newPlanList)
+    },
     /**
      * 修改计划置顶状态
      */
-    changeTopStatus(){},
+    changeTopStatus(context,value){
+      context.commit('changeTopStatus',value)
+    },
     /**
      * 修改计划完成状态
      */
-    changeDoneStatus(){},
+    changeDoneStatus(context,value){
+      context.commit('changeDoneStatus',value)
+    },
     /**
      * 编辑计划标签
      */
@@ -197,20 +221,48 @@ const planAbout = {
      * 添加计划
      */
     addPlan(state,value){
-      state.planData.push(value);
+      state.planData.unshift(value);
+      // TODO:重新排序列表
+      state.planData = planApi.sortPlanList(state.planData)
+      console.log("sorted:"+JSON.stringify(state.planData))
     },
     /**
      * 删除计划
      */
-    deletePlan(){},
+    deletePlan(state,value){
+      state.planData.splice(value,1)
+    },
+    /**
+     * 批量删除计划
+     */
+    deletePlanBatch(state,value){
+      state.planData = value;
+    },
     /**
      * 修改计划置顶状态
      */
-    changeTopStatus(){},
+    changeTopStatus(state,value){
+      state.planData.map(item=>{
+        if(item.planId === value.planId){
+          item.isTop = value.isTop
+        }
+      })
+      console.log("state:"+value.isTop)
+      // TODO:重新排序
+      state.planData = planApi.sortPlanList(state.planData)
+    },
     /**
      * 修改计划完成状态
      */
-    changeDoneStatus(){},
+    changeDoneStatus(state,value){
+      state.planData.map(item=>{
+        if(item.planId === value.planId){
+          item.isDone = value.isDone
+        }
+      })
+      // TODO:重新排序
+      state.planData = planApi.sortPlanList(state.planData)
+    },
     /**
      * 编辑计划标签
      */
@@ -219,6 +271,11 @@ const planAbout = {
      * 排序计划
      */
     sortPlan(){},
+  },
+  getters:{
+    sortedPlanList(state){
+      return planApi.sortPlanList(state.planData)
+    }
   }
 }
 
