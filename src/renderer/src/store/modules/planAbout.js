@@ -7,6 +7,7 @@ import Plan from '../../models/Plan'
 import {nanoid} from 'nanoid'
 
 const planApi = {
+  // TODO:置顶的，正常的，完成的，每组按照什么顺序排序？
   sortPlanList(planList){
     let newPlanList = [];
     let topPlans = planList.filter(item=>item.isTop===1)
@@ -260,7 +261,7 @@ const planAbout = {
           item.isDone = value.isDone
         }
       })
-      // TODO:重新排序
+      // TODO:置顶的，正常的，完成的，每组按照什么顺序排序？
       state.planData = planApi.sortPlanList(state.planData)
     },
     /**

@@ -1,7 +1,8 @@
 <template>
   <div class="Plan-container top" ref="plan-box">
     <div class="check">
-      <input type="checkbox" name="plan-done" id="plan-done" />
+<!--      <input type="checkbox" name="plan-done" id="plan-done" />-->
+      <el-checkbox v-model="finish"  size="large" id="plan-done"/>
     </div>
     <div class="plan">
       <span id="tags">
@@ -48,6 +49,23 @@ export default {
   computed:{
     plan(){
       return store.state.planAbout.planData.filter(item=>item.planId===this.planId)[0]
+    },
+    finish:{
+      get(){
+        return this.plan.isDone === 1
+      },
+      set(value){
+        this.handleDone()
+        console.log("done:",this.plan.isDone)
+        // this.plan.isDone = value;
+        // store.dispatch('planAbout/changeDoneStatus',this.planId)
+        // if(this.plan.isDone === 1){
+        //   this.$refs['plan-box'].classList.add('done')
+        // }else{
+        //   this.$refs['plan-box'].classList.remove('done')
+        // }
+        // this.plan.isTop = 0;
+      }
     }
   },
   methods: {
@@ -56,10 +74,14 @@ export default {
       if(this.plan.isDone === 1){
         this.$refs['plan-box'].classList.add('done')
       }else{
+        console.log(this.$refs['plan-box'])
         this.$refs['plan-box'].classList.remove('done')
       }
       this.plan.isTop = 0;
       this.$store.dispatch('planAbout/changeTopStatus',{planId:this.plan.planId,isTop:0})
+    },
+    handleFinish(){
+      this.finish = this.finish === 1 ? 0 : 1;
     },
     handleTop() {
       this.plan.isTop = this.plan.isTop === 1 ? 0 : 1
