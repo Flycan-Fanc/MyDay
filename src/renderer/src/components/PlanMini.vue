@@ -1,28 +1,40 @@
 <template>
   <div class="Plan-container top" ref="plan-box">
     <div class="check">
-<!--      <input type="checkbox" name="plan-done" id="plan-done" />-->
-      <el-checkbox v-model="finish"  size="large" id="plan-done"/>
+      <!--      <input type="checkbox" name="plan-done" id="plan-done" />-->
+      <el-checkbox v-model="finish" size="large" id="plan-done" />
     </div>
     <div class="plan">
       <span id="tags">
-        <span v-for="item in plan.planTags" :style="{color:item.tagColor,marginRight:'5px'}">{{item.tagName}}</span>
+        <span v-for="item in plan.planTags" :style="{ color: item.color, marginRight: '5px' }">{{item.tagName}}</span>
       </span>
-      <span id="plan-content"> {{plan.planContent}} </span>
+      <span id="plan-content" v-if="!planContentInputVisible" @click="changePlanContent"> {{ plan.planContent }} </span>
+      <el-input
+        ref="planContentInput"
+        v-if="planContentInputVisible"
+        v-model="content"
+        :autofocus="false"
+        @blur="overChangePlanContent"
+        style="width: 180px"
+        placeholder="请输入计划内容"
+      />
     </div>
     <div class="tools">
-      <img src="../assets/icon/ic_action_tick.png" alt="" @click="handleDone"/>
-      <img src="../assets/icon/ic_tools_top.png" alt="" @click="handleTop" v-if="!plan.isDone"/>
+      <img src="../assets/icon/ic_action_tick.png" alt="" @click="handleDone" />
+      <img src="../assets/icon/ic_tools_top.png" alt="" @click="handleTop" v-if="!plan.isDone" />
       <img
         src="../assets/icon/ic_tools_addTag.png"
         alt=""
         class="addTags"
         @click="showPlanTagDialog = !showPlanTagDialog"
       />
-      <img src="../assets/icon/ic_tools_delete.png" alt="" @click="handleDelete"/>
+      <img src="../assets/icon/ic_tools_delete.png" alt="" @click="handleDelete" />
     </div>
     <img src="../assets/icon/ic_status_toped.png" alt="" id="status-toped" v-show="plan.isTop" />
-    <PlanTagManager v-model:showPlanTagDialog.async="showPlanTagDialog"></PlanTagManager>
+    <PlanTagManager
+      v-model:showPlanTagDialog.async="showPlanTagDialog"
+      :planId="planId"
+    ></PlanTagManager>
   </div>
 </template>
 
@@ -46,10 +58,16 @@ export default {
       this.$refs['plan-box'].classList.add('done')
     }
   },
+  beforeUpdate() {
+    //console.log("Plan:>"+JSON.stringify(this.plan))
+  },
   computed:{
     plan(){
       return store.state.planAbout.planData.filter(item=>item.planId===this.planId)[0]
     },
+    // planTags(){
+    //   return this.plan.planTags
+    // },
     finish:{
       get(){
         return this.plan.isDone === 1
@@ -57,16 +75,11 @@ export default {
       set(value){
         this.handleDone()
         console.log("done:",this.plan.isDone)
-        // this.plan.isDone = value;
-        // store.dispatch('planAbout/changeDoneStatus',this.planId)
-        // if(this.plan.isDone === 1){
-        //   this.$refs['plan-box'].classList.add('done')
-        // }else{
-        //   this.$refs['plan-box'].classList.remove('done')
-        // }
-        // this.plan.isTop = 0;
       }
-    }
+    },
+    // content(){
+    //   return this.plan.planContent
+    // }
   },
   methods: {
     handleDone() {
@@ -91,30 +104,33 @@ export default {
     handleDelete() {
       // TODO: 删除计划的逻辑
       this.$store.dispatch('planAbout/deletePlan',this.plan.planId)
-    }
+    },
+    //改变计划内容
+    changePlanContent(){
+      this.content = this.plan.planContent
+      this.planContentInputVisible = true;
+      this.$nextTick(() => {
+        this.$refs.planContentInput.focus();
+      });
+    },
+    overChangePlanContent(){
+      if(this.content===''){
+        ElMessage({
+          message:'计划内容不能为空',
+          type:'warning',
+        })
+      } else{
+        store.dispatch('planAbout/editPlanContent',{planId:this.planId, planContent:this.content})
+        this.planContentInputVisible = false;
+      }
+    },
   },
-  // computed:{
-  //   rawPlanTags(){
-  //     return toRaw(this.plan.planTags);
-  //   },
-  // },
   data() {
     return {
       showPlanTagDialog: false,
-      // plan: {
-      //   planId: 1,
-      //   userId: 1,
-      //   planContent: '制作活动策划书',
-      //   planTags: [
-      //     { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-      //     { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-      //     { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
-      //   ],
-      //   isDone: 1,
-      //   isTop: 0,
-      //   startTime: '2023-04-01',
-      //   endTime: '2023-04-05'
-      // }
+      //修改计划内容
+      planContentInputVisible:false,
+      content: '',  //input内容
     }
   }
 }

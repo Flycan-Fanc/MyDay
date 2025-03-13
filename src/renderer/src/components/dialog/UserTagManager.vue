@@ -2,7 +2,7 @@
   <!-- 标签管理对话框 -->
   <el-dialog
     id="tagPage"
-    v-model:="dialogTagVisible"
+    v-model="dialogTagVisible"
     title="标签管理"
     width="500"
     center

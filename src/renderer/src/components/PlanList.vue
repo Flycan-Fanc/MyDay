@@ -22,7 +22,7 @@ export default {
     });
   },
   beforeUpdate() {
-    console.log("updated")
+    //console.log("planData:"+this.planData)
   },
   methods:{
     handleDone(){

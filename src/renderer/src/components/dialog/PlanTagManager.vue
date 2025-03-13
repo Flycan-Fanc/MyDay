@@ -9,10 +9,10 @@
     :append-to-body="true"
     :close="beforeClosePlanTagPage"
   >
-    <TagMini class="tagMini"></TagMini>
+    <TagMini class="tagMini" :planId="planId" :dialogPlanTagVisible="dialogPlanTagVisible"></TagMini>
     <span class="planTagTool">
-      <el-button>确认</el-button>
-      <el-button>取消</el-button>
+      <el-button @click="handleSave">确认</el-button>
+      <el-button @click="handleCancel">取消</el-button>
     </span>
   </el-dialog>
 </template>
@@ -21,6 +21,7 @@
 // TODO: 当标签关闭时，如果有信息被修改，应该提示是否修改信息==>增加逻辑：如何获知信息被修改？
 import TagMini from '../TagMini.vue'
 import { ElMessage, ElMessageBox } from "element-plus";
+import store from "../../store/store";
 export default {
   name: 'PlanTagManager',
   props:{
@@ -28,6 +29,10 @@ export default {
       type: Boolean,
       default: false
     },
+    planId:{
+      type: Number,
+      required: true
+    }
   },
   components:{TagMini},
   computed: {
@@ -38,6 +43,9 @@ export default {
       set(val) {
         this.$emit('update:showPlanTagDialog', val)
       }
+    },
+    selectedTag(){
+      return store.state.tagAbout.selectedTag
     }
   },
   data(){
@@ -77,7 +85,21 @@ export default {
       } else{
         this.dialogPlanTagVisible = false;
       }
-    }
+    },
+    handleSave(){
+      console.log('handleSave')
+      console.log("handleSave:"+this.planId+",selectedTag"+JSON.stringify(this.selectedTag))
+      //去除掉selectedTag里面要去除的tag
+      //store.dispatch('tagAbout/deleteSelectedTagByCloseTag')
+      store.dispatch('planAbout/editPlanTag',{planId:this.planId,selectedTag:this.selectedTag})
+      store.dispatch('tagAbout/clearSelectedTag')
+      this.dialogPlanTagVisible = false;
+    },
+    handleCancel(){
+      //store.dispatch()
+      //store.dispatch('tagAbout/clearCloseTag')
+      this.dialogPlanTagVisible = false;
+    },
   }
 }
 

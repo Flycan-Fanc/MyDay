@@ -26,9 +26,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 0,
         isTop: 0,
@@ -40,9 +40,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 0,
         isTop: 1,
@@ -54,9 +54,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -68,9 +68,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -82,9 +82,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -96,9 +96,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -110,9 +110,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -124,9 +124,9 @@ const planAbout = {
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', tagColor: '#ff0000' },
-          { tagId: 2, tagName: '#学习', tagColor: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', tagColor: '#0000ff' }
+          { tagId: 1, tagName: '#工作', color: '#ff0000' },
+          { tagId: 2, tagName: '#学习', color: '#00ff00' },
+          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -197,9 +197,18 @@ const planAbout = {
       context.commit('changeDoneStatus',value)
     },
     /**
+     * 编辑计划内容
+     */
+    editPlanContent(context,value){
+      context.commit('editPlanContent',value)
+    },
+    /**
      * 编辑计划标签
      */
-    editPlanTag(){},
+    editPlanTag(context,value){
+      console.log('冬瓜！！！')
+      context.commit('editPlanTag',value)
+    },
     /**
      * 排序计划
      */
@@ -265,9 +274,28 @@ const planAbout = {
       state.planData = planApi.sortPlanList(state.planData)
     },
     /**
+     * 编辑计划内容
+     */
+    editPlanContent(state,value){
+      state.planData.forEach(item=>{
+        if(item.planId===value.planId){
+          item.planContent = value.planContent
+        }
+      })
+    },
+    /**
      * 编辑计划标签
      */
-    editPlanTag(){},
+    editPlanTag(state,value){
+      console.log("editPlanTag:"+JSON.stringify(value))
+      state.planData.forEach(item=>{
+        if(item.planId === value.planId){
+          // TODO:后续可以优化一下，只修改变化的标签部分
+          item.planTags = value.selectedTag
+        }
+      })
+      console.log("editPlanTag:"+JSON.stringify(state.planData.filter(item=>item.planId === value.planId)))
+    },
     /**
      * 排序计划
      */
