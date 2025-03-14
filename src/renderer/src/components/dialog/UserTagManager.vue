@@ -12,30 +12,44 @@
   >
     <div id="userTags-area">
       <div class="tag-editor">
+        <el-color-picker v-model="color" :predefine="predefineColors" style="margin-right:10px"/>
         <el-input v-model="tagInput" style="width: 160px" placeholder="添加标签" />
-        <el-button class="mt-4" style="width: 20%; margin-left: 10px" @click="">Add</el-button>
+        <el-button class="mt-4" style="width: 20%; margin-left: 10px" @click="addTag">Add</el-button>
       </div>
       <div class="tagList-box">
         <el-table :data="userTagData" style="width: 100%" max-height="250">
-          <el-table-column fixed prop="name" label="标签" align="center" width="150">
+          <el-table-column fixed prop="tagId" label="tagId" v-if="false"></el-table-column>>
+          <el-table-column fixed prop="tagName" label="标签" align="center" width="150">
             <template #default="scope">
               <el-tag
+                v-show="!tagContentInputVisible[scope.$index]"
                 :color="scope.row.color"
                 effect="dark"
                 style="border:none;font-weight:bold;cursor:pointer;"
-              >{{scope.row.name}}</el-tag>
+                @click="console.log(scope.row.tagName)"
+              >{{scope.row.tagName}}</el-tag>
+              <el-input
+                ref="planContentInput"
+                v-if="tagContentInputVisible[scope.$index]"
+                v-model="content"
+                autofocus
+                @blur="overChangeTagContent(scope)"
+                @keyup.enter="overChangeTagContent(scope)"
+                style="width: 100px"
+                placeholder="请输入标签"
+              />
             </template>
           </el-table-column>
           <el-table-column fixed="right" label="删除标签" align="center" min-width="120">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click.prevent="deleteRow(scope.$index)">
+              <el-button link type="primary" size="small" @click.prevent="deleteRow(scope.row.tagId)">
                 Remove
               </el-button>
             </template>
           </el-table-column>
           <el-table-column fixed="right" label="编辑标签" align="center" min-width="120">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click.prevent="editRow(scope.$index)">
+              <el-button link type="primary" size="small" @click.prevent="editRow(scope)">
                 Edit
               </el-button>
             </template>
@@ -49,6 +63,8 @@
 <script>
 import { Select, CloseBold, Edit, Delete } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import store from "../../store/store";
+
 export default {
   name: 'UserTagManager',
   props: {
@@ -56,6 +72,9 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+  created() {
+    this.initializeTagContentInputVisible();
   },
   computed: {
     dialogTagVisible: {
@@ -67,7 +86,20 @@ export default {
         console.log('set Show:' + this.showTagDialog)
         this.$emit('update:showTagDialog', val)
       }
+    },
+    //用户拥有的标签
+    userTagData(){
+      return store.state.tagAbout.userTags
     }
+  },
+  watch: {
+    userTagData:{
+      handler(newValue) {
+        // 当 userTagData 变化时，重新初始化 tagContentInputVisible
+        this.initializeTagContentInputVisible();
+      },
+      deep: true, // 启用深度检测
+    },
   },
   methods: {
     closeUserTagDialog() {
@@ -75,10 +107,47 @@ export default {
     },
     // tag 操作
     deleteRow(index) {
-      this.userTagData.value.splice(index, 1)
+      store.dispatch('tagAbout/deleteTag',index)
     },
-    editRow(index){
-      this.userTagData.value[index].name = this.tagInput
+    editRow(scope){
+      console.log('scope:'+scope)
+      this.content = scope.row.tagName
+      this.tagContentInputVisible[scope.$index] = true
+      // 自动获取焦点
+      this.$nextTick(() => {
+        this.$refs.planContentInput.focus();
+      });
+      console.log(this.content)
+    },
+    addTag(){
+      console.log("123:"+this.color)
+      store.dispatch('tagAbout/addTag',{tagName:this.tagInput,color:this.color})
+    },
+    overChangeTagContent(scope){
+      let newName = ''
+      if(this.content === '' || this.content === '#'){
+        ElMessage({
+          message: '标签名不能为空',
+          type: 'warning',
+          duration: 2000
+        })
+      } else if(this.content[0] === '#'){
+        newName = this.content
+      } else{
+        //this.userTagData[scope.$index].tagName = '#' + this.content
+        newName = '#' + this.content
+      }
+      store.dispatch('tagAbout/editTagName',{tagId:scope.row.tagId,tagName:newName})
+      this.tagContentInputVisible[scope.$index] = false
+      this.content = ''
+      console.log('tagData:'+JSON.stringify(this.userTagData))
+    },
+    initializeTagContentInputVisible() {
+      if (this.userTagData && this.userTagData.length) {
+        this.tagContentInputVisible = new Array(this.userTagData.length).fill(false);
+      } else {
+        console.warn('userTagData is not initialized or is empty');
+      }
     },
   },
   data() {
@@ -90,21 +159,26 @@ export default {
       Delete,
       // tag
       tagInput: '',
-      userTagData: [
-        { id: 1, name: '标签1', color: '#2da322' },
-        { id: 2, name: '标签2', color: '#89eeff' },
-        { id: 3, name: '标签3', color: '#D71CFF' },
-        { id: 4, name: '标签4', color: '#71d2af' },
-        { id: 5, name: '标签5', color: '#672882' },
-        { id: 6, name: '标签6', color: '#968869' },
-        { id: 7, name: '标签7', color: '#449ef8' },
-        { id: 8, name: '标签8', color: '#FFD700' },
-        { id: 9, name: '标签9', color: '#717892' },
-        { id: 10, name: '标签10', color: '#456789' },
-        { id: 11, name: '标签11', color: '#78eadc' },
-        { id: 12, name: '标签12', color: '#121145' },
-        { id: 13, name: '标签13', color: '#777777' }
+      color: '#FF8707',
+      predefineColors:[
+        '#ff4500',
+        '#ff8c00',
+        '#ffd700',
+        '#90ee90',
+        '#00ced1',
+        '#1e90ff',
+        '#c71585',
+        'rgba(255, 69, 0, 0.68)',
+        'rgb(255, 120, 0)',
+        'hsv(51, 100, 98)',
+        'hsva(120, 40, 94, 0.5)',
+        'hsl(181, 100%, 37%)',
+        'hsla(209, 100%, 56%, 0.73)',
+        '#c7158577',
       ],
+      // 标签edit
+      tagContentInputVisible: [],
+      content:'',
     }
   }
 }

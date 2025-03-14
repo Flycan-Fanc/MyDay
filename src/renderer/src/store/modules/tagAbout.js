@@ -58,10 +58,12 @@ const tagAbout = {
      */
     addTag(context,value){
       let tagId = nanoid()
-      let tagName = value;
-      // TODO:后续可能会支持用户自定义颜色
-      let color = tagApi.randomHexColor()
-      let newTag = new Tag(tagId,tagName,color)
+      //TODO: 后面增加用户id
+      let userId = 1
+      let tagName = '#'+value.tagName;
+      let color = value.color;
+      let newTag = new Tag(tagId,userId,tagName,color)
+      console.log('newTag:'+JSON.stringify(newTag))
       context.commit('addTag',newTag)
     },
     /**
@@ -77,6 +79,7 @@ const tagAbout = {
     editTagName(context,value){
       let index = context.state.userTags.findIndex((item=>item.tagId === value.tagId))
       let newTagName = value.tagName
+      console.log('state editName:'+JSON.stringify(value))
       context.commit('editTagName',{index,newTagName})
     },
     /**
@@ -140,7 +143,8 @@ const tagAbout = {
      * 修改标签内容
      */
     editTagName(state,value){
-      state.userTags[value.index].tagName = value.tagName;
+      state.userTags[value.index].tagName = value.newTagName;
+      console.log('state:'+JSON.stringify(value))
     },
     /**
      * 获取对应id项目的tagList,放在selectedTag中

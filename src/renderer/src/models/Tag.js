@@ -10,7 +10,7 @@ function Tag(tagId,userId,tagName,tagColor){
     this.tagId = tagId;
     this.userId = userId;
     this.tagName = tagName;
-  this.tagColor = tagColor;
+    this.color = tagColor;
 }
 
 export default Tag;

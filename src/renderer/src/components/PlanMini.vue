@@ -15,6 +15,7 @@
         v-model="content"
         :autofocus="false"
         @blur="overChangePlanContent"
+        @keyup.enter="overChangePlanContent"
         style="width: 180px"
         placeholder="请输入计划内容"
       />
