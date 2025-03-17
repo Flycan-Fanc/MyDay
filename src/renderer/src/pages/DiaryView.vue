@@ -2,7 +2,7 @@
   <div id="diaryView">
     <div id="diaryHeader">
       <span class="calendar-area"><CalendarWeather></CalendarWeather></span>
-      <span class="tools-area">
+      <span class="tools-area" @click="back()">
         <img src="../assets/icon/ic_tools_return.png" alt="返回" />
         <span>返回</span>
       </span>
@@ -29,10 +29,16 @@ import CalendarWeather from '../components/CalendarWeather.vue'
 import Editor from '../components/Editor.vue'
 import editorConfig from '../config/editorConfig'
 import {Edit,Delete} from '@element-plus/icons-vue'
+import router from "../router";
 
 export default {
   name: 'InsView',
   components: { Editor, CalendarWeather },
+  methods:{
+    back(){
+      router.back()
+    }
+  },
   data(){
     return {
       Edit, Delete,

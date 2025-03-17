@@ -42,12 +42,11 @@ export default {
   props:{
     planId:{
       type:Number,
-      required:true,
     },
-    dialogPlanTagVisible:{
-      type:Boolean,
-      required:true,
-    }
+    // dialogPlanTagVisible:{
+    //   type:Boolean,
+    //   required:true,
+    // }
   },
   mounted(){
     console.log("tagList:" + JSON.stringify(this.userTags))
@@ -72,9 +71,9 @@ export default {
     }
   },
   watch:{
-    dialogPlanTagVisible(){
-      store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
-    }
+    // dialogPlanTagVisible(){
+    //   store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
+    // }
   },
   methods:{
     handleClose:function(tag){

@@ -1,16 +1,22 @@
 <template>
     <div id="DiaryList">
-      <DiaryMini v-for="i in 20" :key="i" />
+      <DiaryMini v-for="i in 20" :key="i" @click="diaryRead(i)"/>
     </div>
 </template>
 
 <script>
 import DiaryMini from './DiaryMini.vue'
+import router from "../router";
 export default {
-    name: 'DiaryList',
-    components: {
-      DiaryMini
-    },
+  name: 'DiaryList',
+  components: {
+    DiaryMini
+  },
+  methods:{
+    diaryRead(i){
+      router.push('/diaryView')
+    }
+  }
 }
 
 

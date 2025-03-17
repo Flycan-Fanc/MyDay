@@ -1,11 +1,12 @@
 <template>
   <div id="InsList">
-    <InsMini v-for="i in 20" :key="i"></InsMini>
+    <InsMini v-for="i in 20" :key="i" @click="insRead()"></InsMini>
   </div>
 </template>
 
 <script>
 import InsMini from './InsMini.vue'
+import router from "../router";
 export default {
   name:'InsList',
   mounted(){
@@ -19,6 +20,11 @@ export default {
   components:{
     InsMini
   },
+  methods:{
+    insRead(){
+      router.push('/insView')
+    }
+  }
 }
 
 

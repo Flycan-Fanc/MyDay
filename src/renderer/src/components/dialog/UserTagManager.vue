@@ -21,14 +21,15 @@
           <el-table-column fixed prop="tagId" label="tagId" v-if="false"></el-table-column>>
           <el-table-column fixed prop="tagName" label="标签" align="center" width="150">
             <template #default="scope">
-              <el-tag
-                v-show="!tagContentInputVisible[scope.$index]"
-                :color="scope.row.color"
-                effect="dark"
-                style="border:none;font-weight:bold;cursor:pointer;"
-                @click="console.log(scope.row.tagName)"
-              >{{scope.row.tagName}}</el-tag>
-              <el-input
+                <el-tag
+                  v-show="!tagContentInputVisible[scope.$index]"
+                  :color="scope.row.color"
+                  disable-transitions
+                  effect="dark"
+                  style="border:none;font-weight:bold;cursor:pointer;"
+                  @click="navigateToTagBased(scope.row)"
+                >{{scope.row.tagName}}</el-tag>
+                <el-input
                 ref="planContentInput"
                 v-if="tagContentInputVisible[scope.$index]"
                 v-model="content"
@@ -37,7 +38,7 @@
                 @keyup.enter="overChangeTagContent(scope)"
                 style="width: 100px"
                 placeholder="请输入标签"
-              />
+                />
             </template>
           </el-table-column>
           <el-table-column fixed="right" label="删除标签" align="center" min-width="120">
@@ -64,6 +65,7 @@
 import { Select, CloseBold, Edit, Delete } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import store from "../../store/store";
+import router from "../../router";
 
 export default {
   name: 'UserTagManager',
@@ -112,7 +114,7 @@ export default {
     editRow(scope){
       console.log('scope:'+scope)
       this.content = scope.row.tagName
-      this.tagContentInputVisible[scope.$index] = true
+      this.tagContentInputVisible[scope.$index] = !this.tagContentInputVisible[scope.$index]
       // 自动获取焦点
       this.$nextTick(() => {
         this.$refs.planContentInput.focus();
@@ -149,6 +151,19 @@ export default {
         console.warn('userTagData is not initialized or is empty');
       }
     },
+    // 导航到标签内容页
+    navigateToTagBased(row){
+      console.log('row:'+JSON.stringify(row))
+      this.closeUserTagDialog()
+      router.push({
+        name:'TagAbout',
+        params:{
+          tagId:row.tagId,
+          tagName:row.tagName,
+          color:row.color
+        }
+      })
+    }
   },
   data() {
     return {
@@ -198,4 +213,5 @@ export default {
   display:flex;
   justify-content: center;
 }
+
 </style>

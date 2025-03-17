@@ -3,7 +3,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Today from '../pages/Today.vue'
 import OneWeek from '../pages/OneWeek.vue'
 import Diary from '../pages/Diary.vue'
+import DiaryView from '../pages/DiaryView.vue'
+import DiaryEditor from '../pages/DiaryEditor.vue'
 import Inspiration from '../pages/Inspiration.vue'
+import InsView from '../pages/InsView.vue'
+import InsEditor from '../pages/InsEditor.vue'
 import TagBasedContentView from "../pages/TagBasedContentView.vue";
 import ErrorPage from "../pages/ErrorPage.vue";
 
@@ -26,39 +30,35 @@ const routes = [
     name:'Diary',
     path:'/diary',
     component: Diary,
-    children:[
-      {
-        name:'DiaryView',
-        path:'diaryView',
-        component: () => import('../pages/DiaryView.vue'),
-      },
-      {
-        name:'DiaryEditor',
-        path:'diaryEditor',
-        component: () => import('../pages/DiaryEditor.vue'),
-      },
-    ]
+  },
+  {
+    name:'DiaryView',
+    path:'/diaryView',
+    component: DiaryView
+  },
+  {
+    name:'DiaryEditor',
+    path:'/diaryEditor',
+    component: DiaryEditor
   },
   {
     name:'Inspiration',
     path:'/inspiration',
     component: Inspiration,
-    children:[
-      {
-        name:'InsView',
-        path:'insView',
-        component: () => import('../pages/InsView.vue'),
-      },
-      {
-        name:'InsEditor',
-        path:'insEditor',
-        component: () => import('../pages/InsEditor.vue'),
-      },
-    ],
+  },
+  {
+    name:'InsView',
+    path:'/insView',
+    component: InsView,
+  },
+  {
+    name:'InsEditor',
+    path:'/insEditor',
+    component: InsEditor,
   },
   {
     name:'TagAbout',
-    path:'/tagAbout',
+    path:'/tagAbout/:tagId/:tagName/:color',
     component: TagBasedContentView,
   },
   {

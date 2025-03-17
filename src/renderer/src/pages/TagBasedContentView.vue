@@ -3,12 +3,12 @@
     <div class="planInsToggle" @click="handleToggle">
       <div class="planToggle">
         <span
-          >{{ planChoose }}<span class="tagName" v-if="from === '计划'">{{ tag.value }}</span></span
+          >{{ planChoose }}<span class="tagName" v-if="from === '计划'">{{ tag.tagName }}</span></span
         >
       </div>
       <div class="insToggle">
         <span
-          >{{ insChoose }}<span class="tagName" v-if="from === '灵感'">{{ tag.value }}</span></span
+          >{{ insChoose }}<span class="tagName" v-if="from === '灵感'">{{ tag.tagName }}</span></span
         >
       </div>
     </div>
@@ -26,20 +26,17 @@
 import Search from "../components/Search.vue";
 import PlanList from "../components/PlanList.vue";
 import InsList from "../components/InsList.vue";
+import router from "../router";
 
 export default {
   name: "TagBasedContentView",
   components: { Search, PlanList, InsList },
   props: {
-    // tag:{
-    //   value: '#学习',
-    //   label: '#学习',
-    //   color: '#ff6b81'
-    // }
-    // TODO: 后续tag需要从外面传进来
+
   },
   mounted(){
     console.log("hhhhhh");
+    console.log('tag:'+JSON.stringify(this.tag))
     document.querySelector('.tagName').style.color = this.tag.color;
     if(this.from==='计划'){
       document.querySelector('.planToggle').classList.add('active');
@@ -63,11 +60,6 @@ export default {
   data() {
     return {
       from: '计划',   //用户点击不同选项改变from值
-      tag: {
-        value: '#学习',
-        label: '#学习',
-        color: '#ff6b81'
-      }
     }
   },
   computed: {
@@ -76,6 +68,14 @@ export default {
     },
     insChoose() {
       return this.from === '灵感' ? 'All of your inspirations labeled ' : 'Inspiration';
+    },
+    // 路由传过来的参数
+    tag(){
+      return {
+        tagId: this.$route.params.tagId,
+        tagName: this.$route.params.tagName,
+        color: this.$route.params.color
+      }
     }
   },
   methods: {
@@ -98,6 +98,7 @@ export default {
   height:40px;
   width:100%;
   margin-top:40px;
+  cursor:pointer;
 }
 .planToggle,.insToggle{
   display: flex;
@@ -117,11 +118,11 @@ export default {
   margin-top:15px;
 }
 .content-show{
-  margin-top:15px;
+  margin-top:12px;
   display:flex;
   justify-content: center;
   align-items: center;
-  height:75%;
+  height:77%;
   width:100%;
   background-color: rgba(255,255,255,0.2);
   border-radius: 10px;

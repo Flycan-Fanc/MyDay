@@ -2,8 +2,8 @@
     <div id="diaryEditor">
       <div id="diaryHeader">
         <span class="calendar-area"><CalendarWeather></CalendarWeather></span>
-        <span class="tools-area">
-          <img src="../assets/icon/ic_tools_return.png" alt="返回">
+        <span class="tools-area" @click="back()">
+          <img src="../assets/icon/ic_tools_return.png" alt="返回" >
           <span>返回</span>
         </span>
       </div>
@@ -31,6 +31,7 @@
 import CalendarWeather from "../components/CalendarWeather.vue";
 import Editor from "../components/Editor.vue";
 import editorConfig from "../config/editorConfig";
+import router from "../router";
 export default {
   name: 'DiaryEditor',
   data(){
@@ -65,9 +66,14 @@ export default {
     }
   },
   methods: {
+    //路由返回
+    back(){
+      router.back()
+    },
     disabledDate(time) {
       return time.getTime() > Date.now();
-    }
+    },
+
   },
   components:{
     CalendarWeather,

@@ -12,7 +12,7 @@
     <div id="InsList-container">
       <InsList id="InsList"></InsList>
     </div>
-    <NewBtn id="NewBtn"></NewBtn>
+    <NewBtn id="NewBtn" @click="createIns()"></NewBtn>
   </div>
 </template>
 
@@ -20,15 +20,11 @@
 import CalendarSearch from '../components/CalendarSearch.vue'
 import InsList from '../components/InsList.vue'
 import NewBtn from "../components/NewBtn.vue";
+import router from "../router";
 
 export default {
   name: 'Inspiration',
   components: { NewBtn, CalendarSearch,InsList },
-  data(){
-    return{
-      from:'灵感',
-    }
-  },
   mounted(){
     //鼠标滚动时页面横向滚动
     document.querySelector('#InsList-container').addEventListener('wheel', function(event) {
@@ -36,6 +32,16 @@ export default {
       console.log(scrollLength)
       document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' });
     })
+  },
+  methods:{
+    createIns(){
+      router.push('/insEditor')
+    }
+  },
+  data(){
+    return{
+      from:'灵感',
+    }
   },
 }
 </script>

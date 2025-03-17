@@ -2,7 +2,7 @@
   <div id="insEditor">
     <div id="insHeader">
       <span class="calendar-area"><CalendarWeather></CalendarWeather></span>
-      <span class="tools-area">
+      <span class="tools-area" @click="back()">
         <img src="../assets/icon/ic_tools_return.png" alt="返回" />
         <span>返回</span>
       </span>
@@ -64,6 +64,7 @@ import TagMini from '../components/TagMini.vue'
 import { ref } from 'vue'
 import { Check } from '@element-plus/icons-vue'
 import editorConfig from "../config/editorConfig";
+import router from "../router";
 
 export default {
   name: 'InsEditor',
@@ -96,6 +97,9 @@ export default {
     }
   },
   methods:{
+    back(){
+      router.back()
+    },
     handleClose:function(tag){
       console.log(tag)
       this.selectedTag.splice(this.selectedTag.indexOf(tag), 1)
