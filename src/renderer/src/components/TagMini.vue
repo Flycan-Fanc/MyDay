@@ -40,18 +40,22 @@ import store from "../store/store";
 export default {
   name: 'TagMini',
   props:{
-    planId:{
+    contentId:{
       type:Number,
     },
-    // dialogPlanTagVisible:{
+    originComponent:{
+      type:String,
+      required:true
+    },
+    // visible:{
     //   type:Boolean,
-    //   required:true,
+    //   default:true
     // }
   },
   mounted(){
-    console.log("tagList:" + JSON.stringify(this.userTags))
+    //console.log("tagList:" + JSON.stringify(this.userTags))
     store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
-    console.log("selectedTag111:"+this.planId)
+    //console.log("selectedTag111:"+this.contentId)
   },
   computed:{
     userTags(){
@@ -59,11 +63,19 @@ export default {
     },
     //该项目拥有的标签
     tagList(){
-      return store.state.planAbout.planData.filter(item => item.planId === this.planId)[0].planTags
+      if(this.originComponent === 'planTagManager'){
+        return store.state.planAbout.planData.filter(item => item.planId === this.contentId)[0].planTags
+      } else if(this.originComponent === 'insTagEditor'){
+        //TODO: 获取灵感拥有的标签
+        return store.state.planAbout.planData.filter(item => item.planId === this.contentId)[0].planTags
+      }
+
     },
     //用户选择赋予目标项的标签
     selectedTag(){
+      //console.log("selectedTag:"+JSON.stringify(store.state.tagAbout.selectedTag))
       return store.state.tagAbout.selectedTag
+      //return JSON.parse(JSON.stringify(this.tagList))
     },
     //用户选择要关闭的标签
     closeTag(){
@@ -72,8 +84,12 @@ export default {
   },
   watch:{
     // dialogPlanTagVisible(){
-    //   store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
+    //   console.log("dialogPlanTagVisible:"+this.dialogPlanTagVisible)
+    //   if(this.dialogPlanTagVisible === true){
+    //     store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
+    //   }
     // }
+
   },
   methods:{
     handleClose:function(tag){

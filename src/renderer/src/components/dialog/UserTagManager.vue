@@ -104,6 +104,19 @@ export default {
     },
   },
   methods: {
+    // 输入字符串过滤器
+    filterString(input) {
+      // 1. 过滤非法字符（保留#、空格、中文、英文、数字）
+      const filtered = input.replace(/[^#\s\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+      // 2. 移除所有空格
+      const noSpace = filtered.replace(/\s/g, '');
+      // 3. 提取所有有效字符（移除所有#）
+      const validChars = noSpace.replace(/#/g, '');
+      // 4. 如果没有有效字符则返回空字符串
+      if (validChars.length === 0) return '';
+      // 5. 构造结果：始终以#开头，后跟所有有效字符
+      return `#${validChars}`;
+    },
     closeUserTagDialog() {
       this.dialogTagVisible = false
     },
@@ -114,6 +127,12 @@ export default {
     editRow(scope){
       console.log('scope:'+scope)
       this.content = scope.row.tagName
+      // 防止操作一个标签时，别的标签的edit被触发
+      for(let i=0;i<this.tagContentInputVisible.length;i++){
+        if(i !== scope.$index){
+          this.tagContentInputVisible[i] = false
+        }
+      }
       this.tagContentInputVisible[scope.$index] = !this.tagContentInputVisible[scope.$index]
       // 自动获取焦点
       this.$nextTick(() => {
@@ -123,26 +142,60 @@ export default {
     },
     addTag(){
       console.log("123:"+this.color)
-      store.dispatch('tagAbout/addTag',{tagName:this.tagInput,color:this.color})
-    },
-    overChangeTagContent(scope){
-      let newName = ''
-      if(this.content === '' || this.content === '#'){
+      if(this.filterString(this.tagInput) === ''){
         ElMessage({
           message: '标签名不能为空',
           type: 'warning',
           duration: 2000
         })
-      } else if(this.content[0] === '#'){
-        newName = this.content
-      } else{
-        //this.userTagData[scope.$index].tagName = '#' + this.content
-        newName = '#' + this.content
+      } else if(this.filterString(this.tagInput).length> 10){
+        ElMessage({
+          message: '标签名不能超过10个字符',
+          type: 'warning',
+          duration: 2000
+        })
+      } else if(this.userTagData.some(item=>item.tagName === this.filterString(this.tagInput))){
+        ElMessage({
+          message: '标签已存在',
+          type: 'warning',
+          duration: 2000
+        })
+      }else{
+        store.dispatch('tagAbout/addTag',{tagName:this.filterString(this.tagInput),color:this.color})
       }
-      store.dispatch('tagAbout/editTagName',{tagId:scope.row.tagId,tagName:newName})
-      this.tagContentInputVisible[scope.$index] = false
-      this.content = ''
-      console.log('tagData:'+JSON.stringify(this.userTagData))
+    },
+    overChangeTagContent(scope){
+      // 标签没有变化时，直接关闭
+      if(scope.row.tagName===this.content){
+        this.tagContentInputVisible[scope.$index] = false
+      } else{
+        let newName = ''
+        if(this.filterString(this.content) === ''){
+          ElMessage({
+            message: '标签名不能为空',
+            type: 'warning',
+            duration: 2000
+          })
+        } else if(this.filterString(this.content).length> 10){
+          ElMessage({
+            message: '标签名不能超过10个字符',
+            type: 'warning',
+            duration: 2000
+          })
+        } else if(this.userTagData.some(item=>item.tagName === this.filterString(this.content))){
+          ElMessage({
+            message: '标签已存在',
+            type: 'warning',
+            duration: 2000
+          })
+        } else{
+          newName = this.filterString(this.content)
+          store.dispatch('tagAbout/editTagName',{tagId:scope.row.tagId,tagName:newName})
+          this.tagContentInputVisible[scope.$index] = false
+          this.content = ''
+          console.log('tagData:'+JSON.stringify(this.userTagData))
+        }
+      }
     },
     initializeTagContentInputVisible() {
       if (this.userTagData && this.userTagData.length) {

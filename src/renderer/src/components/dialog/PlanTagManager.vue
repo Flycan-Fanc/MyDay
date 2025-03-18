@@ -9,7 +9,7 @@
     :append-to-body="true"
     :close="beforeClosePlanTagPage"
   >
-    <TagMini class="tagMini" :planId="planId" :dialogPlanTagVisible="dialogPlanTagVisible"></TagMini>
+    <TagMini class="tagMini" :contentId="planId" originComponent="planTagManager" :dialogPlanTagVisible="dialogPlanTagVisible"></TagMini>
     <span class="planTagTool">
       <el-button @click="handleSave">确认</el-button>
       <el-button @click="handleCancel">取消</el-button>

@@ -19,7 +19,7 @@
         <div class="title-container">
           <input type="text" placeholder="请填写标题">
         </div>
-        <TagMini></TagMini>
+        <TagMini originComponent="insTagEditor" :contentId="1"></TagMini>
 <!--        <div class="tag-container">-->
 <!--          <span class="tagAdd">-->
 <!--            <el-select-->

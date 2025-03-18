@@ -60,7 +60,7 @@ const tagAbout = {
       let tagId = nanoid()
       //TODO: 后面增加用户id
       let userId = 1
-      let tagName = '#'+value.tagName;
+      let tagName = value.tagName;
       let color = value.color;
       let newTag = new Tag(tagId,userId,tagName,color)
       console.log('newTag:'+JSON.stringify(newTag))
