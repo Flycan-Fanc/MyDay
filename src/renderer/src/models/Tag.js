@@ -7,10 +7,10 @@
  * @constructor
  */
 function Tag(tagId,userId,tagName,tagColor){
-    this.tagId = tagId;
-    this.userId = userId;
-    this.tagName = tagName;
-    this.color = tagColor;
+    this.tagId = tagId;  //Number
+    this.userId = userId;  //Number
+    this.tagName = tagName;   //String
+    this.color = tagColor;   //String,例如"#ffffff"
 }
 
 export default Tag;
