@@ -8,17 +8,17 @@
       </span>
     </div>
     <div class="tools-container">
-      <div class="diaryTitle">
-        日记标题七个字
+      <div class="diaryTitle" >
+        {{diary.diaryTitle}}
       </div>
       <div class="tools-box">
-        <el-button class="EditBtn" type="primary" :icon="Edit" style="width:60px"></el-button>
+        <el-button class="EditBtn" type="primary" :icon="Edit" style="width:60px" @click="handleEdit"></el-button>
         <el-button class="DelBtn" type="danger" :icon="Delete" style="width:60px"></el-button>
       </div>
     </div>
     <div id="view-container">
       <div class="view-box">
-        <Editor id="editor" :config="config"></Editor>
+        <Editor id="editor" :config="config" :diary="diary" @handleSave="handleSave"></Editor>
       </div>
     </div>
   </div>
@@ -30,19 +30,45 @@ import Editor from '../components/Editor.vue'
 import editorConfig from '../config/editorConfig'
 import {Edit,Delete} from '@element-plus/icons-vue'
 import router from "../router";
+import {mapState} from "vuex";
+import store from "../store/store";
 
 export default {
   name: 'InsView',
   components: { Editor, CalendarWeather },
+  mounted(){
+
+  },
+  computed:{
+    diaryId(){
+      return Number(this.$route.params.diaryId)  //param参数获取到的为string类型，需要转换
+    },
+    diary(){
+      return store.state.diaryAbout.diaryData.filter(item=>item.diaryId===this.diaryId)[0]
+    }
+  },
   methods:{
     back(){
       router.back()
+    },
+    handleEdit(){
+      router.push({
+        name:'DiaryEditor',
+        params:{
+          diaryId:this.diaryId
+        }
+      })
+      //this.config = editorConfig.diaryConfig.editor
+    },
+    handleSave(){
+      console.log('保存了')
+      this.config = editorConfig.diaryConfig.view
     }
   },
   data(){
     return {
       Edit, Delete,
-      config: editorConfig.insConfig.view,
+      config: editorConfig.diaryConfig.view,
       selectedTag: [
         { label: '#工作', value: '#工作', color: '#67C23A' },
         { label: '#学习', value: '#学习', color: '#909399' },

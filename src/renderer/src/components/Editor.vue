@@ -1,11 +1,15 @@
 <template>
   <mavon-editor
+    id="editor"
+    ref="md"
     v-model="content"
     :toolbars="config.toolbarConfig"
     v-bind="config.editorConfig"
+    :markdownIt="md"
     @change="handleChange"
     @imgAdd="$imgAdd"
     @imgDel="$imgDel"
+    @save="handleSave"
     :style="{ borderRadius: '10px' }"
     :boxShadow="false"
   />
@@ -13,6 +17,7 @@
 
 <script>
 import { ref } from 'vue';
+import { md, interact} from '../utils/markdown.js'
 
 export default {
   name: 'Editor',
@@ -20,42 +25,144 @@ export default {
     config: {
       type: Object,
       required: true
+    },
+    diary:{
+      type:Object,
+      default: {}
     }
   },
   mounted(){
-    console.log("editor:"+JSON.stringify(this.config));
+    console.log('DATA'+JSON.stringify(this.content))
+    console.log('markdownit:'+JSON.stringify(this.md))
+    this.$nextTick(() => {
+      this.initImageResize();
+    });
   },
   data() {
     return {
-      content: '## 欢迎使用mavon-editor\n输入内容...',
+      md,
+      content: '',
+      img_file: [{miniurl:'no img at pos 0',_name:'null'}]
+    }
+  },
+  watch: {
+    // 监听 diary 变化并更新 content
+    diary: {
+      immediate: true, // 立即触发一次
+      handler(newVal) {
+        if (Object.keys(newVal).length > 0) {
+          this.content = JSON.stringify(newVal.diaryContent);
+        } else {
+          this.content = '默认内容';
+        }
+      }
     }
   },
   methods: {
     handleChange(markdown, html) {
       console.log('当前内容:', { markdown, html })
     },
-    // 图片上传
+    handleSave(){
+      this.$emit('handleSave')
+    },
+    // 图片添加
     $imgAdd(pos, $file) {
-      // 第一步.将图片上传到服务器.
-      var formdata = new FormData();
-      formdata.append('image', $file);
-      axios({
-        url: 'server url',
-        method: 'post',
-        data: formdata,
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }).then((url) => {
-        // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
-        /**
-         * $vm 指为mavonEditor实例，可以通过如下两种方式获取
-         * 1. 通过引入对象获取: `import {mavonEditor} from ...` 等方式引入后，`$vm`为`mavonEditor`
-         * 2. 通过$refs获取: html声明ref : `<mavon-editor ref=md ></mavon-editor>，`$vm`为 `this.$refs.md`
-         */
-        $vm.$img2Url(pos, url);
-      })
+      this.img_file[pos] = $file
+      // 生成base64并添加到img_files数组
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const miniurl = e.target.result
+
+        // 初始化默认尺寸
+        this.$set(this.sizes, miniurl, {
+          width: '300px',
+          height: 'auto'
+        })
+      }
+      reader.readAsDataURL(file)
+      //将图片缓存
+      this.img_file[pos] = $file
+      console.log('imgs:'+JSON.stringify(this.img_file))
+      // // 第一步.将图片上传到服务器.
+      // var formdata = new FormData();
+      // formdata.append('image', $file);
+      // axios({
+      //   url: 'server url',
+      //   method: 'post',
+      //   data: formdata,
+      //   headers: { 'Content-Type': 'multipart/form-data' },
+      // }).then((url) => {
+      //   // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
+      //   /**
+      //    * $vm 指为mavonEditor实例，可以通过如下两种方式获取
+      //    * 1. 通过引入对象获取: `import {mavonEditor} from ...` 等方式引入后，`$vm`为`mavonEditor`
+      //    * 2. 通过$refs获取: html声明ref : `<mavon-editor ref=md ></mavon-editor>，`$vm`为 `this.$refs.md`
+      //    */
+      //   $vm.$img2Url(pos, url);
+      // })
     },
     // 图片删除
-    $imgDel(pos) {}
+    $imgDel(pos) {
+      delete this.img_file[pos]
+    },
+    // 图片上传处理（示例：转 Base64）
+    // handleImageAdd(filename, file) {
+    //   const reader = new FileReader();
+    //   reader.onload = (e) => {
+    //     // 替换图片路径为 Base64
+    //     this.content = this.content.replace(
+    //       filename,
+    //       e.target.result
+    //     );
+    //   };
+    //   reader.readAsDataURL(file);
+    // },
+
+    // 初始化图片拖拽调整
+    initImageResize() {
+      interact(".editor img[data-editable]").resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        modifiers: [
+          // // 防御性判断 + 参数修正
+          // interact.modifiers.aspectRatio ?
+          //   interact.modifiers.aspectRatio({ ratio: 'preserve' }) :
+          //   null
+        ].filter(Boolean),
+        listeners: {
+          move: (event) => {
+            const target = event.target;
+            let width = parseFloat(target.getAttribute("width")) || target.offsetWidth;
+            let height = parseFloat(target.getAttribute("height")) || target.offsetHeight;
+
+            width += event.deltaRect.left + event.deltaRect.right;
+            height += event.deltaRect.top + event.deltaRect.bottom;
+
+            target.style.width = `${width}px`;
+            target.style.height = `${height}px`;
+            target.setAttribute("width", width);
+            target.setAttribute("height", height);
+
+            this.syncMarkdownContent(target);
+          }
+        }
+      });
+    },
+
+    // 同步修改后的尺寸到 Markdown 原文
+    syncMarkdownContent(imgElement) {
+      const src = imgElement.getAttribute("src");
+      const alt = imgElement.getAttribute("alt") || "";
+      const width = imgElement.getAttribute("width");
+      const height = imgElement.getAttribute("height");
+
+      // 构造新语法
+      const regex = /!\[(.*?)\]\((.*?)(?:\s*=\s*(\d+)x(\d+))?\)/;
+      this.content = this.content.replace(regex, (match, pAlt, pSrc) => {
+        return pSrc === src
+          ? `![${alt}](${src} =${width}x${height})`
+          : match;
+      });
+    }
   }
 }
 // 工具栏配置
@@ -101,6 +208,15 @@ const editorConfig = ref({
   navigation: false,   // 显示导航栏
   shortCut: false      // 启用快捷键
 })
-
 </script>
 
+<style scoped>
+#editor{
+  min-width: 95%;
+}
+/* 图片拖拽手柄样式 */
+.interact-resize {
+  background: #2196f3;
+  opacity: 0.5;
+}
+</style>

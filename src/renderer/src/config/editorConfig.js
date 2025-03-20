@@ -24,9 +24,9 @@ export default {
         trash: true, // 清空
         save: true, // 保存（触发events中的save事件）
         /* 1.4.2 */
-        navigation: true, // 导航目录
+        navigation: false, // 导航目录
         /* 2.2.1 */
-        subfield: false, // 关闭分栏模式
+        subfield: true, // 关闭分栏模式
         preview: true, // 预览
       },
       // 编辑器配置
@@ -69,7 +69,7 @@ export default {
         trash: true, // 清空
         save: true, // 保存（触发events中的save事件）
         /* 1.4.2 */
-        navigation: true, // 导航目录
+        navigation: false, // 导航目录
         /* 2.2.1 */
         subfield: false, // 关闭分栏模式
         preview: true, // 预览
@@ -84,8 +84,8 @@ export default {
         placeholder: '请输入内容...',
         codeStyle: 'atom-one-dark', // 代码高亮主题
         subfield: false,    // 双栏模式
-        defaultOpen: 'edit', // 默认打开模式（edit/preview）
-        toolbarsFlag: true, // 显示工具栏
+        defaultOpen: 'preview', // 默认打开模式（edit/preview）
+        toolbarsFlag: false, // 显示工具栏
         navigation: false,   // 显示导航栏
         shortCut: false      // 启用快捷键
       }

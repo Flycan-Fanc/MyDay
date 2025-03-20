@@ -21,7 +21,7 @@
           style="width: 300px;margin-left: 20px;"
           placeholder="请输入标题"
         />
-        <el-button class="SaveBtn" type="primary" style="margin-left: 20px;">Save</el-button>
+        <el-button class="SaveBtn" type="primary" style="margin-left: 20px;cursor:pointer;" @click="handleSave">Save</el-button>
       </div>
       <Editor id="editor" :config="config"></Editor>
     </div>
@@ -34,9 +34,17 @@ import editorConfig from "../config/editorConfig";
 import router from "../router";
 export default {
   name: 'DiaryEditor',
+  mounted(){
+    console.log('DD'+this.diaryId)
+  },
+  computed:{
+    diaryId(){
+      return this.$route.params.diaryId
+    }
+  },
   data(){
     return {
-      config:editorConfig.diaryConfig.editor,
+      config:editorConfig.insConfig.editor,
       diary:{
         date:'',
         title:'',
@@ -73,6 +81,10 @@ export default {
     disabledDate(time) {
       return time.getTime() > Date.now();
     },
+    handleSave(){
+      //TODO:保存的逻辑
+      this.back()
+    }
 
   },
   components:{

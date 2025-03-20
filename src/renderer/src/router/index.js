@@ -33,12 +33,12 @@ const routes = [
   },
   {
     name:'DiaryView',
-    path:'/diaryView',
+    path:'/diaryView/:diaryId',
     component: DiaryView
   },
   {
     name:'DiaryEditor',
-    path:'/diaryEditor',
+    path:'/diaryEditor/:diaryId',
     component: DiaryEditor
   },
   {

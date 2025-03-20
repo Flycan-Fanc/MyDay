@@ -1,20 +1,30 @@
 <template>
     <div id="DiaryList">
-      <DiaryMini v-for="i in 20" :key="i" @click="diaryRead(i)"/>
+      <DiaryMini v-for="item in diaryData" :key="item.diaryId" @click="diaryRead(item)"/>
     </div>
 </template>
 
 <script>
 import DiaryMini from './DiaryMini.vue'
 import router from "../router";
+import store from "../store/store";
+import {mapState} from "vuex";
 export default {
   name: 'DiaryList',
   components: {
     DiaryMini
   },
+  computed:{
+    ...mapState('diaryAbout', ['diaryData'])
+  },
   methods:{
-    diaryRead(i){
-      router.push('/diaryView')
+    diaryRead(item){
+      router.push({
+        name:'DiaryView',
+        params:{
+          diaryId:item.diaryId
+        }
+      })
     }
   }
 }
