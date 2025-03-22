@@ -47,6 +47,10 @@ export default {
       type:String,
       required:true
     },
+    dialogPlanTagVisible:{
+      type:Boolean,
+      default:true,
+    }
     // visible:{
     //   type:Boolean,
     //   default:true
@@ -83,13 +87,12 @@ export default {
     }
   },
   watch:{
-    // dialogPlanTagVisible(){
-    //   console.log("dialogPlanTagVisible:"+this.dialogPlanTagVisible)
-    //   if(this.dialogPlanTagVisible === true){
-    //     store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
-    //   }
-    // }
-
+    dialogPlanTagVisible(){
+      console.log("dialogPlanTagVisible:"+this.dialogPlanTagVisible)
+      if(this.dialogPlanTagVisible === true){
+        store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
+      }
+    }
   },
   methods:{
     handleClose:function(tag){

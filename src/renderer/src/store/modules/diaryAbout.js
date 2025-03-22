@@ -133,9 +133,9 @@ const diaryAbout = {
      * 添加日记
      */
     addDiary(context,value){
-      let diaryId = nanoid()
+      let diaryId = value.diaryId || nanoid()
       // TODO:后续引入用户实际数据
-      let userId = 1
+      let userId = value.userId
       let diaryTitle = value.diaryTitle
       let diaryContent = value.diaryContent
       let diaryDate = value.diaryDate
@@ -170,7 +170,7 @@ const diaryAbout = {
       newDiary.diaryContent = value.diaryContent
       newDiary.diaryDate = value.diaryDate
       newDiary.diaryTags = value.diaryTags || []
-      context.commit('editDiary',newDiary)
+      context.commit('addDiary',newDiary)
     },
   },
   mutations:{
@@ -192,7 +192,15 @@ const diaryAbout = {
      * 添加日记
      */
     addDiary(state,value){
-      state.diaryData.push(value)
+      if(state.diaryData.some(item => item.diaryId === value.diaryId)){
+        state.diaryData.forEach(item => {
+          if(item.diaryId === value.diaryId){
+            item = value
+          }
+        })
+      } else {
+        state.diaryData.push(value)
+      }
     },
     /**
      * 删除日记

@@ -3,6 +3,7 @@ import planAbout from './modules/planAbout'
 import tagAbout from './modules/tagAbout'
 import diaryAbout from './modules/diaryAbout'
 import insAbout from "./modules/insAbout";
+import pictureAbout from "./modules/pictureAbout";
 
 
 const store = createStore({
@@ -10,7 +11,8 @@ const store = createStore({
     planAbout,
     tagAbout,
     diaryAbout,
-    insAbout
+    insAbout,
+    pictureAbout
   }
 })
 
