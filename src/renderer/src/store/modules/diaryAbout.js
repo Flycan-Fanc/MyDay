@@ -195,12 +195,15 @@ const diaryAbout = {
       if(state.diaryData.some(item => item.diaryId === value.diaryId)){
         state.diaryData.forEach(item => {
           if(item.diaryId === value.diaryId){
-            item = value
+            item.diaryTitle = value.diaryTitle
+            item.diaryContent = value.diaryContent
+            item.diaryDate = value.diaryDate
           }
         })
       } else {
         state.diaryData.push(value)
       }
+      console.log('改了吧？'+JSON.stringify(state.diaryData[0]))
     },
     /**
      * 删除日记

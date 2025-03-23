@@ -29,7 +29,7 @@
         >Save</el-button
       >
     </div>
-    <Editor id="editor" :config="config" ref="editor"></Editor>
+    <Editor id="editor" :config="config" ref="editor" :diary="diary"></Editor>
   </div>
 </template>
 
@@ -55,7 +55,7 @@ export default {
   data(){
     return {
       config:editorConfig.insConfig.editor,
-
+      // 日期选择器的配置数据
       shortcuts:[
         {
           text: 'Today',
@@ -110,7 +110,13 @@ export default {
         diaryContent: data.markdown,
         diaryDate: this.diary.date,
       });
-      this.back()
+      router.push({
+        name:'DiaryView',
+        params:{
+          diaryId:this.diary.diaryId
+        }
+      })
+      //router.back()
     }
 
   },

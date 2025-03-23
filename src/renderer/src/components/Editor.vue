@@ -35,34 +35,17 @@ export default {
     }
   },
   mounted(){
-    //const markdownIt = this.$refs.md.getMarkdownIt()
-    //markdownIt.use(imgSize)
-    //console.log('DATA'+JSON.stringify(this.content))
-    //console.log('markdownit:'+JSON.stringify(this.md))
-    // this.$nextTick(() => {
-    //   this.initImageResize();
-    // });
-    // this.markdownIt.use(imgSize,{
-    //   img: {
-    //     width: '200px',
-    //     height: 'auto', // 高度自适应
-    //   },
-    // });
-    //console.log("md:"+JSON.stringify(this.markdownIt))
-    // 配置换行规则：必须两个空格才换行
-    //this.markdownIt.set({ breaks: false });
-    // this.markdownIt.renderer.rules.image = function (tokens, idx, options, env, self) {
-    //   const token = tokens[idx];
-    //   let src = token.attrs[token.attrIndex('src')][1];
-    //   // 解析自定义尺寸 `=宽x高`
-    //   const match = src.match(/=(\d+)x(\d+)$/);
-    //   let width = "auto", height = "auto";
-    //   if (match) {
-    //     width = match[1] + "px"; height = match[2] + "px";
-    //     src = src.replace(match[0], ''); // 移除尺寸部分
-    //   }
-    //   return `<img src="${src}" style="width:${width}; height:${height};">`;
-    // };
+    console.log('diary数据：'+JSON.stringify(this.diary))
+    // 获取图片
+    let img = store.getters['pictureAbout/fetchDiaryImage'](this.diary.diaryId)
+    console.log('图片数据：'+JSON.stringify(img))
+    if(img === null){
+      this.img_file = [{miniurl:'no img at pos 0',_name:'null'}]
+    } else{
+      this.img_file = img
+    }
+    // 获取内容
+    this.content = this.diary.diaryContent || '默认内容'
   },
   data() {
     return {

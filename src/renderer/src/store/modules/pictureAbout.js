@@ -8,15 +8,29 @@ import {nanoid} from 'nanoid'
 
 const pictureApi = {
   // TODO:将md收集到的图片数据转为后端可以读取的形式
-  toObj(state){
+  toObj(data){
     return {
-      miniurl:state._miniurl,
-      _name:state._name,
+      miniurl:data._miniurl,
+      _name:data._name,
     }
   },
 
   //TODO:将后端返回的数据转为md可以使用的格式
-  toMd(state){}
+  toMd(data){
+    let tempArr = data.map(item => {
+      return {
+        miniurl:item.pictureContent,
+        _name:item.pictureName
+      }
+    })
+    if(tempArr.length === 0){
+      return null
+    } else{
+      tempArr.unshift({miniurl:'no img at pos 0',_name:'null'})
+      return tempArr
+    }
+
+  }
 }
 
 const pictureAbout = {
@@ -103,7 +117,10 @@ const pictureAbout = {
     },
   },
   getters:{
-
+    fetchDiaryImage:(state) => (id) => {
+      console.log('getter state：'+JSON.stringify(pictureApi.toMd(state.pictureData.filter(item => item.diaryId === id))))
+      return pictureApi.toMd(state.pictureData.filter(item => item.diaryId === id))
+    }
   }
 }
 
