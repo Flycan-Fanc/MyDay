@@ -26,6 +26,9 @@ export default defineConfig({
       Components({
         resolvers: [ElementPlusResolver()],
       }),
-    ]
+    ],
+    devServer:{
+      proxy:"http://localhost:8080"    //请求路径为http://localhost:5000的资源时要走代理
+    }
   }
 })

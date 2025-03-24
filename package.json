@@ -21,6 +21,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
     "@element-plus/icons-vue": "^2.3.1",
+    "axios": "^1.8.4",
     "electron-updater": "^6.1.7",
     "element-plus": "^2.9.5",
     "interactjs": "^1.10.27",

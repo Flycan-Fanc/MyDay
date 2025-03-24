@@ -20,6 +20,7 @@ import { ref } from 'vue';
 import { imgSize } from "@mdit/plugin-img-size";
 import { mavonEditor }  from 'mavon-editor'
 import store from "../store/store";
+import axios from "axios";
 
 
 export default {
@@ -82,12 +83,13 @@ export default {
       //   this.$refs.md.$img2Url(pos, e.target.result + "=300x200"); // 这里可以追加尺寸参数 };
       //   reader.readAsDataURL($file);
       // }
-      console.log('pos:'+pos)
-      console.log('$file:'+JSON.stringify($file))
-      this.img_file[pos] = $file
+      // console.log('pos:'+pos)
+      // console.log('$file:'+JSON.stringify($file))
+      // this.img_file[pos] = $file
       //将图片缓存
       this.img_file[pos] = $file
       //console.log('imgs:'+JSON.stringify(this.img_file))
+      this.uploadImg()
     },
     // 图片删除
     $imgDel(pos) {
@@ -95,6 +97,48 @@ export default {
     },
     getData(){
       return { markdown:this.content,image:this.img_file}
+    },
+    // uploadImg($e){
+    //   // 第一步.将图片上传到服务器.
+    //   let formData = new FormData();
+    //   for(let _img in this.img_file){
+    //     formData.append(_img, this.img_file[_img]);
+    //   }
+    //   axios({
+    //     url: 'http://localhost:8080/image',
+    //     method: 'post',
+    //     data: formData,
+    //     headers: { 'Content-Type': 'multipart/form-data' },
+    //   }).then((res) => {
+    //     /**
+    //      * 例如：返回数据为 res = [[pos, url], [pos, url]...]
+    //      * pos 为原图片标志（0）
+    //      * url 为上传后图片的url地址
+    //      */
+    //     // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
+    //     for (let img in res) {
+    //       // $vm.$img2Url 详情见本页末尾
+    //       this.$refs.md.$img2Url(img[0], img[1]);
+    //     }
+    //   })
+    // },
+    uploadImg($e) {
+      let formData = new FormData();
+
+      // 假设 this.img_files 是 File 对象数组
+      this.img_file.forEach((file, index) => {
+        formData.append(`images`, file); // 字段名需与后端 upload.array("images") 匹配
+      });
+
+      axios.post('http://localhost:8080/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((res) => {
+        res.data.forEach(img => {
+          this.$refs.md.$img2Url(img[0], img[1]);
+        });
+      }).catch((error) => {
+        console.error("上传失败:", error);
+      });
     }
   }
 }
