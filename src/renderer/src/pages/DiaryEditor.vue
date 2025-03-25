@@ -39,6 +39,7 @@ import Editor from "../components/Editor.vue";
 import editorConfig from "../config/editorConfig";
 import router from "../router";
 import store from "../store/store";
+import {imageStorage, mdStorage} from "../utils/fileLocalStorage";
 export default {
   name: 'DiaryEditor',
   created(){
@@ -89,27 +90,32 @@ export default {
       return time.getTime() > Date.now();
     },
     handleSave(){
-      let data = this.$refs.editor.getData()
+      let data = this.$refs.editor.getImage()
+      // console.log('data:'+JSON.stringify(data))
+      data.forEach((file, pos) => {
+        // TODO:后续改为真实用户id
+        imageStorage.saveImage(`user1_diary${this.diaryId}_image.imgJSON`, JSON.stringify(file))
+      })
       //TODO:保存的逻辑
       // 先保存图片
-      data.image.forEach((file, pos) => {
-        if(pos!==0){
-          store.dispatch("pictureAbout/addPicture", {
-            //TODO:后续使用vuex的userId
-            userId: 1,
-            diaryId: this.diary.diaryId,
-            image: file,
-          });
-        }
-      })
-      // 再保存diary date、title、markdown
-      store.dispatch("diaryAbout/addDiary", {
-        userId: 1,
-        diaryId: this.diary.diaryId,
-        diaryTitle: this.diary.title,
-        diaryContent: data.markdown,
-        diaryDate: this.diary.date,
-      });
+      // data.image.forEach((file, pos) => {
+      //   if(pos!==0){
+      //     store.dispatch("pictureAbout/addPicture", {
+      //       //TODO:后续使用vuex的userId
+      //       userId: 1,
+      //       diaryId: this.diary.diaryId,
+      //       image: file,
+      //     });
+      //   }
+      // })
+      // // 再保存diary date、title、markdown
+      // store.dispatch("diaryAbout/addDiary", {
+      //   userId: 1,
+      //   diaryId: this.diary.diaryId,
+      //   diaryTitle: this.diary.title,
+      //   diaryContent: data.markdown,
+      //   diaryDate: this.diary.date,
+      // });
       router.push({
         name:'DiaryView',
         params:{

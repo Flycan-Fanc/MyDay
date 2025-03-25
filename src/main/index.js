@@ -57,14 +57,16 @@ function createWindow() {
   // 新增的 CSP 配置函数
   function setupCSPHeaders(window) {
     window.webContents.on('did-finish-load', () => {
+      const isDev = process.env.NODE_ENV === 'development';  // 是否为开发环境
+
       // 配置 CSP 规则（开发环境放宽策略）
       const cspHeader = [
         "default-src 'self'",
         "connect-src 'self' http://localhost:8080 ws://localhost:*", // 允许连接到后端和 WebSocket
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // 允许 Vue 开发模式
+        `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ""}`,
         "style-src 'self' 'unsafe-inline'",                 // 允许内联样式
         "img-src 'self' data:"                             // 允许图片和 data URL
-      ].join('; ');
+      ].filter(Boolean).join('; ');
 
       // 通过 webRequest 修改响应头
       window.webContents.session.webRequest.onHeadersReceived((details, callback) => {

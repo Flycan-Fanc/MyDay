@@ -16,6 +16,8 @@ const api = {
     },
     maximize: ()=> ipcRenderer.send('maximize'),
     enlargeWindow: (w,h)=> ipcRenderer.send('enlarge-window',[w,h]),
+    // TODO：文件读取相关api
+
   }
 }
 

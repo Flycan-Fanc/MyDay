@@ -27,6 +27,13 @@ export default defineConfig({
         resolvers: [ElementPlusResolver()],
       }),
     ],
+    server: {
+      headers: {
+        "Content-Security-Policy":
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+          "connect-src 'self' http://localhost:8080 ws://localhost:*"
+      }
+    },
     devServer:{
       proxy:"http://localhost:8080"    //请求路径为http://localhost:5000的资源时要走代理
     }
