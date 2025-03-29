@@ -90,39 +90,40 @@ export default {
       return time.getTime() > Date.now();
     },
     handleSave(){
-      let data = this.$refs.editor.getImage()
+      let image = this.$refs.editor.getImage()
+      let content = this.$refs.editor.getContent()
+      // 1.图片本地存储
       // console.log('data:'+JSON.stringify(data))
-      data.forEach((file, pos) => {
-        // TODO:后续改为真实用户id
-        imageStorage.saveImage(`user1_diary${this.diaryId}_image.imgJSON`, JSON.stringify(file))
-      })
+      // image.forEach((file, pos) => {
+      //   // TODO:后续改为真实用户id
+      //   imageStorage.saveImage(`user1_diary${this.diaryId}_image.imgJSON`, JSON.stringify(file))
+      // })
       //TODO:保存的逻辑
-      // 先保存图片
-      // data.image.forEach((file, pos) => {
-      //   if(pos!==0){
-      //     store.dispatch("pictureAbout/addPicture", {
-      //       //TODO:后续使用vuex的userId
-      //       userId: 1,
-      //       diaryId: this.diary.diaryId,
-      //       image: file,
-      //     });
+      // 2. 保存到store，先保存图片
+      image.forEach((file, pos) => {
+        store.dispatch("pictureAbout/addPicture", {
+          //TODO:后续使用vuex的userId
+          userId: 1,
+          diaryId: this.diary.diaryId,
+          image: file,
+        });
+      })
+      // 再保存diary date、title、markdown
+      store.dispatch("diaryAbout/addDiary", {
+        userId: 1,
+        diaryId: this.diary.diaryId,
+        diaryTitle: this.diary.diaryTitle,
+        diaryContent: content,
+        diaryDate: this.diary.diaryDate,
+      });
+      // 路由跳转
+      // router.push({
+      //   name:'DiaryView',
+      //   params:{
+      //     diaryId:this.diary.diaryId
       //   }
       // })
-      // // 再保存diary date、title、markdown
-      // store.dispatch("diaryAbout/addDiary", {
-      //   userId: 1,
-      //   diaryId: this.diary.diaryId,
-      //   diaryTitle: this.diary.title,
-      //   diaryContent: data.markdown,
-      //   diaryDate: this.diary.date,
-      // });
-      router.push({
-        name:'DiaryView',
-        params:{
-          diaryId:this.diary.diaryId
-        }
-      })
-      //router.back()
+      router.back()
     }
 
   },
