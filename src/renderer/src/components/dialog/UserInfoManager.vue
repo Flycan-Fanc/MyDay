@@ -147,17 +147,13 @@ export default {
   components:{
     Plus,
   },
-  mounted() {
-    console.log(this.userInfo.avatar)
-  },
+  mounted() {},
   computed: {
     dialogUserInfoVisible: {
       get() {
-        console.log('get Show:' + this.showUserInfoDialog)
         return this.showUserInfoDialog
       },
       set(val) {
-        console.log('set Show:' + this.showUserInfoDialog)
         this.$emit('update:showUserInfoDialog', val)
       }
     }

@@ -16,9 +16,7 @@
 export default {
   name: 'CalendarSearch',
   props:['from'],
-  mounted(){
-    console.log(this.from)
-  }
+  mounted(){}
 }
 </script>
 

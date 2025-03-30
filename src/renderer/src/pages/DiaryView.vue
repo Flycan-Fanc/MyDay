@@ -18,7 +18,7 @@
     </div>
     <div id="view-container">
       <div class="view-box">
-        <Editor id="editor" :config="config" :diary="diary" @handleSave="handleSave"></Editor>
+        <Editor id="editor" :config="config" :diary="diary" from="日记" @handleSave="handleSave"></Editor>
       </div>
     </div>
   </div>

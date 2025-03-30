@@ -1,6 +1,6 @@
 <template>
   <div id="InsList">
-    <InsMini v-for="i in 20" :key="i" @click="insRead()"></InsMini>
+    <InsMini v-for="item in insData" :key="item.insId" @click="insRead(item.insId)"></InsMini>
   </div>
 </template>
 
@@ -17,27 +17,35 @@ export default {
       document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' });
     })
   },
+  computed:{
+    insData(){
+      return this.$store.state.insAbout.insData
+    }
+  },
   components:{
     InsMini
   },
   methods:{
-    insRead(){
-      router.push('/insView')
+    insRead(insId){
+      router.push({
+        name:'InsView',
+        params:{
+          insId:insId
+        }
+      })
     }
   }
 }
-
-
 </script>
 
 <style scoped>
 #InsList {
   display: grid;
   grid-template-rows: 250px 250px; /* 固定两行高度 */
-  grid-auto-columns: 200px;       /* 自动生成的列宽 */
-  grid-auto-flow: column;         /* 按列优先排列 */
-  padding: 0 20px;               /* 两侧留白 */
-  overflow-x:auto;
+  grid-auto-columns: 200px; /* 自动生成的列宽 */
+  grid-auto-flow: column; /* 按列优先排列 */
+  padding: 0 20px; /* 两侧留白 */
+  overflow-x: auto;
   /*margin-top: 20px;*/
 }
 /* 自定义滚动条优化 */
@@ -56,4 +64,3 @@ export default {
   background-clip: content-box;
 }
 </style>
-

@@ -6,7 +6,7 @@
     :toolbars="config.toolbarConfig"
     v-bind="config.editorConfig"
     @change="handleChange"
-    @imgAdd="$imgAdd"
+    @imgAdd="asyncImgAdd"
     @imgDel="$imgDel"
     @save="handleSave"
     :style="{ borderRadius: '10px' }"
@@ -15,12 +15,10 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-//import { md } from '../utils/markdown.js'
-import { imgSize } from "@mdit/plugin-img-size";
 import { mavonEditor }  from 'mavon-editor'
 import store from "../store/store";
-import axios from "axios";
+import {imageRequest} from "../utils/fileRequest";
+import {imageUtils} from "../utils/dataUtils";
 
 
 export default {
@@ -30,23 +28,35 @@ export default {
       type: Object,
       required: true
     },
+    from:{
+      type:String,
+      required: true
+    },
     diary:{
+      type:Object,
+      default: {}
+    },
+    ins:{
       type:Object,
       default: {}
     }
   },
   mounted(){
-    console.log('diary数据：'+JSON.stringify(this.diary))
-    // 获取图片
-    let img = store.getters['pictureAbout/fetchDiaryImage'](this.diary.diaryId)
-    console.log('图片数据：'+JSON.stringify(img))
-    if(img === null){
-      this.img_file = [{miniurl:'no img at pos 0',_name:'null'}]
-    } else{
-      this.img_file = img
+    // 初始化数据：根据应用不同，获取不同数据
+    if(this.from === '日记') {
+      // 获取图片
+      let img = store.getters['pictureAbout/fetchDiaryImage'](this.diary.diaryId)
+
+      if (img === null) {
+        this.img_file = [{ miniurl: 'no img at pos 0', _name: 'null' }]
+      } else {
+        this.img_file = img
+      }
+      // 获取内容
+      this.content = this.diary.diaryContent || '默认内容'
+    } else if(this.from === '灵感') {
+
     }
-    // 获取内容
-    this.content = this.diary.diaryContent || '默认内容'
   },
   data() {
     return {
@@ -67,7 +77,16 @@ export default {
           this.content = '默认内容';
         }
       }
-    }
+    },
+    // 监听 ins 变化并更新 content
+    ins: {
+      immediate: true,
+      handler(newVal) {
+        if (Object.keys(newVal).length > 0) {
+          this.content = JSON.stringify(newVal.insContent);
+        }
+      }
+    },
   },
   methods: {
     handleChange(value, render) {
@@ -77,19 +96,25 @@ export default {
       this.$emit('handleSave',{ markdown:this.content,image:this.img_file})
     },
     // 图片添加
-    $imgAdd(pos, $file) {
+    async asyncImgAdd(pos, $file) {
+      let newFileObj = {}
       //压缩图片
-      this.compressBase64Image($file.miniurl)
-        .then(compressedBase64 => {
-          $file.miniurl = compressedBase64
-        })
-        .catch(error => {
-          console.error('处理失败:', error);
-        });
+      await imageUtils.compressImage($file).then(res=>{
+        newFileObj = res
+      })
+
+      let newFile = imageUtils.base64ToFile(newFileObj.miniurl, newFileObj._name)
+
       // 图片缓存
-      this.img_file[pos] = $file
+      this.img_file[pos] = newFile
       // 图片上传至服务器
-      this.uploadImg(pos)
+      imageRequest.post('http://localhost:8080/image', newFile)
+        .then(res=>{
+          console.log('上传成功')  // TODO:后续改为ElMessage？
+          this.$refs.md.$img2Url(pos, res.url);
+        }).catch(err=>{
+          console.log(err)
+        })
     },
     // 图片删除
     $imgDel(pos) {
@@ -105,72 +130,6 @@ export default {
     getContent(){
       return this.content
     },
-    // 将图片上传至服务器
-    uploadImg(pos) {
-      let formData = new FormData();
-
-      // 假设 this.img_files 是 File 对象数组
-      this.img_file.forEach((file, index) => {
-        formData.append(`file`, file); // 字段名需与后端 upload.array("images") 匹配
-        // console.log('img_file:'+JSON.stringify(file))
-      });
-
-      axios.post('http://localhost:8080/image', formData, {
-        headers: { 'Content-Type': 'multipart/form-data;charset=utf-8' },
-      }).then((res) => {
-        res.data.forEach(img => {
-          this.$refs.md.$img2Url(pos, img.url);
-        });
-      }).catch((error) => {
-        console.error("上传失败:", error);
-      });
-    },
-    /**
-     * 压缩图片Base64数据（当宽度 > 300px时等比例缩小）
-     * @param {string} base64 - 原始图片Base64
-     * @param {number} [maxWidth=300] - 最大允许宽度
-     * @returns {Promise<string>} 处理后的Base64
-     */
-    async compressBase64Image(base64, maxWidth = 300) {
-      return new Promise((resolve, reject) => {
-        // 1. 创建Image对象加载图片
-        const img = new Image();
-        img.src = base64;
-
-        img.onload = () => {
-          // 2. 获取原始尺寸
-          const originalWidth = img.width;
-          const originalHeight = img.height;
-
-          // 3. 判断是否需要缩放
-          if (originalWidth <= maxWidth) {
-            resolve(base64); // 直接返回原始数据
-            return;
-          }
-
-          // 4. 计算缩放后尺寸
-          const scaleFactor = maxWidth / originalWidth;
-          const newWidth = maxWidth;
-          const newHeight = originalHeight * scaleFactor;
-
-          // 5. 使用Canvas进行缩放绘制
-          const canvas = document.createElement('canvas');
-          canvas.width = newWidth;
-          canvas.height = newHeight;
-
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, newWidth, newHeight);
-
-          // 6. 转换回Base64（可调整质量）
-          const quality = 0.85; // 0~1质量系数
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-
-        img.onerror = (err) => {
-          reject(new Error('图片加载失败'));
-        };
-      });
-    }
   }
 }
 </script>

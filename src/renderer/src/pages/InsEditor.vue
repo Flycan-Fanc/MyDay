@@ -9,7 +9,7 @@
     </div>
     <div id="editor-container">
       <div class="editor-box">
-        <Editor id="editor" :config="config"></Editor>
+        <Editor id="editor" :config="config" from="灵感"></Editor>
       </div>
       <div class="info-box">
         <div class="cover-container">

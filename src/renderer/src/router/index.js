@@ -48,7 +48,7 @@ const routes = [
   },
   {
     name:'InsView',
-    path:'/insView',
+    path:'/insView/:insId',
     component: InsView,
   },
   {

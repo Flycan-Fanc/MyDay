@@ -118,7 +118,6 @@ const pictureAbout = {
   },
   getters:{
     fetchDiaryImage:(state) => (id) => {
-      console.log('getter state：'+JSON.stringify(pictureApi.toMd(state.pictureData.filter(item => item.diaryId === id))))
       return pictureApi.toMd(state.pictureData.filter(item => item.diaryId === id))
     }
   }

@@ -13,6 +13,14 @@
 
 export default {
   name: 'InsMini',
+  mounted(){
+
+  },
+  computed:{
+    insData(){
+      return this.$store.state.insAbout.insData
+    }
+  }
 }
 
 

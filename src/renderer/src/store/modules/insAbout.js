@@ -18,7 +18,7 @@ const insApi = {
       .join(".*");
     const regex = new RegExp(pattern); // 构建正则表达式
     return regex.test(origin); // 测试是否匹配
-  }
+  },
 }
 
 const insAbout = {
@@ -166,9 +166,9 @@ const insAbout = {
      * 添加灵感
      */
     addIns(context,value){
-      let insId = nanoid()
+      let insId = value.insId || nanoid()
       // TODO:后续引入用户实际数据
-      let userId = 1
+      let userId = value.userId || 1
       let insTitle = value.insTitle
       let insContent = value.insContent
       let insDate = value.insDate
@@ -226,7 +226,19 @@ const insAbout = {
      * 添加灵感
      */
     addIns(state,value){
-      state.insData.push(value)
+      if(state.insData.some(item=>item.insId === value.insId)){
+        state.insData.forEach(item => {
+          if(item.insId === value.insId){
+            item.insTitle = value.insTitle
+            item.insContent = value.insContent
+            item.insDate = value.insDate
+            item.insTags = value.insTags
+            item.insCover = value.insCover
+          }
+        })
+      } else {
+        state.insData.push(value)
+      }
     },
     /**
      * 删除灵感

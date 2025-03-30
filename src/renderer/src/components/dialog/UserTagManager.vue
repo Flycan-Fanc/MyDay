@@ -81,11 +81,9 @@ export default {
   computed: {
     dialogTagVisible: {
       get() {
-        console.log('get Show:' + this.showTagDialog)
         return this.showTagDialog
       },
       set(val) {
-        console.log('set Show:' + this.showTagDialog)
         this.$emit('update:showTagDialog', val)
       }
     },
@@ -193,7 +191,6 @@ export default {
           store.dispatch('tagAbout/editTagName',{tagId:scope.row.tagId,tagName:newName})
           this.tagContentInputVisible[scope.$index] = false
           this.content = ''
-          console.log('tagData:'+JSON.stringify(this.userTagData))
         }
       }
     },
@@ -206,7 +203,6 @@ export default {
     },
     // 导航到标签内容页
     navigateToTagBased(row){
-      console.log('row:'+JSON.stringify(row))
       this.closeUserTagDialog()
       router.push({
         name:'TagAbout',

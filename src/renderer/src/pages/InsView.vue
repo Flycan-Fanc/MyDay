@@ -9,21 +9,20 @@
     </div>
     <div id="view-container">
       <div class="view-box">
-        <Editor id="editor" :config="config"></Editor>
+        <Editor id="editor" :config="config" from="灵感"></Editor>
       </div>
       <div class="info-box">
         <div class="cover-container">
           <span class="cover-box"><img src="../assets/background/plouzane-1758197.jpg" alt=""></span>
         </div>
         <div class="title-container">
-          灵感标题七个字
+          {{insData.insTitle}}
         </div>
         <div class="tag-container">
           <div class="tags">
             <el-tag
-              v-for="tag in selectedTag"
-              :key="tag.label"
-              :type="tag.type"
+              v-for="tag in insData.insTags"
+              :key="tag.tagId"
               :color="tag.color"
               effect="dark"
               style="
@@ -34,7 +33,7 @@
                 border: none;
               "
             >
-              {{ tag.value }}
+              {{ tag.tagName }}
             </el-tag>
           </div>
         </div>
@@ -55,10 +54,22 @@ import Editor from '../components/Editor.vue'
 import editorConfig from '../config/editorConfig'
 import {Edit,Delete} from '@element-plus/icons-vue'
 import router from "../router";
+import store from "../store/store";
 
 export default {
   name: 'InsView',
   components: { Editor, CalendarWeather },
+  mounted(){
+    console.log(this.$route.params.insId)
+  },
+  computed:{
+    insId(){
+      return Number(this.$route.params.insId)
+    },
+    insData(){
+      return store.state.insAbout.insData.filter(item => item.insId === this.insId)[0]
+    }
+  },
   methods:{
     back(){
       router.back()

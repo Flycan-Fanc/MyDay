@@ -29,7 +29,7 @@
         >Save</el-button
       >
     </div>
-    <Editor id="editor" :config="config" ref="editor" :diary="diary"></Editor>
+    <Editor id="editor" :config="config" ref="editor" :diary="diary" from="日记"></Editor>
   </div>
 </template>
 
@@ -93,7 +93,6 @@ export default {
       let image = this.$refs.editor.getImage()
       let content = this.$refs.editor.getContent()
       // 1.图片本地存储
-      // console.log('data:'+JSON.stringify(data))
       // image.forEach((file, pos) => {
       //   // TODO:后续改为真实用户id
       //   imageStorage.saveImage(`user1_diary${this.diaryId}_image.imgJSON`, JSON.stringify(file))
