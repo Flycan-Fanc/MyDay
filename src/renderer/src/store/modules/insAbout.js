@@ -177,6 +177,7 @@ const insAbout = {
       let ins = new Inspiration(
         insId,userId,insTitle,insContent,insDate,insTags,insCover
       );
+      console.log('state ins:'+JSON.stringify(ins))
       context.commit('addIns',ins)
     },
     /**
@@ -232,7 +233,7 @@ const insAbout = {
             item.insTitle = value.insTitle
             item.insContent = value.insContent
             item.insDate = value.insDate
-            item.insTags = value.insTags
+            item.insTags = JSON.parse(JSON.stringify(value.insTags))
             item.insCover = value.insCover
           }
         })

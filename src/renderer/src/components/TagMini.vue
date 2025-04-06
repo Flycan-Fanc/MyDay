@@ -71,7 +71,7 @@ export default {
         return store.state.planAbout.planData.filter(item => item.planId === this.contentId)[0].planTags
       } else if(this.originComponent === 'insTagEditor'){
         //TODO: 获取灵感拥有的标签
-        return store.state.planAbout.planData.filter(item => item.planId === this.contentId)[0].planTags
+        return store.state.insAbout.insData.filter(item => item.insId === this.contentId)[0].insTags
       }
 
     },
@@ -92,7 +92,7 @@ export default {
       if(this.dialogPlanTagVisible === true){
         store.dispatch('tagAbout/addSelectedTag',JSON.parse(JSON.stringify(this.tagList)))
       }
-    }
+    },
   },
   methods:{
     handleClose:function(tag){
@@ -126,6 +126,10 @@ export default {
         let curTagObj = this.userTags.filter(item=>item.tagName === this.curTag)
         store.dispatch('tagAbout/addSelectedTag',[...curTagObj,...this.selectedTag])
       }
+    },
+    //父组件获取selectedTag
+    getSelectedTag(){
+      return this.selectedTag
     },
   },
   data(){

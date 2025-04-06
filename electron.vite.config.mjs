@@ -31,7 +31,8 @@ export default defineConfig({
       headers: {
         "Content-Security-Policy":
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-          "connect-src 'self' http://localhost:8080 ws://localhost:*"
+          "connect-src 'self' http://localhost:8080 ws://localhost:*" +
+          "img-src 'self' data: blob: http://localhost:8080"
       }
     },
     devServer:{

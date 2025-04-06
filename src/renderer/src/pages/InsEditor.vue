@@ -9,50 +9,28 @@
     </div>
     <div id="editor-container">
       <div class="editor-box">
-        <Editor id="editor" :config="config" from="灵感"></Editor>
+        <Editor id="editor" ref="editor" :config="config" from="灵感" :ins="ins"></Editor>
       </div>
       <div class="info-box">
         <div class="cover-container">
-          <span class="cover-box" @click="handleAddImg()">请选择封面图片</span>
+          <el-upload
+            class="avatar-uploader"
+            action="http://localhost:8080/image"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" alt=""/>
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
 
         </div>
         <div class="title-container">
-          <input type="text" placeholder="请填写标题">
+          <input type="text" placeholder="请填写标题" v-model="title">
         </div>
-        <TagMini originComponent="insTagEditor" :contentId="1"></TagMini>
-<!--        <div class="tag-container">-->
-<!--          <span class="tagAdd">-->
-<!--            <el-select-->
-<!--              v-model="curTag"-->
-<!--              placeholder="请选择标签"-->
-<!--              size="large"-->
-<!--              style="width: 210px;margin-right:10px;"-->
-<!--            >-->
-<!--              <el-option-->
-<!--                v-for="item in tags"-->
-<!--                :key="item.value"-->
-<!--                :label="item.label"-->
-<!--                :value="item.value"-->
-<!--              />-->
-<!--            </el-select>-->
-<!--            <el-button type="primary" :icon="Check" circle @click="handleSelect()"/>-->
-<!--          </span>-->
-<!--          <div class="tags">-->
-<!--            <el-tag-->
-<!--              v-for="tag in selectedTag"-->
-<!--              :key="tag.label"-->
-<!--              closable-->
-<!--              :type="tag.type"-->
-<!--              :color="tag.color"-->
-<!--              effect="dark"-->
-<!--              @close="handleClose(tag)"-->
-<!--              style="margin-right:5px;margin-bottom: 5px;color:#fff;font-weight: bold;border:none">-->
-<!--              {{ tag.value }}-->
-<!--            </el-tag>-->
-<!--          </div>-->
-<!--        </div>-->
+        <TagMini ref="tagMini" originComponent="insTagEditor" :contentId="ins.insId"></TagMini>
       </div>
-      <el-button class="SaveBtn" type="primary">Save</el-button>
+      <el-button class="SaveBtn" type="primary" @click="handleSave">Save</el-button>
     </div>
   </div>
 </template>
@@ -63,42 +41,73 @@ import CalendarWeather from '../components/CalendarWeather.vue'
 import TagMini from '../components/TagMini.vue'
 import { ref } from 'vue'
 import { Check } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 import editorConfig from "../config/editorConfig";
 import router from "../router";
+import store from "../store/store";
+import { nanoid } from "nanoid";
+import { dayjs } from "element-plus";
 
 export default {
   name: 'InsEditor',
-  components: { CalendarWeather, Editor,TagMini },
+  components: { CalendarWeather, Editor,TagMini,Plus },
+  mounted(){
+    console.log("insId:"+this.insId)
+    console.log("ins:"+JSON.stringify(this.ins))
+    console.log('url:'+this.imageUrl)
+
+    this.imageUrl = this.ins.insCover || ''
+    this.title = this.ins.insTitle || ''
+  },
+  computed:{
+    insId(){
+      return Number(this.$route.params.insId)
+    },
+    ins(){
+      return JSON.parse(JSON.stringify(store.state.insAbout.insData.filter(item => item.insId === this.insId)[0]))
+    },
+  },
   data(){
     return{
       Check,
       config:editorConfig.insConfig.editor,
+      imageUrl: '', //用户头像url
       curTag:'',
+      title: '',
       //用户拥有的标签
-      tags:[
-        {
-          value: '#工作',
-          label: '#工作',
-          color:  '#12c23d'
-        },
-        {
-          value: '#学习',
-          label: '#学习',
-          color: '#ff6b81'
-        },
-        {
-          value: '#娱乐',
-          label: '#娱乐',
-          color: '#ff9f43'
-        },
-      ],
+      tags:[],
       selectedTag:[] //用户选择赋予灵感的标签
-
     }
   },
   methods:{
     back(){
       router.back()
+    },
+    handleAvatarSuccess(res, file){
+      this.imageUrl = res[0].url
+      console.log(this.imageUrl)
+    },
+    beforeAvatarUpload(file){
+      const isJPG = file.type === 'image/jpeg';
+      const isLt3M = file.size / 1024 / 1024 < 3;
+
+      if (!isJPG && !isPng) {
+        // this.$message.error('上传头像图片只能是 JPG/PNG 格式!');
+        ElMessage({
+          message: '上传头像图片只能是 JPG 格式!',
+          type: 'warning',
+          duration:2000,
+        })
+      }
+      if (!isLt3M) {
+        // this.$message.error('上传头像图片大小不能超过 2MB!');
+        ElMessage({
+          message: '上传头像图片大小不能超过 3MB!',
+          type: 'warning',
+          duration:2000,
+        })
+      }
+      return isJPG && isLt3M;
     },
     handleClose:function(tag){
       console.log(tag)
@@ -137,8 +146,27 @@ export default {
         //this.curTag = ''
       }
     },
-    handleAddImg:function(){
+    handleAddCover:function(){
       //TODO: 添加图片
+    },
+    handleSave:function(){
+      //TODO: 保存灵感
+      this.tag = this.$refs.tagMini.getSelectedTag()
+      // 获取tag
+      console.log('tag:'+JSON.stringify(this.tag))
+      // 将信息汇总保存
+      let ins = {
+        insId:this.insId || nanoid(),
+        userId:1,  //TODO：后续引入真实用户id
+        insTitle: this.title,
+        insContent:this.$refs.editor.getContent(),
+        insData: dayjs(),
+        insTags: this.tag,
+        insCover: this.imageUrl,
+      }
+      console.log('save ins:'+JSON.stringify(ins))
+      store.dispatch('insAbout/addIns',ins)
+      router.back()
     }
   },
 
@@ -225,5 +253,34 @@ export default {
   transform:scale(1.2);
   right: 3%;
   bottom: 3%;
+}
+
+.avatar-uploader .avatar {
+  width:100%;
+  height:100%;
+  display: block;
+  object-fit: cover;
+}
+.avatar-uploader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width:75%;
+  height:75%;
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+.avatar-uploader:hover {
+  border-color: var(--el-color-primary);
+}
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 200px;
+  height: 150px;
+  text-align: center;
 }
 </style>

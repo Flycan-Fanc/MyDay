@@ -17,7 +17,7 @@ function Inspiration(insId,userId,insTitle,insContent,insDate,insTags,insCover){
   this.insContent = insContent;  //String
   this.insDate = insDate;  //Date
   this.insTags = insTags;  //Array
-  this.insCover = insCover;   //String
+  this.insCover = insCover;   //String,存储coverUrl
 }
 
 export default Inspiration

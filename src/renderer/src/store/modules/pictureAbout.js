@@ -119,7 +119,10 @@ const pictureAbout = {
   getters:{
     fetchDiaryImage:(state) => (id) => {
       return pictureApi.toMd(state.pictureData.filter(item => item.diaryId === id))
-    }
+    },
+    fetchInsImage:(state) => (id) => {
+      return pictureApi.toMd(state.pictureData.filter(item => item.insId === id))
+    },
   }
 }
 

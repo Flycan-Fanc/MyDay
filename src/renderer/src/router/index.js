@@ -53,7 +53,7 @@ const routes = [
   },
   {
     name:'InsEditor',
-    path:'/insEditor',
+    path:'/insEditor/:insId',
     component: InsEditor,
   },
   {

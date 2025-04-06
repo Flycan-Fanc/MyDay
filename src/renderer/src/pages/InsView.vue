@@ -9,11 +9,11 @@
     </div>
     <div id="view-container">
       <div class="view-box">
-        <Editor id="editor" :config="config" from="灵感"></Editor>
+        <Editor id="editor" :config="config" from="灵感" :ins="insData"></Editor>
       </div>
       <div class="info-box">
         <div class="cover-container">
-          <span class="cover-box"><img src="../assets/background/plouzane-1758197.jpg" alt=""></span>
+          <span class="cover-box"><img :src="insData.insCover" alt=""></span>
         </div>
         <div class="title-container">
           {{insData.insTitle}}
@@ -39,7 +39,7 @@
         </div>
         <div class="tools-container">
           <div class="tools-box">
-            <el-button class="EditBtn" type="primary" :icon="Edit" style="width:60px"></el-button>
+            <el-button class="EditBtn" type="primary" :icon="Edit" style="width:60px" @click="handleEdit"></el-button>
             <el-button class="DelBtn" type="danger" :icon="Delete" style="width:60px"></el-button>
           </div>
         </div>
@@ -73,7 +73,15 @@ export default {
   methods:{
     back(){
       router.back()
-    }
+    },
+    handleEdit(){
+      router.push({
+        name:'InsEditor',
+        params:{
+          insId:this.insId
+        }
+      })
+    },
   },
   data(){
     return {

@@ -7,7 +7,7 @@ const imageUtils = {
    * @param {number} maxWidth - 最大宽度
    * @returns {Promise<{ miniurl: string, _name: string }>} 压缩后的图片文件对象
    */
-  async compressImage(fileObj, maxWidth = 600) {
+  async compressImage(fileObj, maxWidth = 400) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.src = fileObj.miniurl;

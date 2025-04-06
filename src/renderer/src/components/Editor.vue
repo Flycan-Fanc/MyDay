@@ -55,7 +55,15 @@ export default {
       // 获取内容
       this.content = this.diary.diaryContent || '默认内容'
     } else if(this.from === '灵感') {
+      let img = store.getters['pictureAbout/fetchInsImage'](this.ins.insId)
 
+      if (img === null) {
+        this.img_file = [{ miniurl: 'no img at pos 0', _name: 'null' }]
+      } else {
+        this.img_file = img
+      }
+      // 获取内容
+      this.content = this.ins.insContent || '默认内容'
     }
   },
   data() {
