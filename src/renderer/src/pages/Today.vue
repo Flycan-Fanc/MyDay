@@ -5,9 +5,9 @@
         <span class="hello">Hello,Steve</span>
         <span class="greetings">今天想做什么？</span>
       </div>
-      <div class="deleteArea">
+      <div class="deleteArea" @click="handleDeleteAllDone()">
         <span>Delete all done</span>
-        <img src="../assets/icon/ic_tools_delete.png" alt="DeleteAllDoneBtn" @click="handleDeleteAllDone()"/>
+        <img src="../assets/icon/ic_tools_delete.png" alt="DeleteAllDoneBtn"/>
       </div>
     </div>
     <AddPlan />
@@ -44,7 +44,7 @@ export default {
             })
           }
           else{
-            store.dispatch('planAbout/deletePlanBatch')
+            store.dispatch('planAbout/deletePlanBatch','')
             ElMessage({
               type: 'success',
               message: '删除成功',

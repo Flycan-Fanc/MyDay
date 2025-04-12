@@ -30,20 +30,34 @@
 </template>
 
 <script>
+import PubSub from "pubsub-js";
 import store from "../store/store";
 
 export default {
   name: 'AddPlan',
+  mounted(){
+    this.pid = PubSub.subscribe('getCurDate',this.getCurDate)
+  },
   data(){
     return{
-      planInput:''
+      planInput:'',
+      curDate:'',
+      pid:'',
     }
   },
   methods:{
     addPlan(planInput){
-      this.$store.dispatch('planAbout/addPlan',planInput)
+      this.$store.dispatch('planAbout/addPlan',{planInput,curDate:this.curDate})
       this.planInput = ''
+    },
+    getCurDate(msg,data){
+      console.log('msg:'+msg+';data:'+data)
+      // TODO:添加对应日期的计划
+      this.curDate = data
     }
+  },
+  beforeUnmount(){
+    PubSub.unsubscribe(this.pid)
   }
 }
 </script>

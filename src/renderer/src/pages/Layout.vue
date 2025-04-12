@@ -8,27 +8,26 @@
         >
       </div>
       <div class="list-area">
-        <ul class="page-selector">
-          <li class="lable selected" id="todayBtn" @click="routerPush('/today')">
+        <ul class="page-selector" ref="pageSelector">
+          <li class="lable today selected" id="todayBtn" @click="routerPush($event,'/today')">
             <img src="../assets/icon/ic_sidebar_today.png" alt="" />
             <span>Today</span>
           </li>
-          <li class="lable" id="oneWeekBtn" @click="routerPush('/oneWeek')">
+          <li class="lable oneWeek" id="oneWeekBtn" @click="routerPush($event,'/oneWeek')">
             <img src="../assets/icon/ic_sidebar_7days.png" alt="" />
             <span>7 Days</span>
           </li>
-          <li class="lable" id="diaryBtn" @click="routerPush('/diary')">
+          <li class="lable diary" id="diaryBtn" @click="routerPush($event,'/diary')">
             <img src="../assets/icon/ic_sidebar_diary.png" alt="" />
             <span>Diary</span>
           </li>
-          <li class="lable" id="insBtn" @click="routerPush('/inspiration')">
+          <li class="lable inspiration" id="insBtn" @click="routerPush($event,'/inspiration')">
             <img src="../assets/icon/ic_sidebar_ins.png" alt="" />
             <span>Inspiration</span>
           </li>
           <li class="lable" id="tagsBtn" @click="showTagDialog = !showTagDialog">
             <img src="../assets/icon/ic_sidebar_flag.png" alt="" />
             <span>Tags</span>
-<!--            <img src="../assets/icon/ic_action_add.png" alt="" class="createTagBtn">-->
           </li>
         </ul>
       </div>
@@ -130,9 +129,9 @@ export default {
     }
   },
   watch:{
-    showTagDialog(val){
-      console.log("showTagDialog changed:"+val)
-    }
+    // showTagDialog(val){
+    //   console.log("showTagDialog changed:"+val)
+    // }
   },
   directives:{
     clickOutside: vClickOutside,
@@ -159,12 +158,16 @@ export default {
       unref(this.popoverRef).popperRef?.delayHide?.()
     },
     // router
-    routerPush(targetPath,...args){
-      if(args.length!==0){
-
-      }else{
-        this.$router.push({path:targetPath})
-      }
+    routerPush(e,targetPath){
+      this.$router.push({path:targetPath})
+      Array.from(this.$refs.pageSelector.children).forEach(item => {
+        if(item.classList.contains("selected")){
+          item.classList.remove("selected")
+        }
+        if(item.classList.contains(targetPath.slice(1))){
+          item.classList.add("selected")
+        }
+      })
     }
   }
 }
@@ -234,9 +237,15 @@ html,body {
   margin-bottom: 10px;
   cursor: pointer;
 }
-.list-area li:hover,
-li.selected {
+.list-area li.selected {
   background-color: #fff;
+  border-radius: 10px;
+  color: #2e4ac5;
+  font-weight: bold;
+  width: 105%;
+}
+.list-area li:hover{
+  background-color: rgba(255,255,255,0.4);
   border-radius: 10px;
   color: #2e4ac5;
   font-weight: bold;

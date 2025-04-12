@@ -14,6 +14,11 @@ const imageStorage = {
       fs.mkdirSync(this.imageDir);
     }
   },
+  /**
+   * 将图片base64写入文件
+   * @param fileName
+   * @param imageData
+   */
   saveImage: function(fileName,imageData) {
     this.pathInit()
     let imagePath = path.join(this.imageDir, fileName)
@@ -25,6 +30,11 @@ const imageStorage = {
       }
     })
   },
+  /**
+   * 从文件中读取图片base64数据
+   * @param fileName
+   * @returns {Promise<unknown>}
+   */
   getImage: function(fileName) {
     this.pathInit()
     let imagePath = path.join(this.imageDir, fileName)
@@ -37,6 +47,28 @@ const imageStorage = {
         resolve(data);
       });
     });
+  },
+  /**
+   * 将图片文件保存到本地
+   * @param fileName
+   * @param file
+   */
+  saveImageFile(fileName, file) {
+
+  },
+  /**
+   * 从本地读取图片文件
+   * @param fileName
+   */
+  getImageFile(fileName) {
+
+  },
+  /**
+   * 删除本地图片文件
+   * @param fileName
+   */
+  deleteImageFile(fileName) {
+
   }
 }
 

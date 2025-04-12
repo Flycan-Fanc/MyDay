@@ -9,6 +9,12 @@ import PlanMini from "./PlanMini.vue";
 import store from "../store/store";
 export default {
   name: "PlanList",
+  props:{
+    curDate:{
+      type:String,
+      default:''
+    }
+  },
   components: {
     PlanMini,
   },
@@ -34,7 +40,21 @@ export default {
   },
   computed:{
     planData(){
-      return store.getters["planAbout/sortedPlanList"]
+      if(this.curDate===''){
+        return store.getters["planAbout/sortedPlanList"]
+      } else {
+        return store.getters["planAbout/sortedPlanListByDate"](this.curDate)
+      }
+    }
+  },
+  watch:{
+    curDate(){
+      console.log("curDate changed"+this.curDate)
+      if(this.curDate===''){
+        return store.getters["planAbout/sortedPlanList"]
+      } else {
+        return store.getters["planAbout/sortedPlanListByDate"](this.curDate)
+      }
     }
   }
 }

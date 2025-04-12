@@ -5,6 +5,7 @@
 import Plan from '../../models/Plan'
 
 import {nanoid} from 'nanoid'
+import { dayjs } from "element-plus";
 
 const planApi = {
   // TODO:置顶的，正常的，完成的，每组按照什么顺序排序？
@@ -157,17 +158,16 @@ const planAbout = {
       let planId = nanoid()
       // TODO:后续引入实际用户数据
       let userId = nanoid()
-      let planContent = value
+      let planContent = value.planInput
       let planTags = []
       let isDone = 0
       let isTop = 0
       // TODO:后续增加计划起止时间的功能
-      let startTime = ''
+      let startTime = value.curDate || dayjs().format('YYYY-MM-DD')
       let endTime = ''
       let plan = new Plan(
         planId,userId,planContent,planTags,isDone,isTop,startTime,endTime
       );
-
       context.commit('addPlan',plan)
     },
     /**
@@ -181,7 +181,13 @@ const planAbout = {
      * 批量删除计划
      */
     deletePlanBatch(context,value){
-      let newPlanList = context.state.planData.filter(item=>item.isDone === 0)
+      let newPlanList = []
+      if(value!==''){
+        newPlanList = context.state.planData.filter(item => !(item.isDone === 1 && item.startTime === value))
+      } else{
+        // 删除特定日期的完成计划
+        newPlanList = context.state.planData.filter(item => item.isDone === 0)
+      }
       context.commit('deletePlanBatch',newPlanList)
     },
     /**
@@ -304,6 +310,10 @@ const planAbout = {
   getters:{
     sortedPlanList(state){
       return planApi.sortPlanList(state.planData)
+    },
+    sortedPlanListByDate: (state) => (date) => {
+      console.log("date:"+date)
+      return planApi.sortPlanList(state.planData.filter((item) => item.startTime === date))
     }
   }
 }

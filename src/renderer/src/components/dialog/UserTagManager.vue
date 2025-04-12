@@ -120,6 +120,7 @@ export default {
     },
     // tag 操作
     deleteRow(index) {
+      // TODO：级联删除所有数据中的该标签
       store.dispatch('tagAbout/deleteTag',index)
     },
     editRow(scope){

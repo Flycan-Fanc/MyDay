@@ -2,25 +2,60 @@
     <div class="CalenderMini-container"
          @click="onclick"
          :class="{selected: choose}">
-      <div class="month">12月</div>
+      <div class="month">{{date.month()+1}}月</div>
       <div class="dateArea">
-        <div class="date">2</div>
-        <div class="week">Mon.</div>
+        <div class="date">{{date.date()}}</div>
+        <div class="week">{{week}}</div>
       </div>
       <div class="planNum">+3 more</div>
     </div>
 </template>
 
 <script>
+import { dayjs } from 'element-plus'
 
 export default {
-    name: 'CalendarMini',
-    props: ['choose'],
-    methods: {
-        onclick() {
-            this.$emit('select')
-        }
+  name: 'CalendarMini',
+  props: ['choose','offset'],
+  mounted(){
+  },
+  data() {
+    return{
     }
+  },
+  computed:{
+    date(){
+      return dayjs().add(this.offset,'day')
+    },
+    // 格式化星期
+    week(){
+      switch (this.date.day()) {
+        case 0:
+          return 'Sun.'
+        case 1:
+          return 'Mon.'
+        case 2:
+          return 'Tues.'
+        case 3:
+          return 'Wed.'
+        case 4:
+          return 'Thurs.'
+        case 5:
+          return 'Fri.'
+        case 6:
+          return 'Sat.'
+      }
+    }
+  },
+  methods: {
+    onclick() {
+      this.$emit('select')
+    },
+    // 父组件获取日期的api
+    getDate(){
+      return this.date.format('YYYY-MM-DD')
+    }
+  }
 }
 
 
