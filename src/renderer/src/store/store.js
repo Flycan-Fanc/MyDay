@@ -4,6 +4,7 @@ import tagAbout from './modules/tagAbout'
 import diaryAbout from './modules/diaryAbout'
 import insAbout from "./modules/insAbout";
 import pictureAbout from "./modules/pictureAbout";
+import weatherAbout from "./modules/weatherAbout";
 
 
 const store = createStore({
@@ -12,7 +13,8 @@ const store = createStore({
     tagAbout,
     diaryAbout,
     insAbout,
-    pictureAbout
+    pictureAbout,
+    weatherAbout,
   }
 })
 

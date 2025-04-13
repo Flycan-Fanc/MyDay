@@ -1,37 +1,36 @@
 <template>
-    <div>
-      <div id="AddPlan-container">
-        <div class="data-area">
-          <span id="week">周五</span>
-          <span id="day">6</span>
-          <span id="month">12月</span>
-        </div>
-        <div class="weather-area">
-          <span id="suggestion">记得喝水</span>
-          <span id="weather-img"
-          ><img
-            src="../assets/weather/ic_weather_cloudy.png"
-            alt="weather"
-            style="width: 40px"
-          /></span>
-          <span id="weather">11℃</span>
-        </div>
-        <div class="addplan-area">
-          <input
-            id="planInput"
-            v-model="planInput"
-            type="text"
-            placeholder="添加你的计划，按下回车确认"
-            @keyup.enter="addPlan(planInput)"
-          />
-        </div>
+  <div>
+    <div id="AddPlan-container">
+      <div class="data-area">
+        <span id="week">{{dayObj.week}}</span>
+        <span id="day">{{dayObj.day}}</span>
+        <span id="month">{{dayObj.month}}月</span>
+      </div>
+      <div class="weather-area">
+        <span id="suggestion">记得喝水</span>
+        <span id="weather-img"
+          ><img src="../assets/weather/ic_weather_cloudy.png" alt="weather" style="width: 40px"
+        /></span>
+        <span id="weather">11℃</span>
+      </div>
+      <div class="addplan-area">
+        <input
+          id="planInput"
+          v-model="planInput"
+          type="text"
+          placeholder="添加你的计划，按下回车确认"
+          @keyup.enter="addPlan(planInput)"
+        />
       </div>
     </div>
+  </div>
 </template>
 
 <script>
 import PubSub from "pubsub-js";
 import store from "../store/store";
+import { dayjs } from "element-plus";
+import { stringUtils } from "../utils/dataUtils";
 
 export default {
   name: 'AddPlan',
@@ -45,8 +44,46 @@ export default {
       pid:'',
     }
   },
+  computed:{
+    dayObj(){
+      let date = ''
+      if(this.curDate===''){
+        date = dayjs()
+      } else{
+        date = dayjs(this.curDate)
+      }
+      let year = date.year()
+      let month = date.month() + 1
+      let day = date.date()
+      switch(date.day()){
+        case 0:
+          return {year,month,day,'week':'周日'}
+        case 1:
+          return {year,month,day,'week':'周一'}
+        case 2:
+          return {year,month,day,'week':'周二'}
+        case 3:
+          return {year,month,day,'week':'周三'}
+        case 4:
+          return {year,month,day,'week':'周四'}
+        case 5:
+          return {year,month,day,'week':'周五'}
+        case 6:
+          return {year,month,day,'week':'周六'}
+      }
+
+    },
+  },
   methods:{
     addPlan(planInput){
+      if(stringUtils.isStringEmpty(planInput)){
+        ElMessage({
+          message: '计划内容不能为空',
+          type: 'warning'
+        })
+        this.planInput = ''
+        return
+      }
       this.$store.dispatch('planAbout/addPlan',{planInput,curDate:this.curDate})
       this.planInput = ''
     },
@@ -149,4 +186,3 @@ body {
   background-color: #fff;
 }
 </style>
-

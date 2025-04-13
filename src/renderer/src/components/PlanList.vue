@@ -7,6 +7,7 @@
 <script>
 import PlanMini from "./PlanMini.vue";
 import store from "../store/store";
+import PubSub from "pubsub-js";
 export default {
   name: "PlanList",
   props:{
@@ -29,6 +30,8 @@ export default {
   },
   beforeUpdate() {
     //console.log("planData:"+this.planData)
+    // TODO:触发CalendarMini更新计划数量
+    PubSub.publish('updatePlanNum')
   },
   methods:{
     handleDone(){

@@ -24,7 +24,8 @@ function createWindow() {
       scrollbarOverlayStyle: 'none', // 隐藏滚动条
       webSecurity: false,  //TODO：electron跨域处理 暂时禁用web安全策略，仅在开发环境中使用
       nodeIntegration: true, // 如果未启用可能需要设置
-      contextIsolation: false // 如果未启用可能需要设置
+      contextIsolation: false, // 如果未启用可能需要设置
+      enableBlinkFeatures: 'Geolocation', // 启用定位功能
     }
   })
 
@@ -39,6 +40,17 @@ function createWindow() {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
+
+  // 处理权限请求
+  mainWindow.webContents.session.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      if (permission === 'geolocation') {
+        callback(true); // 允许定位
+      } else {
+        callback(false);
+      }
+    }
+  );
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
@@ -62,7 +74,7 @@ function createWindow() {
       // 配置 CSP 规则（开发环境放宽策略）
       const cspHeader = [
         "default-src 'self'",
-        "connect-src 'self' http://localhost:8080 ws://localhost:*", // 允许连接到后端和 WebSocket
+        "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com", // 允许连接到后端和 WebSocket
         `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ""}`,
         "style-src 'self' 'unsafe-inline'",                 // 允许内联样式
         "img-src 'self' data:"                             // 允许图片和 data URL

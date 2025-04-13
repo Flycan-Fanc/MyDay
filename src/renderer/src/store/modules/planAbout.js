@@ -314,6 +314,9 @@ const planAbout = {
     sortedPlanListByDate: (state) => (date) => {
       console.log("date:"+date)
       return planApi.sortPlanList(state.planData.filter((item) => item.startTime === date))
+    },
+    getPlanNumByDate: (state) => (date) => {
+      return planApi.sortPlanList(state.planData.filter((item) => item.startTime === date)).length
     }
   }
 }

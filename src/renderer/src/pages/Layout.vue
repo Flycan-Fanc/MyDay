@@ -89,6 +89,7 @@ import { ref, unref } from 'vue'
 import { ClickOutside as vClickOutside } from 'element-plus'
 import PlanList from "../components/PlanList.vue";
 
+import { locationUtils, weatherUtils } from "../utils/dataUtils";
 
 const windowControls = window.api.windowControls;
 
@@ -100,6 +101,7 @@ export default {
   mounted() {
     this.buttonRef = this.$refs.buttonRef;
     this.popoverRef = this.$refs.popoverRef;
+    weatherUtils.getWeatherInfo()
   },
   components:{
     PlanList,

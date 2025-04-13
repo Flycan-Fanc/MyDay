@@ -7,20 +7,31 @@
         <div class="date">{{date.date()}}</div>
         <div class="week">{{week}}</div>
       </div>
-      <div class="planNum">+3 more</div>
+      <div class="planNum">+{{planNumCurDay}} more</div>
     </div>
 </template>
 
 <script>
 import { dayjs } from 'element-plus'
+import store from "../store/store";
+import PubSub from "pubsub-js";
 
 export default {
   name: 'CalendarMini',
   props: ['choose','offset'],
   mounted(){
+    this.getCurDatePlanNum()
+    this.pid = PubSub.subscribe('updatePlanNum',(msg,data) => {
+      this.getCurDatePlanNum()
+    })
+  },
+  beforeUnmount(){
+    PubSub.unsubscribe(this.pid)
   },
   data() {
     return{
+      planNumCurDay:0,
+      pid:'',
     }
   },
   computed:{
@@ -50,6 +61,10 @@ export default {
   methods: {
     onclick() {
       this.$emit('select')
+    },
+    // 获取当前日期的计划数量
+    getCurDatePlanNum(){
+      this.planNumCurDay = store.getters['planAbout/getPlanNumByDate'](this.getDate())
     },
     // 父组件获取日期的api
     getDate(){
