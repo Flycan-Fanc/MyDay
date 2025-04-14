@@ -3,9 +3,10 @@
  */
 
 import Inspiration from '../../models/Inspiration'
-
-import {nanoid} from 'nanoid'
 import Diary from "../../models/Diary";
+
+import {stringUtils} from '../../utils/dataUtils'
+import {nanoid} from 'nanoid'
 
 const insApi = {
   // 判断origin是否包含target的全部字符
@@ -30,7 +31,7 @@ const insAbout = {
         "userId": 3,
         "insTitle": "灵感标题1",
         "insContent": "这是灵感内容1...",
-        "insDate": "2023-05-15T00:00:00.000Z",
+        "insDate": "2025-04-14",
         "insTags": [
           { "tagId": 1, "userId": 3, "tagName": "技术", "color": "#ff5733" },
           { "tagId": 2, "userId": 3, "tagName": "设计", "color": "#33ff57" }
@@ -42,7 +43,7 @@ const insAbout = {
         "userId": 5,
         "insTitle": "灵感标题2",
         "insContent": "这是灵感内容2...",
-        "insDate": "2023-07-22T00:00:00.000Z",
+        "insDate": "2023-07-22",
         "insTags": [
           { "tagId": 3, "userId": 5, "tagName": "旅行", "color": "#3357ff" }
         ],
@@ -53,7 +54,7 @@ const insAbout = {
         "userId": 2,
         "insTitle": "灵感标题3",
         "insContent": "这是灵感内容3...",
-        "insDate": "2023-02-10T00:00:00.000Z",
+        "insDate": "2025-04-13",
         "insTags": [
           { "tagId": 4, "userId": 2, "tagName": "美食", "color": "#ff33a1" },
           { "tagId": 5, "userId": 2, "tagName": "艺术", "color": "#a133ff" },
@@ -66,7 +67,7 @@ const insAbout = {
         "userId": 1,
         "insTitle": "灵感标题4",
         "insContent": "这是灵感内容4...",
-        "insDate": "2023-09-05T00:00:00.000Z",
+        "insDate": "2025-04-13",
         "insTags": [
           { "tagId": 7, "userId": 1, "tagName": "生活", "color": "#ffd733" },
           { "tagId": 8, "userId": 1, "tagName": "科技", "color": "#33d7ff" }
@@ -78,7 +79,7 @@ const insAbout = {
         "userId": 4,
         "insTitle": "灵感标题5",
         "insContent": "这是灵感内容5...",
-        "insDate": "2023-11-18T00:00:00.000Z",
+        "insDate": "2025-04-14",
         "insTags": [
           { "tagId": 9, "userId": 4, "tagName": "摄影", "color": "#33ff57" },
           { "tagId": 10, "userId": 4, "tagName": "自然", "color": "#ff5733" }
@@ -90,7 +91,7 @@ const insAbout = {
         "userId": 3,
         "insTitle": "灵感标题6",
         "insContent": "这是灵感内容6...",
-        "insDate": "2023-04-30T00:00:00.000Z",
+        "insDate": "2023-04-30",
         "insTags": [
           { "tagId": 11, "userId": 3, "tagName": "音乐", "color": "#a133ff" },
           { "tagId": 12, "userId": 3, "tagName": "电影", "color": "#33a1ff" },
@@ -103,7 +104,7 @@ const insAbout = {
         "userId": 5,
         "insTitle": "灵感标题7",
         "insContent": "这是灵感内容7...",
-        "insDate": "2023-08-14T00:00:00.000Z",
+        "insDate": "2025-04-12",
         "insTags": [
           { "tagId": 14, "userId": 5, "tagName": "运动", "color": "#33d7ff" }
         ],
@@ -114,7 +115,7 @@ const insAbout = {
         "userId": 2,
         "insTitle": "灵感标题8",
         "insContent": "这是灵感内容8...",
-        "insDate": "2023-01-25T00:00:00.000Z",
+        "insDate": "2025-04-13",
         "insTags": [
           { "tagId": 15, "userId": 2, "tagName": "健康", "color": "#ffd733" },
           { "tagId": 16, "userId": 2, "tagName": "教育", "color": "#d733ff" }
@@ -126,7 +127,7 @@ const insAbout = {
         "userId": 1,
         "insTitle": "灵感标题9",
         "insContent": "这是灵感内容9...",
-        "insDate": "2023-06-09T00:00:00.000Z",
+        "insDate": "2025-04-11",
         "insTags": [
           { "tagId": 17, "userId": 1, "tagName": "科技", "color": "#33ffa1" }
         ],
@@ -137,7 +138,7 @@ const insAbout = {
         "userId": 4,
         "insTitle": "灵感标题10",
         "insContent": "这是灵感内容10...",
-        "insDate": "2023-12-01T00:00:00.000Z",
+        "insDate": "2023-12-01",
         "insTags": [
           { "tagId": 18, "userId": 4, "tagName": "旅行", "color": "#3357ff" },
           { "tagId": 19, "userId": 4, "tagName": "美食", "color": "#ff5733" },
@@ -277,7 +278,7 @@ const insAbout = {
      * @returns {function(*): *}
      */
     fuzzySearchInsList:(state)=>(fuzzySearch)=>{
-      return state.insData.filter(item=> insApi.isFuzzyMatch(fuzzySearch,item.diaryTitle))
+      return state.insData.filter(item=> stringUtils.isFuzzyMatch(item.insTitle,fuzzySearch))
     }
   }
 }

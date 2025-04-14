@@ -1,23 +1,77 @@
 <template>
-  <div id="DiaryMini-container" class="selected">
-    <span class="date">2023.1.4</span>
-    <span class="diaryAbstract">今天元旦开学......</span>
-    <input
-      type="checkbox"
-      name="diary-selector"
+  <div id="DiaryMini-container">
+    <span class="date">{{ date }}</span>
+    <span class="diaryAbstract">{{ title }}</span>
+    <el-checkbox
       id="diary-selector"
-      class=""
+      type="checkbox"
+      v-model="selected"
+      @click="changeSelectState($event)"
+      style="position: absolute; right: 5%; top: 5%"
     />
   </div>
 </template>
 
 <script>
 
+import store from "../store/store";
+
 export default {
   name: 'DiaryMini',
+  props: {
+    diaryId: {
+      type: Number,
+      required: true
+    },
+  },
+  beforeUnmount() {
+    // 解绑自定义事件
+    //this.$off('changeSelectState')
+  },
+  data() {
+    return {
+      selected: false,
+    }
+  },
+  computed:{
+    diary(){
+      return store.state.diaryAbout.diaryData.filter(item=>item.diaryId === this.diaryId)[0]
+    },
+    date(){
+      return this.diary.diaryDate.split('-').join('.')
+    },
+    title(){
+      if(this.diary.diaryTitle.length <= 5){
+        return this.diary.diaryTitle
+      }else{
+        return this.diary.diaryTitle.slice(0,5) + '...'
+      }
+    },
+  },
+  watch:{
+    selected:{
+      handler(){
+        this.$emit('changeSelectState',this.diaryId)
+      }
+    }
+  },
+  methods:{
+    changeSelectState(e){
+      e.stopPropagation()
+      // this.selected = !this.selected
+      // // TODO:通知diaryList改变对应的diary的select状态
+      // this.$emit('changeSelectState',this.diaryId)
+    },
+    // 选择
+    select(){
+      this.selected = true
+    },
+    // 取消选择
+    unSelect(){
+      this.selected = false
+    }
+  },
 }
-
-
 </script>
 
 <style scoped>
@@ -38,7 +92,7 @@ export default {
   border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.4);
   transition: transform 0.3s ease-in-out;
-  cursor:pointer;
+  cursor: pointer;
 }
 #DiaryMini-container:hover {
   background-color: #fff;
@@ -62,4 +116,3 @@ export default {
   top: 5%;
 }
 </style>
-

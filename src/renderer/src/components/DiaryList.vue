@@ -1,42 +1,161 @@
 <template>
-    <div id="DiaryList">
-      <DiaryMini v-for="item in diaryData" :key="item.diaryId" @click="diaryRead(item)"/>
-    </div>
+  <div id="DiaryList">
+    <DiaryMini
+      v-for="item in diaryData"
+      :key="item.diaryId"
+      :ref="'diaryMini'+item.diaryId"
+      :diaryId="item.diaryId"
+      @changeSelectState="changeSelectState"
+      @click="diaryRead($event,item)" />
+  </div>
 </template>
 
 <script>
 import DiaryMini from './DiaryMini.vue'
 import router from "../router";
 import store from "../store/store";
-import {mapState} from "vuex";
+import PubSub from "pubsub-js";
+
 export default {
   name: 'DiaryList',
+  mounted(){
+    this.pid_date = PubSub.subscribe('updateDiaryListByDate', this.updateDiaryListByDate)
+    this.pid_init = PubSub.subscribe('updateDiaryListInit', this.updateDiaryListInit)
+    this.pid_search = PubSub.subscribe('updateDiaryListFuzzySearch', this.updateDiaryListFuzzySearch)
+  },
+  beforeUnmount() {
+    PubSub.unsubscribe(this.pid_date)
+    PubSub.unsubscribe(this.pid_init)
+    PubSub.unsubscribe(this.pid_search)
+  },
   components: {
     DiaryMini
   },
+  data(){
+    return {
+      pid_date:'',
+      pid_init:'',
+      pid_search:'',
+      isDateChanged:false,  // 是否要按照日期筛选的标志，false-不筛选，true-筛选
+      date:'', // 按照日期筛选的日期
+      isFuzzySearch:false, // 是否模糊搜索的标志
+      search:'', // 模糊搜索关键词,
+      selectState:[],
+    }
+  },
   computed:{
-    ...mapState('diaryAbout', ['diaryData'])
+    diaryData:{
+      get(){
+        if(this.isDateChanged === false && this.isFuzzySearch === false){
+          return store.state.diaryAbout.diaryData
+        } else if(this.isDateChanged === true && this.isFuzzySearch === false){
+          return store.getters['diaryAbout/diaryListByDate'](this.date)
+        } else if(this.isDateChanged === false && this.isFuzzySearch === true){
+          return store.getters['diaryAbout/fuzzySearchDiaryList'](this.search)
+        }
+      },
+    },
+    // selectDiaryNum(){
+    //   return this.selectState.filter(item=>item.selected === true).length
+    // }
+  },
+  watch:{
+    diaryData:{
+      immediate:true,
+      handler(){
+        this.diaryData.forEach(item=>{
+          this.selectState.push({diaryId:item.diaryId,selected:false})
+        })
+      }
+    },
+    selectState:{
+      immediate:true,
+      deep:true,
+      handler(val){
+        if(val.filter(item=>item.selected === true).length === this.diaryData.length){
+          PubSub.publish('selectAll')
+        } else{
+          PubSub.publish('unSelectAll')
+        }
+      }
+    }
+    // selectDiaryNum:{
+    //   immediate:true,
+    //   handler(newVal){
+    //     if(newVal === this.diaryData.length){
+    //       PubSub.publish('selectAll')
+    //     } else if(newVal !== this.diaryData.length){
+    //       console.log('调用了')
+    //       PubSub.publish('unSelectAll')
+    //     }
+    //   }
+    // }
   },
   methods:{
-    diaryRead(item){
+    diaryRead(e,item){
       router.push({
         name:'DiaryView',
         params:{
           diaryId:item.diaryId
         }
       })
+    },
+    updateDiaryListByDate(msg,data){
+      this.isDateChanged = true
+      this.isFuzzySearch = false // 模糊搜索和日期筛选不能同时存在
+      this.date = data
+    },
+    updateDiaryListFuzzySearch(msg,data){
+      this.isFuzzySearch = true
+      this.isDateChanged = false
+      this.search = data
+    },
+    updateDiaryListInit(msg,data){
+      this.isDateChanged = false
+      this.isFuzzySearch = false
+      this.date = ''
+      this.search = ''
+    },
+    changeSelectState(diaryId){
+      this.selectState.forEach(item=>{
+        if(item.diaryId === diaryId){
+          item.selected = !item.selected
+        }
+      })
+    },
+    // 全选
+    selectAll(){
+      this.selectState.forEach(item=>{
+        item.selected = true
+        this.$refs['diaryMini'+item.diaryId][0].select()  // 通知diaryMini也变为选择状态
+      })
+    },
+    // 全不选
+    unSelectAll(){
+      this.selectState.forEach(item=>{
+        item.selected = false
+        this.$refs['diaryMini'+item.diaryId][0].unSelect()
+      })
+    },
+    // 获取选中的diaryId数组
+    getSelectDiaryId(){
+      let res = []
+      this.selectState.forEach(item=>{
+        if(item.selected === true){
+          res.push(item.diaryId)
+        }
+      })
+      return res
     }
   }
 }
-
-
 </script>
 
 <style scoped>
 #DiaryList {
-  display:grid;
+  display: grid;
   grid-template-columns: repeat(auto-fill, 250px);
-  overflow-y:auto;
+  overflow-y: auto;
   margin-top: 10px;
 }
 /* 自定义滚动条优化 */
@@ -55,4 +174,3 @@ export default {
   background-clip: content-box;
 }
 </style>
-

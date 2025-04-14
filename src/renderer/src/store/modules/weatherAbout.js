@@ -2,14 +2,11 @@
  * @description: 天气store
  */
 
-const weatherApi = {
-
-}
-
 const weatherAbout = {
   namespaced:true,
   state:{
-    weatherData:{},
+    weatherData:null,
+    isWeatherReady: false, // 就绪状态检测
   },
   actions:{
     setWeatherData(context,value){
@@ -19,11 +16,17 @@ const weatherAbout = {
   mutations:{
     setWeatherData(state,value){
       state.weatherData = value
-      console.log('state weather:'+JSON.stringify(state.weatherData))
+      state.isWeatherReady = true
     }
   },
   getters:{
-
+    getWeather(state){
+      console.log(state.weatherData)
+      return state.weatherData[0]
+    },
+    getWeatherByDate:(state) => (date) => {
+      return state.weatherData[0].forecast.filter(item => item.date === date)
+    }
   }
 }
 

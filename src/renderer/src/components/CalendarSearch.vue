@@ -1,22 +1,86 @@
 <template>
   <div id="CalenderWeather-container">
     <div class="calender-area">
-      <img src="../assets/icon/ic_tools_calendar.png" alt="calender" class="calender" />
+      <el-popover placement="bottom-start" :width="280" trigger="click">
+        <template #reference>
+          <img src="../assets/icon/ic_tools_calendar.png" alt="calender" class="calender" />
+        </template>
+        <VDatePicker
+          v-model="date"
+          :max-date="maxDate"
+        />
+      </el-popover>
       <!--      <VDatePicker v-model="date" mode="date" />后续使用日历组件-->
     </div>
-    <div class="date-area">2024.12.7</div>
+    <div class="date-area">{{formatedDate}}</div>
     <div class="search-area selected">
-      <img src="../assets/icon/ic_tools_search.png" alt="" class="searchImg" />
-      <input type="text" class="search" :placeholder="`查找:输入${from}标题`" />
+      <img src="../assets/icon/ic_tools_search.png" alt="" class="searchImg" @click="fuzzySearch"/>
+      <input type="text" class="search" :placeholder="`查找:输入${from}标题`" v-model="search" @keyup.enter="fuzzySearch"/>
     </div>
   </div>
 </template>
 
 <script>
+import { dayjs } from "element-plus";
+import { Calendar as VCalendar, DatePicker as VDatePicker } from 'v-calendar';
+import 'v-calendar/style.css';
+import PubSub from "pubsub-js";
+
 export default {
   name: 'CalendarSearch',
   props:['from'],
-  mounted(){}
+  mounted(){},
+  components: {
+    VCalendar,
+    VDatePicker,
+  },
+  data(){
+    return {
+      date: null,
+      maxDate: dayjs().format('YYYY-MM-DD'),
+      search:''
+    }
+  },
+  computed:{
+    formatedDate(){
+      if(this.date === null){
+        return dayjs().format('YYYY.MM.DD').split('-').join('.')
+      } else {
+        let day = dayjs(this.date).format('YYYY-MM-DD')
+        return day.split('-').join('.')
+      }
+    }
+  },
+  watch:{
+    date:{
+      handler() {
+        let curDate = dayjs(this.date).format('YYYY-MM-DD');
+        if(this.from === '日记'){
+          if(this.date === null){
+            PubSub.publish('updateDiaryListInit')
+          } else{
+            PubSub.publish('updateDiaryListByDate',curDate)
+          }
+        } else if(this.from === '灵感'){
+          if(this.date === null){
+            PubSub.publish('updateInsListInit')
+          } else{
+            PubSub.publish('updateInsListByDate',curDate)
+          }
+        }
+      }
+    },
+  },
+  methods:{
+    fuzzySearch(){
+      this.data = null
+      if(this.from === '日记'){
+        PubSub.publish('updateDiaryListFuzzySearch',this.search)
+      } else if(this.from === '灵感'){
+        PubSub.publish('updateInsListFuzzySearch',this.search)
+      }
+    }
+  },
 }
 </script>
 

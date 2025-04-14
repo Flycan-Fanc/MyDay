@@ -52,7 +52,6 @@ export default {
   },
   watch:{
     curDate(){
-      console.log("curDate changed"+this.curDate)
       if(this.curDate===''){
         return store.getters["planAbout/sortedPlanList"]
       } else {

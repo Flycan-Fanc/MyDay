@@ -90,6 +90,7 @@ import { ClickOutside as vClickOutside } from 'element-plus'
 import PlanList from "../components/PlanList.vue";
 
 import { locationUtils, weatherUtils } from "../utils/dataUtils";
+import PubSub from "pubsub-js";
 
 const windowControls = window.api.windowControls;
 
@@ -101,7 +102,12 @@ export default {
   mounted() {
     this.buttonRef = this.$refs.buttonRef;
     this.popoverRef = this.$refs.popoverRef;
-    weatherUtils.getWeatherInfo()
+
+    async function fetchWeatherAndNotify() {
+      await weatherUtils.getWeatherInfo(); // 等待天气数据获取完成
+      PubSub.publish("getWeather");       // 再发布事件
+    }
+    fetchWeatherAndNotify().catch(console.error);
   },
   components:{
     PlanList,

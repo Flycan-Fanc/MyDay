@@ -300,7 +300,6 @@ const planAbout = {
           item.planTags = value.selectedTag
         }
       })
-      console.log("editPlanTag:"+JSON.stringify(state.planData.filter(item=>item.planId === value.planId)))
     },
     /**
      * 排序计划
@@ -312,7 +311,6 @@ const planAbout = {
       return planApi.sortPlanList(state.planData)
     },
     sortedPlanListByDate: (state) => (date) => {
-      console.log("date:"+date)
       return planApi.sortPlanList(state.planData.filter((item) => item.startTime === date))
     },
     getPlanNumByDate: (state) => (date) => {

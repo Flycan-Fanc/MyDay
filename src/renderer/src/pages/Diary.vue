@@ -3,13 +3,21 @@
     <div id="diaryHeader">
       <span class="calendar-area"><CalendarSearch :from="from"></CalendarSearch></span>
       <span class="tools-area">
-        <span>Select All</span>
-        <span id="delete-SelectAll-Checkbox" class="someSelected">✔</span>
+        <span style="margin-right:10px;">Select All</span>
+<!--        <span id="delete-SelectAll-Checkbox" class="someSelected">✔</span>-->
+        <el-switch
+          v-model="isSelectAll"
+          class="mt-2"
+          inline-prompt
+          @change="changeSwitchState"
+          :active-icon="Check"
+          :inactive-icon="Close"
+        />
         <img src="../assets/icon/ic_tools_delete.png" alt="删除" />
-        <img src="../assets/icon/ic_tools_return.png" alt="返回" />
+<!--        <img src="../assets/icon/ic_tools_return.png" alt="返回" />-->
       </span>
     </div>
-    <DiaryList id="DiaryList" ></DiaryList>
+    <DiaryList id="DiaryList" ref="diaryList"></DiaryList>
     <NewBtn id="NewBtn" @click="createDiary()"></NewBtn>
   </div>
 </template>
@@ -19,19 +27,61 @@ import DiaryList from '../components/DiaryList.vue'
 import CalendarSearch from '../components/CalendarSearch.vue'
 import NewBtn from '../components/NewBtn.vue'
 import router from "../router";
+import { Check, Close } from '@element-plus/icons-vue'
+import PubSub from "pubsub-js";
+
 export default {
   name: 'Diary',
   components: { NewBtn, CalendarSearch, DiaryList },
+  mounted(){
+    this.pid_select = PubSub.subscribe('selectAll',this.selectAll)
+    this.pid_unselect = PubSub.subscribe('unSelectAll',this.unSelectAll)
+  },
+  beforeUnmount(){
+    PubSub.unsubscribe(this.pid_select)
+    PubSub.unsubscribe(this.pid_unselect)
+  },
   methods:{
     createDiary(){
       router.push({ name: "DiaryEditor" })
     },
+    changeSwitchState(){
+      console.log(this.isSelectAll)
+      if(this.isSelectAll === true){
+        this.$refs.diaryList.selectAll()
+      }else{
+        this.$refs.diaryList.unSelectAll()
+      }
+    },
+    selectAll(msg,data){
+      this.isSelectAll = true
+    },
+    unSelectAll(msg,data){
+      this.isSelectAll = false
+      console.log('false了')
+    }
   },
   data() {
     return {
-      from: '日记'
+      Check,
+      Close,
+      from: '日记',
+      isSelectAll: false,
+      pid_select:'',
+      pid_unselect:'',
     }
-  }
+  },
+  watch:{
+    // isSelectAll:{
+    //   handler(newVal, oldVal){
+    //     if(newVal === true){
+    //       this.$refs.diaryList.selectAll()
+    //     }else{
+    //       this.$refs.diaryList.unSelectAll()
+    //     }
+    //   }
+    // },
+  },
 }
 </script>
 

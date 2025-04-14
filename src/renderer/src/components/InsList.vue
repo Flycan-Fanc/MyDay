@@ -7,8 +7,13 @@
 <script>
 import InsMini from './InsMini.vue'
 import router from "../router";
+import PubSub from "pubsub-js";
+import store from "../store/store";
 export default {
   name:'InsList',
+  components:{
+    InsMini
+  },
   mounted(){
     //鼠标滚动时页面横向滚动
     document.querySelector('#InsList').addEventListener('wheel', function(event) {
@@ -16,14 +21,39 @@ export default {
       console.log(scrollLength)
       document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' });
     })
+
+    this.pid_date = PubSub.subscribe('updateInsListByDate', this.updateInsListByDate)
+    this.pid_init = PubSub.subscribe('updateInsListInit', this.updateInsListInit)
+    this.pid_search = PubSub.subscribe('updateInsListFuzzySearch', this.updateInsListFuzzySearch)
   },
-  computed:{
-    insData(){
-      return this.$store.state.insAbout.insData
+  beforeUnmount() {
+    PubSub.unsubscribe(this.pid_date)
+    PubSub.unsubscribe(this.pid_init)
+    PubSub.unsubscribe(this.pid_search)
+  },
+  data(){
+    return {
+      pid_date:'',
+      pid_init:'',
+      pid_search:'',
+      isDateChanged:false,  // 是否要按照日期筛选的标志，false-不筛选，true-筛选
+      date:'', // 按照日期筛选的日期
+      isFuzzySearch:false, // 是否模糊搜索的标志
+      search:'', // 模糊搜索关键词
     }
   },
-  components:{
-    InsMini
+  computed:{
+    insData:{
+      get(){
+        if(this.isDateChanged === false && this.isFuzzySearch === false){
+          return store.state.insAbout.insData
+        } else if(this.isDateChanged === true && this.isFuzzySearch === false){
+          return store.getters['insAbout/insListByDate'](this.date)
+        } else if(this.isDateChanged === false && this.isFuzzySearch === true){
+          return store.getters['insAbout/fuzzySearchInsList'](this.search)
+        }
+      },
+    },
   },
   methods:{
     insRead(insId){
@@ -33,6 +63,22 @@ export default {
           insId:insId
         }
       })
+    },
+    updateInsListByDate(msg,data){
+      this.isDateChanged = true
+      this.isFuzzySearch = false
+      this.date = data
+    },
+    updateInsListFuzzySearch(msg,data){
+      this.isFuzzySearch = true
+      this.isDateChanged = false
+      this.search = data
+    },
+    updateInsListInit(msg,data){
+      this.isDateChanged = false
+      this.isFuzzySearch = false
+      this.date = ''
+      this.search = ''
     }
   }
 }

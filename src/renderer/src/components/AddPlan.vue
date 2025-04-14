@@ -11,7 +11,7 @@
         <span id="weather-img"
           ><img src="../assets/weather/ic_weather_cloudy.png" alt="weather" style="width: 40px"
         /></span>
-        <span id="weather">11℃</span>
+        <span id="weather">{{curWeather.temperature}}℃</span>
       </div>
       <div class="addplan-area">
         <input
@@ -28,20 +28,31 @@
 
 <script>
 import PubSub from "pubsub-js";
-import store from "../store/store";
 import { dayjs } from "element-plus";
 import { stringUtils } from "../utils/dataUtils";
+import store from "../store/store";
 
 export default {
   name: 'AddPlan',
   mounted(){
-    this.pid = PubSub.subscribe('getCurDate',this.getCurDate)
+    this.pid_getCurDate = PubSub.subscribe('getCurDate',this.getCurDate)
+    this.pid_getWeather = PubSub.subscribe('getWeather',this.getWeather)
+    console.log('AddPlan挂载了')
+    // 检测weather是否就绪，若就绪则获取
+    let isWeatherReady = store.state.weatherAbout.isWeatherReady
+    console.log('isWeatherReady:'+isWeatherReady)
+    if(isWeatherReady === true){
+      console.log('重新获取天气')
+      this.getWeather()
+    }
   },
   data(){
     return{
       planInput:'',
       curDate:'',
-      pid:'',
+      pid_getCurDate:'',
+      pid_getWeather:'',
+      weather:{},
     }
   },
   computed:{
@@ -73,6 +84,27 @@ export default {
       }
 
     },
+    curWeather(){
+      console.log('weather:'+JSON.stringify(this.weather))
+      if(Object.keys(this.weather).length===0){
+        console.log('curWeather变了:'+'-')
+        return {temperature:'-',sky:''}
+      }
+      let today = dayjs().format('YYYY-MM-DD')
+      if(this.curDate === ''||this.curDate === today){
+        return {temperature:this.weather.current.temperature,sky:this.weather.current.skytext}
+      } else{
+        if(this.weather.forecast.some(item => item.date === this.curDate)){
+          let forecastItem = this.weather.forecast.filter(item => item.date === this.curDate)[0]
+          return {
+            temperature:`${forecastItem.low}-${forecastItem.high}`,
+            sky:this.weather.forecast.filter(item => item.date === this.curDate)[0].skytextday
+          }
+        } else {
+          return {temperature:'-',sky:''}
+        }
+      }
+    }
   },
   methods:{
     addPlan(planInput){
@@ -88,13 +120,16 @@ export default {
       this.planInput = ''
     },
     getCurDate(msg,data){
-      console.log('msg:'+msg+';data:'+data)
       // TODO:添加对应日期的计划
       this.curDate = data
+    },
+    getWeather(msg,data){
+      this.weather = store.getters['weatherAbout/getWeather']
     }
   },
   beforeUnmount(){
-    PubSub.unsubscribe(this.pid)
+    PubSub.unsubscribe(this.pid_getCurDate)
+    PubSub.unsubscribe(this.pid_getWeather)
   }
 }
 </script>

@@ -75,7 +75,23 @@ const stringUtils = {
     if (str === null) return true;
     // 检查去空格后的长度是否为 0
     return str.trim().length === 0;
-  }
+  },
+  /**
+   * 判断字符串间是否模糊匹配
+   * @param origin 源字符串
+   * @param target 目标字符串
+   * @returns {boolean}
+   */
+  isFuzzyMatch: function(origin,target){
+    if (target === "") return true; // 空目标字符串直接返回 true
+    // 将 target 的每个字符转义后，用 ".*" 连接，生成正则表达式
+    const pattern = target
+      .split("")
+      .map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) // 转义正则特殊字符
+      .join(".*");
+    const regex = new RegExp(pattern); // 构建正则表达式
+    return regex.test(origin); // 测试是否匹配
+  },
 }
 
 const locationUtils = {
@@ -139,14 +155,41 @@ const locationUtils = {
 }
 
 const weatherUtils = {
+  // async getWeatherInfo() {
+  //   let pos = await locationUtils.fetchLocationByIP()
+  //   // TODO:后续可能改为和风天气api？
+  //   weather.find({search: pos.city+','+pos.countryCode, degreeType: 'C'}, function(err, result) {
+  //     if(err) console.log(err);
+  //     console.log(JSON.stringify(result, null, 2));
+  //     store.dispatch('weatherAbout/setWeatherData',result)
+  //   });
+  // }
   async getWeatherInfo() {
-    let pos = await locationUtils.fetchLocationByIP()
-    // TODO:后续可能改为和风天气api？
-    weather.find({search: pos.city+','+pos.countryCode, degreeType: 'C'}, function(err, result) {
-      if(err) console.log(err);
-      console.log(JSON.stringify(result, null, 2));
-      store.dispatch('weatherAbout/setWeatherData',result)
-    });
+    try {
+      const pos = await locationUtils.fetchLocationByIP();
+      // 将 weather.find 包装为 Promise
+      await new Promise((resolve, reject) => {
+        weather.find(
+          {
+            search: `${pos.city},${pos.countryCode}`,
+            degreeType: 'C'
+          },
+          (err, result) => {
+            if (err) {
+              console.error(err);
+              reject(err);
+            } else {
+              console.log(JSON.stringify(result, null, 2));
+              store.dispatch('weatherAbout/setWeatherData', result);
+              resolve(result); // 完成 Promise
+            }
+          }
+        );
+      });
+    } catch (error) {
+      console.error("Failed to get weather info:", error);
+      throw error; // 抛出错误以便外部捕获
+    }
   }
 }
 
