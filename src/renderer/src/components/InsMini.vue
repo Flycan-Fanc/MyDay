@@ -1,29 +1,88 @@
 <template>
-  <div id="InsMini-container">
+  <div id="InsMini-container" ref="container">
     <span class="insCover">
-      <img src="../assets/background/plouzane-1758197.jpg" alt=""/>
+      <img :src="insCover" alt="" />
     </span>
-    <span class="insTitle">海边夜景</span>
-    <span class="insDate">2020.04.06</span>
-    <input type="checkbox" name="insSelector" id="insSelector" />
+    <span class="insTitle">{{ title }}</span>
+    <span class="insDate">{{ date }}</span>
+    <span id="ins-selector" ref="insSelector">
+      <el-checkbox
+        type="checkbox"
+        v-model="selected"
+        @click="changeSelectState($event)"
+        size="large"
+        style="position: absolute; right: 0; top: 0"
+      />
+    </span>
+
   </div>
 </template>
 
 <script>
+import store from '../store/store'
+import PubSub from "pubsub-js";
 
 export default {
   name: 'InsMini',
-  mounted(){
-
+  props: {
+    insId: {
+      type: Number,
+      required: true
+    }
   },
-  computed:{
-    insData(){
-      return this.$store.state.insAbout.insData
+  mounted() {},
+  data() {
+    return {
+      selected: false
+    }
+  },
+  watch:{
+    selected:{
+      handler(val){
+        if(val){
+          this.$refs.container.classList.add('select')
+        }else{
+          if([...this.$refs.container.classList].indexOf('select')!==-1){
+            this.$refs.container.classList.remove('select')
+          }
+        }
+      }
+    }
+  },
+  computed: {
+    ins() {
+      return store.state.insAbout.insData.filter((item) => item.insId === this.insId)[0]
+    },
+    date(){
+      return this.ins.insDate.split('-').join('.')
+    },
+    title(){
+      if(this.ins.insTitle.length <= 8){
+        return this.ins.insTitle
+      }else{
+        return this.ins.insTitle.slice(0,5) + '...'
+      }
+    },
+    insCover(){
+      return  this.ins.insCover || new URL("../assets/background/plouzane-1758197.jpg", import.meta.url).href;
+    }
+  },
+  methods: {
+    changeSelectState(e){
+      this.$emit('changeSelectState',this.insId)
+      PubSub.publish('changeInsSwitchState') // 每选择一个，都要检测是否要变更为全选状态
+      e.stopPropagation()
+    },
+    // 选择
+    select(){
+      this.selected = true
+    },
+    // 取消选择
+    unSelect(){
+      this.selected = false
     }
   }
 }
-
-
 </script>
 
 <style scoped>
@@ -46,6 +105,9 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
+#InsMini-container.select{
+  background-color: rgb(254, 158, 77)
+}
 .insCover {
   flex: 2;
   margin-top: 15px;
@@ -67,19 +129,26 @@ export default {
 .insDate {
   flex: 1;
 }
-#insSelector {
+#ins-selector {
   position: absolute;
   width: 20px;
   height: 20px;
-  top: 10px;
   right: 10px;
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0s, opacity 0.3s linear;
+  transition: visibility 0s,opacity 0.3s linear;
 }
-#InsMini-container:hover #insSelector {
+.hidden{
+  visibility: hidden;
+  opacity: 0;
+}
+#ins-selector.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+#InsMini-container:hover #ins-selector {
   visibility: visible;
   opacity: 1;
 }
 </style>
-

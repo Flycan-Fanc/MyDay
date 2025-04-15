@@ -60,11 +60,11 @@ export default {
   name: 'InsView',
   components: { Editor, CalendarWeather },
   mounted(){
-    console.log(this.$route.params.insId)
+    // console.log(this.$route.params.insId)
   },
   computed:{
     insId(){
-      return Number(this.$route.params.insId)
+      return this.$route.params.insId
     },
     insData(){
       return store.state.insAbout.insData.filter(item => item.insId === this.insId)[0]

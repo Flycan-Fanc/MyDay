@@ -15,6 +15,7 @@
 <script>
 
 import store from "../store/store";
+import PubSub from "pubsub-js";
 
 export default {
   name: 'DiaryMini',
@@ -38,6 +39,7 @@ export default {
       return store.state.diaryAbout.diaryData.filter(item=>item.diaryId === this.diaryId)[0]
     },
     date(){
+      console.log(this.diary.diaryDate)
       return this.diary.diaryDate.split('-').join('.')
     },
     title(){
@@ -48,15 +50,11 @@ export default {
       }
     },
   },
-  watch:{
-    selected:{
-      handler(){
-        this.$emit('changeSelectState',this.diaryId)
-      }
-    }
-  },
+  watch:{},
   methods:{
     changeSelectState(e){
+      this.$emit('changeSelectState',this.diaryId)
+      PubSub.publish('changeDiarySwitchState') // 每选择一个，都要检测是否要变更为全选状态
       e.stopPropagation()
       // this.selected = !this.selected
       // // TODO:通知diaryList改变对应的diary的select状态

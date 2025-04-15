@@ -22,11 +22,13 @@ export default {
     this.pid_date = PubSub.subscribe('updateDiaryListByDate', this.updateDiaryListByDate)
     this.pid_init = PubSub.subscribe('updateDiaryListInit', this.updateDiaryListInit)
     this.pid_search = PubSub.subscribe('updateDiaryListFuzzySearch', this.updateDiaryListFuzzySearch)
+    this.pid_diartSwitch = PubSub.subscribe('changeDiarySwitchState',this.changeDiarySwitchState)
   },
   beforeUnmount() {
     PubSub.unsubscribe(this.pid_date)
     PubSub.unsubscribe(this.pid_init)
     PubSub.unsubscribe(this.pid_search)
+    PubSub.unsubscribe(this.pid_diartSwitch)
   },
   components: {
     DiaryMini
@@ -36,11 +38,11 @@ export default {
       pid_date:'',
       pid_init:'',
       pid_search:'',
+      pid_diarySwitch:'',
       isDateChanged:false,  // 是否要按照日期筛选的标志，false-不筛选，true-筛选
       date:'', // 按照日期筛选的日期
       isFuzzySearch:false, // 是否模糊搜索的标志
       search:'', // 模糊搜索关键词,
-      selectState:[],
     }
   },
   computed:{
@@ -55,41 +57,19 @@ export default {
         }
       },
     },
-    // selectDiaryNum(){
-    //   return this.selectState.filter(item=>item.selected === true).length
-    // }
-  },
-  watch:{
-    diaryData:{
-      immediate:true,
-      handler(){
-        this.diaryData.forEach(item=>{
-          this.selectState.push({diaryId:item.diaryId,selected:false})
-        })
-      }
-    },
     selectState:{
-      immediate:true,
-      deep:true,
-      handler(val){
-        if(val.filter(item=>item.selected === true).length === this.diaryData.length){
-          PubSub.publish('selectAll')
-        } else{
-          PubSub.publish('unSelectAll')
-        }
+      get(){
+        let res = []
+        this.diaryData.forEach(item=>{res.push({diaryId:item.diaryId,selected:false})})
+        return res
       }
     }
-    // selectDiaryNum:{
-    //   immediate:true,
-    //   handler(newVal){
-    //     if(newVal === this.diaryData.length){
-    //       PubSub.publish('selectAll')
-    //     } else if(newVal !== this.diaryData.length){
-    //       console.log('调用了')
-    //       PubSub.publish('unSelectAll')
-    //     }
-    //   }
-    // }
+  },
+  watch:{
+    selectState:{
+      handler(val){
+      }
+    }
   },
   methods:{
     diaryRead(e,item){
@@ -123,6 +103,7 @@ export default {
         }
       })
     },
+    // 改变diaryMini的状态
     // 全选
     selectAll(){
       this.selectState.forEach(item=>{
@@ -137,6 +118,15 @@ export default {
         this.$refs['diaryMini'+item.diaryId][0].unSelect()
       })
     },
+    // 改变全选switch的状态
+    changeDiarySwitchState(msg,data){
+      // TODO:功能可以实现，但暂时还没找到为什么是false成立？
+      if((this.selectState.filter(item=>item.selected === true).length) === this.diaryData.length){
+        PubSub.publish('selectAllDiary')
+      } else{
+        PubSub.publish('unSelectAllDiary')
+      }
+    },
     // 获取选中的diaryId数组
     getSelectDiaryId(){
       let res = []
@@ -146,7 +136,7 @@ export default {
         }
       })
       return res
-    }
+    },
   }
 }
 </script>

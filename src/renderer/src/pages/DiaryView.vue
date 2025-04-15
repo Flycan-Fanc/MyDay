@@ -41,7 +41,7 @@ export default {
   },
   computed:{
     diaryId(){
-      return Number(this.$route.params.diaryId)  //param参数获取到的为string类型，需要转换
+      return this.$route.params.diaryId  //param参数获取到的为string类型，需要转换
     },
     diary(){
       return store.state.diaryAbout.diaryData.filter(item=>item.diaryId===this.diaryId)[0]

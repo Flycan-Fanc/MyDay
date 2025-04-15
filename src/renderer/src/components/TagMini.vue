@@ -68,10 +68,10 @@ export default {
     //该项目拥有的标签
     tagList(){
       if(this.originComponent === 'planTagManager'){
-        return store.state.planAbout.planData.filter(item => item.planId === this.contentId)[0].planTags
+        return store.state.planAbout.planData.filter(item => item.planId === this.contentId)[0]?.planTags || []
       } else if(this.originComponent === 'insTagEditor'){
         //TODO: 获取灵感拥有的标签
-        return store.state.insAbout.insData.filter(item => item.insId === this.contentId)[0].insTags
+        return store.state.insAbout.insData.filter(item => item.insId === this.contentId)[0]?.insTags || []
       }
 
     },

@@ -9,7 +9,7 @@
     </div>
     <div id="diaryInfo">
       <el-date-picker
-        v-model="diary.diaryDate"
+        v-model="diaryDate"
         type="date"
         placeholder="请选择日期"
         :disabled-date="disabledDate"
@@ -17,7 +17,7 @@
         size="default"
       />
       <el-input
-        v-model="diary.diaryTitle"
+        v-model="diaryTitle"
         style="width: 300px; margin-left: 20px"
         placeholder="请输入标题"
       />
@@ -40,22 +40,27 @@ import editorConfig from "../config/editorConfig";
 import router from "../router";
 import store from "../store/store";
 import {imageStorage, mdStorage} from "../utils/fileLocalStorage";
+import { dayjs } from "element-plus";
 export default {
   name: 'DiaryEditor',
-  created(){
+  mounted(){
     console.log('DD'+JSON.stringify(this.diary))
+    this.diaryTitle = this.diary?.diaryTitle || ''
+    this.diaryDate = this.diary?.diaryDate || ''
   },
   computed:{
-    diaryId(){
-      return Number(this.$route.params.diaryId)
+    diaryId() {
+      return this.$route.params.diaryId
     },
     diary(){
-      return store.state.diaryAbout.diaryData.filter(item => item.diaryId === this.diaryId)[0]
-    },
+      return JSON.parse(JSON.stringify(store.state.diaryAbout.diaryData.filter(item => item.diaryId === this.diaryId)[0]||{}))
+    }
   },
   data(){
     return {
       config:editorConfig.insConfig.editor,
+      diaryTitle:'',
+      diaryDate:'',
       // 日期选择器的配置数据
       shortcuts:[
         {
@@ -103,17 +108,17 @@ export default {
         store.dispatch("pictureAbout/addPicture", {
           //TODO:后续使用vuex的userId
           userId: 1,
-          diaryId: this.diary.diaryId,
+          diaryId: this.diaryId,
           image: file,
         });
       })
       // 再保存diary date、title、markdown
       store.dispatch("diaryAbout/addDiary", {
         userId: 1,
-        diaryId: this.diary.diaryId,
-        diaryTitle: this.diary.diaryTitle,
+        diaryId: this.diaryId,
+        diaryTitle: this.diaryTitle,
         diaryContent: content,
-        diaryDate: this.diary.diaryDate,
+        diaryDate: dayjs(this.diaryDate).format('YYYY-MM-DD'),
       });
       // 路由跳转
       // router.push({

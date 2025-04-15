@@ -23,13 +23,13 @@ const planAbout = {
   state:{
     planData:[
       {
-        planId: 1,
+        planId: '1',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 0,
         isTop: 0,
@@ -37,13 +37,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 2,
+        planId: '2',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 0,
         isTop: 1,
@@ -51,13 +51,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 3,
+        planId: '3',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -65,13 +65,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 4,
+        planId: '4',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -79,13 +79,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 5,
+        planId: '5',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -93,13 +93,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 6,
+        planId: '6',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -107,13 +107,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 7,
+        planId: '7',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,
@@ -121,13 +121,13 @@ const planAbout = {
         endTime: '2023-04-05'
       },
       {
-        planId: 8,
+        planId: '8',
         userId: 1,
         planContent: '制作活动策划书',
         planTags: [
-          { tagId: 1, tagName: '#工作', color: '#ff0000' },
-          { tagId: 2, tagName: '#学习', color: '#00ff00' },
-          { tagId: 3, tagName: '#娱乐', color: '#0000ff' }
+          { tagId: '1', tagName: '#工作', color: '#ff0000' },
+          { tagId: '2', tagName: '#学习', color: '#00ff00' },
+          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
         ],
         isDone: 1,
         isTop: 0,

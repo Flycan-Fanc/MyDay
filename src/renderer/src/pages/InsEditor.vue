@@ -52,19 +52,15 @@ export default {
   name: 'InsEditor',
   components: { CalendarWeather, Editor,TagMini,Plus },
   mounted(){
-    console.log("insId:"+this.insId)
-    console.log("ins:"+JSON.stringify(this.ins))
-    console.log('url:'+this.imageUrl)
-
     this.imageUrl = this.ins.insCover || ''
     this.title = this.ins.insTitle || ''
   },
   computed:{
     insId(){
-      return Number(this.$route.params.insId)
+      return this.$route.params.insId
     },
     ins(){
-      return JSON.parse(JSON.stringify(store.state.insAbout.insData.filter(item => item.insId === this.insId)[0]))
+      return JSON.parse(JSON.stringify(store.state.insAbout.insData.filter(item => item.insId === this.insId)[0]||{}))
     },
   },
   data(){
@@ -160,7 +156,7 @@ export default {
         userId:1,  //TODO：后续引入真实用户id
         insTitle: this.title,
         insContent:this.$refs.editor.getContent(),
-        insData: dayjs(),
+        insDate: dayjs(this.ins?.insDate ?? undefined).format('YYYY-MM-DD'),
         insTags: this.tag,
         insCover: this.imageUrl,
       }

@@ -13,7 +13,19 @@
           :active-icon="Check"
           :inactive-icon="Close"
         />
-        <img src="../assets/icon/ic_tools_delete.png" alt="删除" />
+        <el-popconfirm
+          class="box-item"
+          title="确认删除所有选择的日记？"
+          confirm-button-text="确认"
+          cancel-button-text="取消"
+          @confirm="deleteAllSelectDiary"
+          placement="bottom-end"
+        >
+          <template #reference>
+            <img src="../assets/icon/ic_tools_delete.png" alt="删除"/>
+          </template>
+        </el-popconfirm>
+<!--        <img src="../assets/icon/ic_tools_delete.png" alt="删除" @click="deleteAllSelectDiary"/>-->
 <!--        <img src="../assets/icon/ic_tools_return.png" alt="返回" />-->
       </span>
     </div>
@@ -29,13 +41,15 @@ import NewBtn from '../components/NewBtn.vue'
 import router from "../router";
 import { Check, Close } from '@element-plus/icons-vue'
 import PubSub from "pubsub-js";
+import store from "../store/store";
+import { nanoid } from "nanoid";
 
 export default {
   name: 'Diary',
   components: { NewBtn, CalendarSearch, DiaryList },
   mounted(){
-    this.pid_select = PubSub.subscribe('selectAll',this.selectAll)
-    this.pid_unselect = PubSub.subscribe('unSelectAll',this.unSelectAll)
+    this.pid_select = PubSub.subscribe('selectAllDiary',this.selectAll)
+    this.pid_unselect = PubSub.subscribe('unSelectAllDiary',this.unSelectAll)
   },
   beforeUnmount(){
     PubSub.unsubscribe(this.pid_select)
@@ -43,10 +57,16 @@ export default {
   },
   methods:{
     createDiary(){
-      router.push({ name: "DiaryEditor" })
+      let diaryId = nanoid()
+      console.log(diaryId)
+      router.push({
+        name:'DiaryEditor',
+        params:{
+          diaryId:diaryId
+        }
+      })
     },
     changeSwitchState(){
-      console.log(this.isSelectAll)
       if(this.isSelectAll === true){
         this.$refs.diaryList.selectAll()
       }else{
@@ -58,7 +78,23 @@ export default {
     },
     unSelectAll(msg,data){
       this.isSelectAll = false
-      console.log('false了')
+    },
+    deleteAllSelectDiary(){
+      let deleteDiaryId = this.$refs.diaryList.getSelectDiaryId()
+      if(deleteDiaryId.length === 0){
+        ElMessage({
+          message:'没有选择的日记',
+          type: 'warning',
+        })
+      } else{
+        store.dispatch('diaryAbout/deleteDiaryBatch',deleteDiaryId)
+        ElMessage({
+          message: '删除成功',
+          type: 'success',
+        })
+        this.isSelectAll = false
+      }
+      // TODO:删除全部选择的日记
     }
   },
   data() {

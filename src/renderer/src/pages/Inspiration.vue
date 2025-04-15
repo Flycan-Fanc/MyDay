@@ -3,14 +3,32 @@
     <div id="insHeader">
       <span class="calendar-area"><CalendarSearch :from="from"></CalendarSearch></span>
       <span class="tools-area">
-        <span>Select All</span>
-        <span id="delete-SelectAll-Checkbox" class="someSelected">✔</span>
-        <img src="../assets/icon/ic_tools_delete.png" alt="删除" />
-        <img src="../assets/icon/ic_tools_return.png" alt="返回" />
+        <span style="margin-right:10px;">Select All</span>
+        <el-switch
+          v-model="isSelectAll"
+          class="mt-2"
+          inline-prompt
+          @change="changeSwitchState"
+          :active-icon="Check"
+          :inactive-icon="Close"
+        />
+        <el-popconfirm
+          class="box-item"
+          title="确认删除所有选择的日记？"
+          confirm-button-text="确认"
+          cancel-button-text="取消"
+          @confirm="deleteAllSelectIns"
+          placement="bottom-end"
+        >
+          <template #reference>
+            <img src="../assets/icon/ic_tools_delete.png" alt="删除" />
+          </template>
+        </el-popconfirm>
+<!--        <span id="delete-SelectAll-Checkbox" class="someSelected">✔</span>-->
       </span>
     </div>
     <div id="InsList-container">
-      <InsList id="InsList"></InsList>
+      <InsList id="InsList" ref="insList"></InsList>
     </div>
     <NewBtn id="NewBtn" @click="createIns()"></NewBtn>
   </div>
@@ -21,6 +39,10 @@ import CalendarSearch from '../components/CalendarSearch.vue'
 import InsList from '../components/InsList.vue'
 import NewBtn from "../components/NewBtn.vue";
 import router from "../router";
+import { Check, Close } from "@element-plus/icons-vue";
+import store from "../store/store";
+import PubSub from "pubsub-js";
+import { nanoid } from "nanoid";
 
 export default {
   name: 'Inspiration',
@@ -32,15 +54,61 @@ export default {
       console.log(scrollLength)
       document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' });
     })
+
+    this.pid_select = PubSub.subscribe('selectAllIns',this.selectAll)
+    this.pid_unselect = PubSub.subscribe('unSelectAllIns',this.unSelectAll)
+  },
+  beforeUnmount(){
+    PubSub.unsubscribe(this.pid_select)
+    PubSub.unsubscribe(this.pid_unselect)
   },
   methods:{
     createIns(){
-      router.push('/insEditor')
+      router.push({
+        name:'InsEditor',
+        params:{
+          insId: nanoid(),
+        }
+      })
+    },
+    changeSwitchState(){
+      if(this.isSelectAll === true){
+        this.$refs.insList.selectAll()
+      }else{
+        this.$refs.insList.unSelectAll()
+      }
+    },
+    selectAll(msg,data){
+      this.isSelectAll = true
+    },
+    unSelectAll(msg,data){
+      this.isSelectAll = false
+    },
+    deleteAllSelectIns(){
+      let deleteInsId = this.$refs.insList.getSelectInsId()
+      if(deleteInsId.length === 0){
+        ElMessage({
+          message:'没有选择的灵感',
+          type: 'warning',
+        })
+      } else{
+        store.dispatch('insAbout/deleteInsBatch',deleteInsId)
+        ElMessage({
+          message: '删除成功',
+          type: 'success',
+        })
+        this.isSelectAll = false
+      }
     }
   },
   data(){
     return{
+      Check,
+      Close,
       from:'灵感',
+      isSelectAll: false,
+      pid_select:'',
+      pid_unselect:'',
     }
   },
 }

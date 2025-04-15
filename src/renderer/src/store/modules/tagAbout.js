@@ -24,27 +24,27 @@ const tagAbout = {
   state:{
     userTags:[
       {
-        tagId: 1,
+        tagId: '1',
         tagName: '#工作',
         color:  '#12c23d'
       },
       {
-        tagId: 2,
+        tagId: '2',
         tagName: '#学习',
         color: '#ff6b81'
       },
       {
-        tagId: 3,
+        tagId: '3',
         tagName: '#娱乐',
         color: '#ff9f43'
       },
       {
-        tagId: 4,
+        tagId: '4',
         tagName: '#生活',
         color: '#f6da00'
       },
       {
-        tagId: 5,
+        tagId: '5',
         tagName: '#运动',
         color: "#146de1"
       }
