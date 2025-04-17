@@ -18,7 +18,7 @@ const userAbout = {
       {
         userId: "U001",
         userAccount: "alice123",
-        userPassword: "p@ssw0rd1",
+        userPassword: "alice123",
         email: "alice@example.com",
         userName: "Alice",
         avatarId: "",

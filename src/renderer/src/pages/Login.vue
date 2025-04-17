@@ -21,17 +21,17 @@
         >计划、日记、灵感</span
         >
         <ul class="change">
-          <li class="login active">
+          <li class="login active" @click="toLogin">
             账号登陆<br />
             <div class="decoration active"></div>
           </li>
-          <li class="register">
+          <li class="register" @click="toRegister">
             账号注册<br />
             <div class="decoration"></div>
           </li>
         </ul>
-<!--        <LoginForm></LoginForm>-->
-        <RegisterForm></RegisterForm>
+        <LoginForm v-if="isLogin"></LoginForm>
+        <RegisterForm v-if="!isLogin"></RegisterForm>
       </span>
   </div>
 </template>
@@ -54,6 +54,19 @@ export default {
         console.log("minimize");
         windowControls.minimizeWindow();
       });
+    }
+  },
+  data(){
+    return {
+      isLogin:true
+    }
+  },
+  methods:{
+    toLogin(){
+      this.isLogin = true;
+    },
+    toRegister(){
+      this.isLogin = false;
     }
   }
 }

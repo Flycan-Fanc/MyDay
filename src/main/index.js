@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import storeManager from './stores'
 
 // 窗口管理
 function createWindow() {
@@ -116,6 +117,7 @@ app.whenReady().then(() => {
   // IPC通信控制
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  // 窗口行为控制
   // 关闭窗口API
   ipcMain.on('close-window', () => {
     app.quit();
@@ -146,6 +148,20 @@ app.whenReady().then(() => {
   ipcMain.on('maximize', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
     window.maximize();
+  });
+
+  // electron-store 相关
+  // 读取store
+  ipcMain.handle('electron-store:get', (_, { config, key, defaultValue }) => {
+    return storeManager.get({ config, key, defaultValue });
+  });
+  // 写入store
+  ipcMain.handle('electron-store:set', (_, { config, key, value }) => {
+    return storeManager.set({ config, key, value });
+  });
+  // 从store中删除
+  ipcMain.handle('electron-store:delete', (_, { config, key }) => {
+    return storeManager.delete({ config, key });
   });
 
   createWindow()

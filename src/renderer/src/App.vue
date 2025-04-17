@@ -1,9 +1,32 @@
 <script setup>
 //
 // const ipcHandle = () => window.electron.ipcRenderer.send('ping')
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Login from './pages/Login.vue'
 import Layout from './pages/Layout.vue'
 import Editor from './components/Editor.vue'
+import PubSub from "pubsub-js";
+
+let isLogin = ref(false)
+
+let pid_login = ''
+let pid_logout = ''
+
+const login = ()=>{
+  isLogin.value = true
+  console.log(isLogin)
+}
+const logout = ()=>{
+  isLogin.value = false
+}
+onMounted(()=>{
+  pid_login = PubSub.subscribe('login', login)
+  pid_logout = PubSub.subscribe('logout', logout)
+})
+onBeforeUnmount(()=>{
+  PubSub.unsubscribe(pid_login)
+  PubSub.unsubscribe(pid_logout)
+})
 </script>
 
 <template>
@@ -23,7 +46,8 @@ import Editor from './components/Editor.vue'
 <!--    </div>-->
 <!--  </div>-->
 <!--  <Versions />-->
-  <Layout></Layout>
+  <Login v-if="!isLogin"></Login>
+  <Layout v-if="isLogin"></Layout>
 </template>
 <style>
 * {

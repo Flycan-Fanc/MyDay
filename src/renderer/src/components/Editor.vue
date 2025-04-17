@@ -6,7 +6,7 @@
     :toolbars="config.toolbarConfig"
     v-bind="config.editorConfig"
     @change="handleChange"
-    @imgAdd="asyncImgAdd"
+    @imgAdd="handleImgAdd"
     @imgDel="$imgDel"
     @save="handleSave"
     :style="{ borderRadius: '10px' }"
@@ -104,7 +104,7 @@ export default {
       this.$emit('handleSave',{ markdown:this.content,image:this.img_file})
     },
     // 图片添加
-    async asyncImgAdd(pos, $file) {
+    async handleImgAdd(pos, $file) {
       let newFileObj = {}
       //压缩图片
       await imageUtils.compressImage($file).then(res=>{
@@ -124,6 +124,15 @@ export default {
           console.log(err)
         })
     },
+    // async handleImgAdd(pos, file){
+    //   // 1. 获取图片本地路径
+    //   const originalPath = file.path
+    //   // 2. 转换为应用可管理的路径格式
+    //   // 直接使用绝对路径
+    //   const finalPath = `file://${originalPath.replace(/\\/g, '/')}`
+    //   // 3. 替换编辑器中的图片引用
+    //   this.$refs.md.$img2Url(pos, finalPath)
+    // },
     // 图片删除
     $imgDel(pos) {
       delete this.img_file[pos]

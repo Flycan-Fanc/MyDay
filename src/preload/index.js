@@ -2,7 +2,11 @@ import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
+// 自定义api
 const api = {
+  /**
+   * 窗口行为控制
+   */
   windowControls:{
     closeWindow: () => ipcRenderer.send('close-window'),
     minimizeWindow: () => ipcRenderer.send('minimize-window'),
@@ -16,8 +20,17 @@ const api = {
     },
     maximize: ()=> ipcRenderer.send('maximize'),
     enlargeWindow: (w,h)=> ipcRenderer.send('enlarge-window',[w,h]),
-    // TODO：文件读取相关api
-
+  },
+  /**
+   * electron-store API
+   */
+  electronStore:{
+    get: (config, key, defaultValue) =>
+      ipcRenderer.invoke('electron-store:get', { config, key, defaultValue }),
+    set: (config, key, value) =>
+      ipcRenderer.invoke('electron-store:set', { config, key, value }),
+    delete: (config, key) =>
+      ipcRenderer.invoke('electron-store:delete', { config, key })
   }
 }
 

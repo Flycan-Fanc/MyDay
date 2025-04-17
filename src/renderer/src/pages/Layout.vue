@@ -53,7 +53,7 @@
         <span style="display:flex;justify-content: center;align-items: center;font-size:0;">
           <el-link @click="showUserInfoDialog = !showUserInfoDialog">修改资料</el-link>
           <el-divider direction="vertical" style="height:25px;"/>
-          <el-link>退出登录</el-link>
+          <el-link @click="logout">退出登录</el-link>
         </span>
       </el-popover>
     </div>
@@ -176,6 +176,10 @@ export default {
           item.classList.add("selected")
         }
       })
+    },
+    logout(){
+      // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等
+      PubSub.publish("logout")
     }
   }
 }

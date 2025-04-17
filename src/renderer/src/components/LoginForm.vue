@@ -1,5 +1,5 @@
 <template>
-  <form id="login-form" action="">
+  <form id="login-form" @submit.prevent> <!-- 阻止默认提交行为 -->
     <input
       type="text"
       name="username"
@@ -12,7 +12,7 @@
       id="password"
       placeholder="密码"
     /><br />
-    <button class="login-button">登录</button><br />
+    <button class="login-button" @click="login">登录</button><br />
     <span class="rememberMe-container">
       <input type="checkbox" name="rememberMe" id="rememberMe" />
       <span id="remember">记住我(30天免登录)</span>
@@ -32,9 +32,16 @@
 </template>
 
 <script>
+import PubSub from "pubsub-js";
 
 export default {
   name: 'RegisterForm',
+  methods:{
+    login(){
+      // TODO: 登录验证逻辑
+      PubSub.publish('login')
+    }
+  },
 }
 
 
@@ -76,6 +83,7 @@ export default {
   border-radius: 5px;
   color: white;
   font-size: 15px;
+  cursor: pointer;
 }
 #login-form .rememberMe-container {
   display: inline-block;
