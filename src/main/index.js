@@ -117,7 +117,6 @@ app.whenReady().then(() => {
   // IPC通信控制
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  // 窗口行为控制
   // 关闭窗口API
   ipcMain.on('close-window', () => {
     app.quit();
@@ -151,6 +150,10 @@ app.whenReady().then(() => {
   });
 
   // electron-store 相关
+  // 获取store实例
+  ipcMain.handle('electron-store:get-store', (_, { config }) => {
+    return storeManager.getStore(config);
+  });
   // 读取store
   ipcMain.handle('electron-store:get', (_, { config, key, defaultValue }) => {
     return storeManager.get({ config, key, defaultValue });

@@ -54,7 +54,7 @@ const imageStorage = {
    * @param file
    */
   saveImageFile(fileName, file) {
-
+    
   },
   /**
    * 从本地读取图片文件

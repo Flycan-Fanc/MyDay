@@ -1,4 +1,4 @@
-import StoreManager from './index.js';
+const electronStore = window.api.electronStore
 
 // 使用固定的store配置（无需用户ID）
 const appStoreConfig = {
@@ -8,14 +8,14 @@ const appStoreConfig = {
 
 class AppStore {
   constructor() {
-    this.store = StoreManager.getStore(appStoreConfig)
+    this.store = electronStore.getStore(appStoreConfig)
   }
 
   // TODO:后续拓展一些保存配置的功能（如窗口的状态、主题等）
 
   // ================= 用户索引相关方法 =================
-  // 添加新用户到索引
-  addUserToIndex(user) {
+  // 添加新用户到索引文件
+  addUserIndex(user) {
     const index = this.getUserIndex();
     if (!index.find(u => u.user === user.userId)) {
       index.push({
@@ -33,18 +33,18 @@ class AppStore {
   }
 
   // 根据用户id查找用户
-  findUserByUserId(userId) {
+  findUserById(userId) {
     return this.getUserIndex().find(u => u.userId === userId);
   }
 
   // 根据用户账户查找用户
-  findUserByUsername(userAccount) {
+  findUserByAccount(userAccount) {
     return this.getUserIndex().find(u => u.userAccount === userAccount);
   }
 
   // 返回登陆状态的用户id
   getLoginUserId() {
-    return this.getUserIndex().find(u => u.isLogin).userId
+    return this.getUserIndex().find(u => u.isLogin)?.userId ?? undefined
   }
 
   // 根据用户id更改用户登陆状态
