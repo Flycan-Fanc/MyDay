@@ -1,4 +1,7 @@
-const electronStore = window.api.electronStore
+import userStore from './userStore.js'
+// const electronStore = window.api.electronStore
+
+import electronStore from '../index'
 
 // 使用固定的store配置（无需用户ID）
 const appStoreConfig = {
@@ -9,6 +12,8 @@ const appStoreConfig = {
 class AppStore {
   constructor() {
     this.store = electronStore.getStore(appStoreConfig)
+    console.log(this.store)
+    this.userStore = null  // 将userStore挂载到appStore上，保证全局可用
   }
 
   // TODO:后续拓展一些保存配置的功能（如窗口的状态、主题等）
@@ -17,14 +22,24 @@ class AppStore {
   // 添加新用户到索引文件
   addUserIndex(user) {
     const index = this.getUserIndex();
-    if (!index.find(u => u.user === user.userId)) {
+    if (!index.find(u => u.userId === user.userId)) {
       index.push({
-        id: user.id,
+        userid: user.userId,
         userAccount: user.userAccount,
         isLogin: true
       });
       this.store.set('userIndex', index);
     }
+  }
+
+  // 挂载userStore
+  setUserStore(userId){
+    this.userStore = new userStore(userId)
+  }
+
+  // 获取userStore
+  getUserStore(){
+    return this.userStore
   }
 
   // 获取全部用户索引（用于登录界面判断是否有用户登录）
@@ -52,7 +67,7 @@ class AppStore {
     const index = this.getUserIndex();
     index.forEach(u => {
       if (u.userId === userId) {
-        u.isLogin = true;
+        u.isLogin = !u.isLogin;
       }
       if (u.userId !== userId && u.isLogin) {
         u.isLogin = false;

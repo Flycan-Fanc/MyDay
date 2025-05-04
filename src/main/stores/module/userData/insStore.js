@@ -1,13 +1,15 @@
-const electronStore = window.api.electronStore
+// const electronStore = window.api.electronStore
+
+import electronStore from '../../index'
 
 /**
- * 用户标签存储
+ * 用户灵感存储
  */
-class TagStore {
+class InsStore {
   constructor(userId) {
     this.userId = userId
     this.config = {
-      name: 'user-tag',
+      name: 'user-ins',
       cwd: `users/${userId}`, // 按用户ID分目录存储
       encryptionKey: `user-key-${userId}` // 动态加密密钥
     }
@@ -15,23 +17,23 @@ class TagStore {
   }
 
   /**
-   * 获取用户标签
+   * 获取用户灵感
    * @param userId
    * @returns {*}
    */
-  getTag(userId) {
+  getIns(userId) {
     return this.store.get(userId)
   }
 
   /**
-   * 设置用户标签
+   * 存储用户灵感
    * @param userId
-   * @param tag
+   * @param ins
    * @returns {*}
    */
-  setTag(userId,tag){
-    return this.store.set(userId,tag)
+  setIns(userId,ins){
+    return this.store.set(userId,ins)
   }
 }
 
-export default TagStore
+export default InsStore

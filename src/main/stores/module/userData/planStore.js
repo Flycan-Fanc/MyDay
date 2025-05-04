@@ -1,13 +1,15 @@
-const electronStore = window.api.electronStore
+// const electronStore = window.api.electronStore
+
+import electronStore from '../../index'
 
 /**
- * 用户灵感存储
+ * 用户计划存储
  */
-class InsStore {
+class PlanStore {
   constructor(userId) {
     this.userId = userId
     this.config = {
-      name: 'user-ins',
+      name: 'user-plan',
       cwd: `users/${userId}`, // 按用户ID分目录存储
       encryptionKey: `user-key-${userId}` // 动态加密密钥
     }
@@ -15,23 +17,23 @@ class InsStore {
   }
 
   /**
-   * 获取用户灵感
+   * 获取用户计划
    * @param userId
    * @returns {*}
    */
-  getIns(userId) {
+  getPlan(userId) {
     return this.store.get(userId)
   }
 
   /**
-   * 存储用户灵感
+   * 设置用户计划
    * @param userId
-   * @param ins
+   * @param plan
    * @returns {*}
    */
-  setIns(userId,ins){
-    return this.store.set(userId,ins)
+  setPlan(userId,plan){
+    return this.store.set(userId,plan)
   }
 }
 
-export default InsStore
+export default PlanStore

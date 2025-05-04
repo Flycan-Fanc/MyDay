@@ -23,6 +23,8 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@popperjs/core": "^2.11.8",
     "axios": "^1.8.4",
+    "dotenv": "^16.0.0",
+    "electron-store": "^5.2.0",
     "electron-updater": "^6.1.7",
     "element-plus": "^2.9.5",
     "interactjs": "^1.10.27",

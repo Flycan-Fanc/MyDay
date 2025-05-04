@@ -5,23 +5,26 @@
       name="username"
       id="username"
       placeholder="用户名"
+      v-model="userAccount"
     /><br />
     <input
       type="password"
       name="password"
       id="password"
       placeholder="密码"
+      v-model="password"
     /><br />
     <button class="login-button" @click="login">登录</button><br />
     <span class="rememberMe-container">
-      <input type="checkbox" name="rememberMe" id="rememberMe" />
-      <span id="remember">记住我(30天免登录)</span>
+      <input type="checkbox" name="rememberMe" id="rememberMe" v-model="isRemember"/>
+      <span id="remember" >记住我(30天免登录)</span>
     </span>
     <span class="agree-container">
       <input
         type="checkbox"
         name="confirmAgreement"
         id="confirmAgreement"
+        v-model="isAgree"
       />
       <span id="agreement"
         >已阅读并同意<span style="color: #2eafc5">《用户注册协议》</span
@@ -33,13 +36,80 @@
 
 <script>
 import PubSub from "pubsub-js";
+//import appStore from "../utils/localStores/appStore";
+import userAbout from "../store/modules/userAbout";
+import store from "../store/store";
+
+import {authAPI} from '../utils/api'
 
 export default {
-  name: 'RegisterForm',
+  name: 'LoginForm',
+  data(){
+    return {
+      userAccount: '',
+      password: '',
+      isRemember: false,
+      isAgree: false,
+      userStore: null
+    }
+  },
   methods:{
     login(){
-      // TODO: 登录验证逻辑
-      PubSub.publish('login')
+      if(this.userAccount === '' || this.password === ''){
+        ElMessage({
+          message: '用户名或密码不能为空',
+          type: 'error',
+          number:60,
+          duration: 2000
+        })
+      } else if(!this.isAgree){
+        ElMessage({
+          message: '请先同意用户注册协议与隐私协议',
+          type: 'error',
+          number:60,
+          duration: 2000
+        })
+      } else{
+        // // TODO: 登录验证逻辑
+        // // 向后端验证，成功后返回 token 和 userInfo
+        //
+        // // 将用户写入索引文件中
+        // // TODO:后续使用从后端传来的用户id
+        // let userId = 1
+        // appStore.addUserIndex({userId,userAccount:this.userAccount})
+        // // 建立用户store，将token存储在用户store中，返回一个全局用户store
+        // appStore.setUserStore(userId)
+        // // 将token、用户信息、数据写在userStore和vuex中
+        // let userStore = appStore.getUserStore()
+        // userStore.setUserToken(token)
+        // userStore.setUserInfo(userInfo)
+        // store.dispatch('userAbout/addUser',userInfo)
+        // // TODO:将数据写在对应的vuex store中，可能需要增加setData的api
+        // // 从electron-store中获取数据
+        // store.dispatch('planAbout/setData',userStore.planStore.getPlan(userId))
+        // store.dispatch('diaryAbout/setData',userStore.diaryStore.getDiary(userId))
+        // store.dispatch('insAbout/setData',userStore.insStore.getIns(userId))   // 由后端将标签拼接到灵感中再返回给前端
+        // store.dispatch('tagAbout/setData',userStore.tagStore.getTag(userId))
+        // // 在索引文件中将用户标记为登陆状态
+        // appStore.changeUserLoginStatus(userId)
+        authAPI.login(this.userAccount,this.password).then((res)=>{
+          console.log(res)
+          // 提示成功登录，并跳转
+          ElMessage({
+            message: '登录成功',
+            type: 'success',
+            number:60,
+            duration: 2000
+          })
+          PubSub.publish('login')
+        }).catch((err)=>{
+          console.log(err)
+        })
+
+        // 若失败则提示
+
+      }
+
     }
   },
 }

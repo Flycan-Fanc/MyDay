@@ -28,123 +28,6 @@ const userAbout = {
         createTime: "2023-01-15 10:30:00",
         isDelete: 0
       },
-      {
-        userId: "U002",
-        userAccount: "bob_tech",
-        userPassword: "b0bSecure!",
-        email: "bob@example.com",
-        userName: "Bob",
-        avatarId: "",
-        userProfile: "Tech enthusiast",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-02-20 14:15:00",
-        isDelete: 0
-      },
-      {
-        userId: "U003",
-        userAccount: "charlie_g",
-        userPassword: "ch@rlie99",
-        email: "charlie@example.com",
-        userName: "Charlie",
-        avatarId: "",
-        userProfile: "Music lover",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-03-05 09:00:00",
-        isDelete: 0
-      },
-      {
-        userId: "U004",
-        userAccount: "diana_m",
-        userPassword: "D1@naPass",
-        email: "diana@example.com",
-        userName: "Diana",
-        avatarId: "",
-        userProfile: "Bookworm",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-04-10 16:45:00",
-        isDelete: 0
-      },
-      {
-        userId: "U005",
-        userAccount: "evan_dev",
-        userPassword: "ev@n2023",
-        email: "evan@example.com",
-        userName: "Evan",
-        avatarId: "",
-        userProfile: "Web developer",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-05-12 11:20:00",
-        isDelete: 0
-      },
-      {
-        userId: "U006",
-        userAccount: "fiona_s",
-        userPassword: "F!ona1234",
-        email: "fiona@example.com",
-        userName: "Fiona",
-        avatarId: "",
-        userProfile: "Nature photographer",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-06-18 13:10:00",
-        isDelete: 0
-      },
-      {
-        userId: "U007",
-        userAccount: "george_k",
-        userPassword: "ge0rgeKK",
-        email: "george@example.com",
-        userName: "George",
-        avatarId: "",
-        userProfile: "Coffee addict",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-07-22 08:30:00",
-        isDelete: 0
-      },
-      {
-        userId: "U008",
-        userAccount: "hannah_m",
-        userPassword: "h@nnahMM",
-        email: "hannah@example.com",
-        userName: "Hannah",
-        avatarId: "",
-        userProfile: "Yoga instructor",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-08-30 17:00:00",
-        isDelete: 0
-      },
-      {
-        userId: "U009",
-        userAccount: "ian_coder",
-        userPassword: "I@nPython",
-        email: "ian@example.com",
-        userName: "Ian",
-        avatarId: "",
-        userProfile: "Python developer",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-09-14 10:45:00",
-        isDelete: 0
-      },
-      {
-        userId: "U010",
-        userAccount: "julia_d",
-        userPassword: "Juli@2023",
-        email: "julia@example.com",
-        userName: "Julia",
-        avatarId: "",
-        userProfile: "Digital artist",
-        userRole: 0,
-        isVip: 0,
-        createTime: "2023-10-05 15:20:00",
-        isDelete: 0
-      }
     ],
   },
   actions:{
@@ -154,7 +37,7 @@ const userAbout = {
      * @param value
      */
     addUser(context,value){
-      let userId = nanoid()
+      let userId = nanoid()  // TODO: 后续需要修改为后端生成
       let userAccount = value.userAccount
       let userPassword = value.userPassword
       let email = value.email

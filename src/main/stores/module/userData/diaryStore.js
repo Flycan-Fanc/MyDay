@@ -1,4 +1,6 @@
-const electronStore = window.api.electronStore
+// const electronStore = window.api.electronStore
+
+import electronStore from '../../index'
 
 /**
  * 用户日记存储

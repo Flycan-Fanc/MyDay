@@ -1,35 +1,40 @@
 <template>
-  <form id="register-form" action="" method="">
+  <form id="register-form" @submit.prevent>
     <input
       type="text"
       name="username"
       id="username"
       placeholder="用户名"
+      v-model="userAccount"
     /><br />
     <input
       type="password"
       name="password"
       id="password"
       placeholder="密码"
+      v-model="password"
     /><br />
     <input
       type="password"
       name="checkPassword"
       id="checkPassword"
       placeholder="确认密码"
+      v-model="checkPassword"
     /><br />
     <input
       type="email"
       name="email"
       id="email"
       placeholder="邮箱"
+      v-model="email"
     /><br />
-    <button class="register-button">注册</button><br />
+    <button class="register-button" @click="register()">注册</button><br />
     <span class="agree-container">
             <input
               type="checkbox"
               name="confirmAgreement"
               id="confirmAgreement"
+              v-model="isAgree"
             />
             <span id="agreement"
             >已阅读并同意<span style="color: #2eafc5">《用户注册协议》</span
@@ -41,8 +46,52 @@
 
 <script>
 
+import {authAPI} from '../utils/api'
+
 export default {
-    name: 'RegisterForm',
+  name: 'RegisterForm',
+  data(){
+    return {
+      userAccount: '',
+      password: '',
+      checkPassword: '',
+      email: '',
+      isAgree: false,
+    }
+  },
+  methods: {
+    register(){
+      if(this.userAccount === '' || this.password === ''){
+        ElMessage({
+          message: '用户名或密码不能为空',
+          type: 'error',
+          number:60,
+          duration: 2000
+        })
+      } else if(this.password !== this.checkPassword){
+        ElMessage({
+          message: '两次输入的密码不一致',
+          type: 'error',
+          number: 60,
+          duration: 2000
+        })
+      } else if(!this.isAgree){
+        ElMessage({
+          message: '请先同意用户注册协议与隐私协议',
+          type: 'error',
+          number:60,
+          duration: 2000
+        })
+      } else{
+        // TODO：注册逻辑
+        authAPI.register(this.userAccount, this.email, this.password).then((res)=>{
+          console.log(res)
+        }).catch((err)=>{
+          console.log(err)
+        })
+      }
+    },
+  }
 }
 
 

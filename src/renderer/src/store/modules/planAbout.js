@@ -140,8 +140,9 @@ const planAbout = {
     /**
      * 获取计划列表
      */
-    fetchData(){
+    setData(context,value){
       // TODO: 从本地或者远程获取计划列表
+      context.commit('setData',value)
     },
     /**
      * 存储计划列表到本地
@@ -224,7 +225,9 @@ const planAbout = {
     /**
      * 设置计划列表
      */
-    setData(){},
+    setData(state,value){
+      state.planData = value
+    },
     /**
      * 存储计划列表到本地
      */

@@ -107,8 +107,9 @@ const diaryAbout = {
     /**
      * 获取日记列表
      */
-    fetchData(){
+    setData(context,value){
       // TODO: 从本地或者远程获取计划列表
+      context.commit('setData',value)
     },
     /**
      * 存储日记列表到本地
@@ -166,8 +167,9 @@ const diaryAbout = {
     /**
      * 获取日记列表
      */
-    fetchData(){
+    setData(state,value){
       // TODO: 从本地或者远程获取计划列表
+      state.diaryData = value
     },
     /**
      * 存储日记列表到本地

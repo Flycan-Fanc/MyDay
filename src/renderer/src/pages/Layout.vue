@@ -178,7 +178,7 @@ export default {
       })
     },
     logout(){
-      // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等
+      // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等、将用户登陆状态设为false
       PubSub.publish("logout")
     }
   }

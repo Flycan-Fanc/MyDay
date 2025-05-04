@@ -75,7 +75,7 @@ function createWindow() {
       // 配置 CSP 规则（开发环境放宽策略）
       const cspHeader = [
         "default-src 'self'",
-        "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com", // 允许连接到后端和 WebSocket
+        "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com http://localhost:3000", // 允许连接到后端和 WebSocket
         `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ""}`,
         "style-src 'self' 'unsafe-inline'",                 // 允许内联样式
         "img-src 'self' data:"                             // 允许图片和 data URL
@@ -152,7 +152,13 @@ app.whenReady().then(() => {
   // electron-store 相关
   // 获取store实例
   ipcMain.handle('electron-store:get-store', (_, { config }) => {
-    return storeManager.getStore(config);
+    try {
+      return storeManager.getStore(config);
+    } catch (err) {
+      console.log(err)
+      throw(err)
+    }
+    //return storeManager.getStore(config);
   });
   // 读取store
   ipcMain.handle('electron-store:get', (_, { config, key, defaultValue }) => {

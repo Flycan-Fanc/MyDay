@@ -1,9 +1,11 @@
-import planStore from './userData/planStore.js'
-import diaryStore from './userData/diaryStore.js'
-import insStore from './userData/insStore.js';
-import tagStore from './userData/tagStore.js';
+import planStore from './userData/planStore'
+import diaryStore from './userData/diaryStore'
+import insStore from './userData/insStore';
+import tagStore from './userData/tagStore';
 
-const electronStore = window.api.electronStore
+// const electronStore = window.api.electronStore
+
+import electronStore from '../index'
 
 class UserStore {
   constructor(userId) {
@@ -29,6 +31,14 @@ class UserStore {
 
   setUserInfo(userInfo){
     this.store.set({ config:this.config,key:'userInfo',value:userInfo })
+  }
+
+  getUserToken(){
+    return this.store.get({ config:this.config,key:'token',value:token })
+  }
+
+  setUserToken(token){
+    this.store.set({ config:this.config,key:'token',value:token })
   }
 
   getUserDataDir(){

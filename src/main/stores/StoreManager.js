@@ -1,6 +1,3 @@
-// const Store = require('electron-store'); // 引入electron-store模块
-// const path = require('path'); // 引入路径处理模块
-
 import Store from 'electron-store'
 import path from 'path'
 
@@ -51,7 +48,7 @@ class StoreManager {
       );
 
       // 创建新的store实例并存入Map
-      this.stores.set(storeKey, new Store(finalConfig));
+      this.stores.set(storeKey, new Store(storeConfig));
     }
 
     // 返回对应的store实例
@@ -66,7 +63,7 @@ class StoreManager {
    *        defaultValue - 可选，当键不存在时返回的默认值
    * @return {any} 返回读取到的数据或默认值
    */
-  get({ config, key, defaultValue }) {
+  get({ config, key, defaultValue=-1 }) {
     // 1. 先获取对应的store实例
     const store = this.getStore(config);
     // 2. 调用store的get方法读取数据

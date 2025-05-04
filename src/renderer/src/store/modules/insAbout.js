@@ -152,8 +152,9 @@ const insAbout = {
     /**
      * 获取灵感列表
      */
-    fetchData(){
+    setData(context,value){
       // TODO: 从本地或者远程获取计划列表
+      context.commit('setData',value)
     },
     /**
      * 存储灵感列表到本地
@@ -213,8 +214,9 @@ const insAbout = {
     /**
      * 获取灵感列表
      */
-    fetchData(){
+    setData(state,value){
       // TODO: 从本地或者远程获取计划列表
+      state.insData = value
     },
     /**
      * 存储灵感列表到本地

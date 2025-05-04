@@ -6,6 +6,7 @@ import Components from 'unplugin-vue-components/vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
+  mode: 'development',
   main: {
     plugins: [externalizeDepsPlugin()]
   },
@@ -31,7 +32,7 @@ export default defineConfig({
       headers: {
         "Content-Security-Policy":
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-          "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com;" +
+          "connect-src 'self' http://localhost:8080 http://localhost:3000 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com;" +
           "img-src 'self' data: blob: http://localhost:8080"
       }
     },

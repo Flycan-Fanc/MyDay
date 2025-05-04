@@ -54,6 +54,12 @@ const tagAbout = {
   },
   actions:{
     /**
+     * 获取标签列表
+     */
+    setData(context,value){
+      context.commit('setData',value)
+    },
+    /**
      * 创建标签
      */
     addTag(context,value){
@@ -127,6 +133,12 @@ const tagAbout = {
     }
   },
   mutations:{
+    /**
+     * 获取标签列表
+     */
+    setData(state,value){
+      state.userTags = value
+    },
     /**
      * 创建标签
      */
