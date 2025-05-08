@@ -14,7 +14,7 @@
       placeholder="密码"
       v-model="password"
     /><br />
-    <button class="login-button" @click="login">登录</button><br />
+    <el-button class="login-button" type="primary" @click="login" :loading="loading">登录</el-button><br />
     <span class="rememberMe-container">
       <input type="checkbox" name="rememberMe" id="rememberMe" v-model="isRemember"/>
       <span id="remember" >记住我(30天免登录)</span>
@@ -50,11 +50,17 @@ export default {
       password: '',
       isRemember: false,
       isAgree: false,
-      userStore: null
+      userStore: null,
+      loading:false,
     }
   },
   methods:{
     login(){
+      // 测试用户，仅在开发环境使用
+      if(this.userAccount === '@testAdmin' && import.meta.env.MODE === 'development') {
+        PubSub.publish('login')
+        return
+      }
       if(this.userAccount === '' || this.password === ''){
         ElMessage({
           message: '用户名或密码不能为空',
@@ -70,6 +76,7 @@ export default {
           duration: 2000
         })
       } else{
+        this.loading = true
         // // TODO: 登录验证逻辑
         // // 向后端验证，成功后返回 token 和 userInfo
         //
@@ -94,6 +101,7 @@ export default {
         // appStore.changeUserLoginStatus(userId)
         authAPI.login(this.userAccount,this.password).then((res)=>{
           console.log(res)
+          this.loading = false
           // 提示成功登录，并跳转
           ElMessage({
             message: '登录成功',
@@ -104,6 +112,11 @@ export default {
           PubSub.publish('login')
         }).catch((err)=>{
           console.log(err)
+          this.loading = false
+          ElMessage({
+            message:err.message,
+            type:'error',
+          })
         })
 
         // 若失败则提示

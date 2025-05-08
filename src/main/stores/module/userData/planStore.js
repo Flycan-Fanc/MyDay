@@ -18,21 +18,19 @@ class PlanStore {
 
   /**
    * 获取用户计划
-   * @param userId
    * @returns {*}
    */
-  getPlan(userId) {
-    return this.store.get(userId)
+  getPlan() {
+    return this.store.get('plan')
   }
 
   /**
    * 设置用户计划
-   * @param userId
    * @param plan
    * @returns {*}
    */
-  setPlan(userId,plan){
-    return this.store.set(userId,plan)
+  setPlan(plan){
+    return this.store.set('plan',plan)
   }
 }
 

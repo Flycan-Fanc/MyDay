@@ -18,21 +18,19 @@ class InsStore {
 
   /**
    * 获取用户灵感
-   * @param userId
    * @returns {*}
    */
-  getIns(userId) {
-    return this.store.get(userId)
+  getIns() {
+    return this.store.get('ins')
   }
 
   /**
    * 存储用户灵感
-   * @param userId
    * @param ins
    * @returns {*}
    */
-  setIns(userId,ins){
-    return this.store.set(userId,ins)
+  setIns(ins){
+    return this.store.set('ins',ins)
   }
 }
 

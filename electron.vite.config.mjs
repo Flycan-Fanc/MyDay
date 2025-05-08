@@ -6,7 +6,7 @@ import Components from 'unplugin-vue-components/vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
-  mode: 'development',
+  // mode: 'development',
   main: {
     plugins: [externalizeDepsPlugin()]
   },

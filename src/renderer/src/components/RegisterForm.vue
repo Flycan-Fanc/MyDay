@@ -28,7 +28,8 @@
       placeholder="邮箱"
       v-model="email"
     /><br />
-    <button class="register-button" @click="register()">注册</button><br />
+<!--    <button class="register-button" @click="register()">注册</button><br />-->
+    <el-button class="register-button" type="primary" @click="register()" :loading="loading">注册</el-button><br />
     <span class="agree-container">
             <input
               type="checkbox"
@@ -57,6 +58,7 @@ export default {
       checkPassword: '',
       email: '',
       isAgree: false,
+      loading: false,
     }
   },
   methods: {
@@ -83,11 +85,25 @@ export default {
           duration: 2000
         })
       } else{
+        this.loading = true
         // TODO：注册逻辑
         authAPI.register(this.userAccount, this.email, this.password).then((res)=>{
           console.log(res)
+          this.loading = false
+          // TODO:注册成功，跳转？
+          ElMessage({
+            message: '注册成功，请登录',
+            type: 'success',
+            number:60,
+            duration: 2000
+          })
         }).catch((err)=>{
           console.log(err)
+          this.loading = false
+          ElMessage({
+            message:err.message,
+            type:'error',
+          })
         })
       }
     },

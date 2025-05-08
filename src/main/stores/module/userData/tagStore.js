@@ -18,11 +18,10 @@ class TagStore {
 
   /**
    * 获取用户标签
-   * @param userId
-   * @returns {*}
+   * @returns {any}
    */
-  getTag(userId) {
-    return this.store.get(userId)
+  getTag() {
+    return this.store.get('userTag')
   }
 
   /**
@@ -32,7 +31,7 @@ class TagStore {
    * @returns {*}
    */
   setTag(userId,tag){
-    return this.store.set(userId,tag)
+    return this.store.set('userTag',tag)
   }
 }
 

@@ -24,7 +24,7 @@ class AppStore {
     const index = this.getUserIndex();
     if (!index.find(u => u.userId === user.userId)) {
       index.push({
-        userid: user.userId,
+        userId: user.userId,
         userAccount: user.userAccount,
         isLogin: true
       });
@@ -39,6 +39,9 @@ class AppStore {
 
   // 获取userStore
   getUserStore(){
+    if(!this.userStore) {
+      throw new Error('userStore is unmounted')
+    }
     return this.userStore
   }
 

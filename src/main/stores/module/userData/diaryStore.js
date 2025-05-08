@@ -18,21 +18,19 @@ class DiaryStore {
 
   /**
    * 获取用户日记
-   * @param userId
    * @returns {*}
    */
-  getDiary(userId) {
-    return this.store.get(userId)
+  getDiary() {
+    return this.store.get('diary')
   }
 
   /**
    * 存储用户日记
-   * @param userId
    * @param diary
    * @returns {*}
    */
-  setDiary(userId,diary){
-    return this.store.set(userId,diary)
+  setDiary(diary){
+    return this.store.set('diary',diary)
   }
 }
 

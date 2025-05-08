@@ -26,28 +26,34 @@ class UserStore {
 
   // ================= 用户数据相关方法 =================
   getUserInfo(){
-    return this.store.get({ config:this.config,key:'userInfo' })
+    return this.store.get('userInfo')
   }
 
   setUserInfo(userInfo){
-    this.store.set({ config:this.config,key:'userInfo',value:userInfo })
+    this.store.set('userInfo',userInfo)
   }
 
   getUserToken(){
-    return this.store.get({ config:this.config,key:'token',value:token })
+    return this.store.get('token')
   }
 
   setUserToken(token){
-    this.store.set({ config:this.config,key:'token',value:token })
+    this.store.set('token',token )
   }
 
-  getUserDataDir(){
-    return this.store.get({ config:this.config,key:'userDataDir' })
+  getUserDataStore(){
+    // 返回浅拷贝，保证操作同一个dataStore
+    return {
+      planStore:this.planStore,
+      diaryStore:this.diaryStore,
+      insStore:this.insStore,
+      tagStore:this.tagStore
+    }
   }
 
-  setUserDataDir(userDataDir){
-    this.store.set({ config:this.config,key:'userDataDir',value:userDataDir })
-  }
+  // setUserDataStore(userDataDir){
+  //   this.store.set({ config:this.config,key:'userDataDir',value:userDataDir })
+  // }
 
 }
 
