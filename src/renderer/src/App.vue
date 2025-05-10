@@ -1,12 +1,17 @@
 <script setup>
 //
 // const ipcHandle = () => window.electron.ipcRenderer.send('ping')
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onBeforeMount, onMounted, onBeforeUnmount } from 'vue'
 import Login from './pages/Login.vue'
 import Layout from './pages/Layout.vue'
 import Editor from './components/Editor.vue'
 import PubSub from "pubsub-js";
 //import userStore from "./utils/localStores/userStore";
+import { authAPI } from './utils/api'
+
+const store = window.api.electronStore
+
+let loginUser = {}
 
 let isLogin = ref(false)
 
@@ -23,21 +28,33 @@ const logout = ()=>{
   isLogin.value = false
 }
 
-// // 由App.vue管理全局store
-// // 用户 electron-store获取
-// const getUserStore = (userId)=>{
-//   return userStore
-// }
-// // 用户 electron-store设置
-// const setUserStore = (userId) =>{
-//   user_Store = new userStore(userId)
-// }
+onBeforeMount(async ()=>{
+  // TODO:在onBeforeMount里面编写验证是否有用户已经登陆的逻辑
+  // 获取登陆的用户
+  let loginUserId = await store.appStore.getLoginUserId()
+  if(loginUserId === -1){
+    console.log('未登录')
+    isLogin.value = false
+  }else{
+    // 验证token
+    loginUser = store.appStore.findUserById(loginUserId)
+    let token = loginUser.token
+    try {
+      await authAPI.verifyToken(token)
+    } catch(err){
+      console.log(err)
+      isLogin.value = false
+    }
+    isLogin.value = true
+  }
+
+})
 
 onMounted(()=>{
   pid_login = PubSub.subscribe('login', login)
   pid_logout = PubSub.subscribe('logout', logout)
 
-  // TODO:在onMounted里面编写验证是否有用户已经登陆的逻辑
+
 })
 onBeforeUnmount(()=>{
   PubSub.unsubscribe(pid_login)

@@ -62,7 +62,7 @@ class AppStore {
 
   // 返回登陆状态的用户id
   getLoginUserId() {
-    return this.getUserIndex().find(u => u.isLogin)?.userId ?? undefined
+    return this.getUserIndex().find(u => u.isLogin)?.userId ?? -1;
   }
 
   // 根据用户id更改用户登陆状态

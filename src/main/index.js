@@ -119,6 +119,7 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
 
+  // 注入IPC通信函数
   registerIpcHandler();
 
   // // 关闭窗口API
@@ -155,27 +156,27 @@ app.whenReady().then(() => {
 
   // electron-store 相关
   // 获取store实例
-  ipcMain.handle('electron-store:get-store', (_, { config }) => {
-    try {
-      return storeManager.getStore(config);
-    } catch (err) {
-      console.log(err)
-      throw(err)
-    }
-    //return storeManager.getStore(config);
-  });
-  // 读取store
-  ipcMain.handle('electron-store:get', (_, { config, key, defaultValue }) => {
-    return storeManager.get({ config, key, defaultValue });
-  });
-  // 写入store
-  ipcMain.handle('electron-store:set', (_, { config, key, value }) => {
-    return storeManager.set({ config, key, value });
-  });
-  // 从store中删除
-  ipcMain.handle('electron-store:delete', (_, { config, key }) => {
-    return storeManager.delete({ config, key });
-  });
+  // ipcMain.handle('electron-store:get-store', (_, { config }) => {
+  //   try {
+  //     return storeManager.getStore(config);
+  //   } catch (err) {
+  //     console.log(err)
+  //     throw(err)
+  //   }
+  //   //return storeManager.getStore(config);
+  // });
+  // // 读取store
+  // ipcMain.handle('electron-store:get', (_, { config, key, defaultValue }) => {
+  //   return storeManager.get({ config, key, defaultValue });
+  // });
+  // // 写入store
+  // ipcMain.handle('electron-store:set', (_, { config, key, value }) => {
+  //   return storeManager.set({ config, key, value });
+  // });
+  // // 从store中删除
+  // ipcMain.handle('electron-store:delete', (_, { config, key }) => {
+  //   return storeManager.delete({ config, key });
+  // });
 
   createWindow()
 
