@@ -45,9 +45,9 @@ onBeforeMount(async ()=>{
       console.log(err)
       isLogin.value = false
     }
+    // TODO：获取数据的逻辑
     isLogin.value = true
   }
-
 })
 
 onMounted(()=>{

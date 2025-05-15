@@ -39,7 +39,7 @@ const userAbout = {
     addUser(context,value){
       let userId = nanoid()  // TODO: 后续需要修改为后端生成
       let userAccount = value.userAccount
-      let userPassword = value.userPassword
+      let userPassword = value.userPassword || ''
       let email = value.email
       let userName = value.userName
       // TODO:后续增加修改头像功能

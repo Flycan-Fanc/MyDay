@@ -4,10 +4,15 @@
 
 import httpClient from '../httpClient';
 
-export const verifyToken = (token) => {
-  // 将token暂存在localStorage中
-  localStorage.setItem('token', token);
-  return httpClient.post('/user/auth');
+export const verifyToken = async (token) => {
+  try {
+    let response = await httpClient.post('/user/auth');
+    localStorage.setItem('token', token);
+    return response;
+  } catch (error) {
+    localStorage.removeItem('token');
+    throw error;
+  }
 }
 
 // 登录接口

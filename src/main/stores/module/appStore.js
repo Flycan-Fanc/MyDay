@@ -34,7 +34,7 @@ class AppStore {
 
   // 挂载userStore
   setUserStore(userId){
-    this.userStore = new userStore(userId)
+    this.userStore = userStore(userId)
   }
 
   // 获取userStore
