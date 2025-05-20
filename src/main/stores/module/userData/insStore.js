@@ -21,7 +21,7 @@ class InsStore {
    * @returns {*}
    */
   getIns() {
-    return this.store.get('ins')
+    return this.store.get('ins',[])
   }
 
   /**
@@ -30,7 +30,9 @@ class InsStore {
    * @returns {*}
    */
   setIns(ins){
-    return this.store.set('ins',ins)
+    if(ins) {
+      return this.store.set('ins',ins)
+    }
   }
 }
 

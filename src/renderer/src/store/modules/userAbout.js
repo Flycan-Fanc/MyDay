@@ -95,7 +95,7 @@ const userAbout = {
      */
     addUser(state,value){
       // TODO:后续增加唯一性校验，由注册逻辑和后端校验
-      state.userData.push(value)
+      state.userData = value
     },
     /**
      * 修改用户信息
@@ -128,7 +128,9 @@ const userAbout = {
     },
   },
   getters:{
-
+    getUserId(state){
+      return state.userData.userId
+    }
   }
 }
 

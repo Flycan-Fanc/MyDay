@@ -36,7 +36,7 @@ export function storeHandler() {
   ipcMain.handle('app-store:change-user-login-status',()=>{
     appStore.changeUserLoginStatus()
   })
-  ipcMain.handle('app-store:delete-user-by-id',(userId)=>{
+  ipcMain.handle('app-store:delete-user-by-id', ({ userId }) => {
     appStore.deleteUserById(userId)
   })
 
@@ -48,10 +48,11 @@ export function storeHandler() {
     }
     return userStore.getUserInfo()
   })
-  ipcMain.handle('user-store:set-userInfo',(userInfo)=>{
-    if(!userStore){
+  ipcMain.handle('user-store:set-userInfo', (event,userInfo) => {
+    if (!userStore) {
       throw new Error('userStore is not exist')
     }
+    console.log('userInfo:',userInfo)
     userStore.setUserInfo(userInfo)
   })
   ipcMain.handle('user-store:get-userToken',()=>{
@@ -60,8 +61,8 @@ export function storeHandler() {
     }
     return userStore.getUserToken()
   })
-  ipcMain.handle('user-store:set-userToken',(token)=>{
-    if(!userStore){
+  ipcMain.handle('user-store:set-userToken', ({ token }) => {
+    if (!userStore) {
       throw new Error('userStore is not exist')
     }
     userStore.setUserToken(token)
@@ -81,8 +82,9 @@ export function storeHandler() {
     }
     return tagStore.getTag()
   })
-  ipcMain.handle('tag-store:set-tag',(tag)=>{
-    if(!tagStore){
+  ipcMain.handle('tag-store:set-tag', (event, tag) => {
+    console.log('tag111:',tag)
+    if (!tagStore) {
       throw new Error('tagStore is not exist')
     }
     tagStore.setTag(tag)
@@ -96,8 +98,8 @@ export function storeHandler() {
     }
     return planStore.getPlan()
   })
-  ipcMain.handle('plan-store:set-plan',(plan)=>{
-    if(!planStore){
+  ipcMain.handle('plan-store:set-plan', (event, plan) => {
+    if (!planStore) {
       throw new Error('planStore is not exist')
     }
     planStore.setPlan(plan)
@@ -110,8 +112,8 @@ export function storeHandler() {
     }
     return diaryStore.getDiary()
   })
-  ipcMain.handle('diary-store:set-diary',(diary)=>{
-    if(!diaryStore){
+  ipcMain.handle('diary-store:set-diary', (event, diary) => {
+    if (!diaryStore) {
       throw new Error('diaryStore is not exist')
     }
     diaryStore.setDiary(diary)
@@ -124,8 +126,8 @@ export function storeHandler() {
     }
     return insStore.getIns()
   })
-  ipcMain.handle('ins-store:set-ins',(ins)=>{
-    if(!insStore){
+  ipcMain.handle('ins-store:set-ins', (event, ins) => {
+    if (!insStore) {
       throw new Error('insStore is not exist')
     }
     insStore.setIns(ins)

@@ -7,6 +7,7 @@ import Diary from "../../models/Diary";
 
 import {stringUtils} from '../../utils/dataUtils'
 import {nanoid} from 'nanoid'
+import store from "../store";
 
 const insApi = {
   // 判断origin是否包含target的全部字符
@@ -170,7 +171,7 @@ const insAbout = {
     addIns(context,value){
       let insId = value.insId || nanoid()
       // TODO:后续引入用户实际数据
-      let userId = value.userId || 1
+      let userId = store.getters['userAbout/getUserId']
       let insTitle = value.insTitle
       let insContent = value.insContent
       let insDate = value.insDate

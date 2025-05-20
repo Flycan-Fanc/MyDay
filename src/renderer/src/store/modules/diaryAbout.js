@@ -6,6 +6,7 @@ import Diary from '../../models/Diary'
 
 import {stringUtils} from '../../utils/dataUtils'
 import {nanoid} from 'nanoid'
+import store from "../store";
 
 const diaryApi = {}
 
@@ -125,7 +126,7 @@ const diaryAbout = {
     addDiary(context,value){
       let diaryId = value.diaryId || nanoid()
       // TODO:后续引入用户实际数据
-      let userId = value.userId
+      let userId = store.getters['userAbout/getUserId']
       let diaryTitle = value.diaryTitle
       let diaryContent = value.diaryContent
       let diaryDate = value.diaryDate

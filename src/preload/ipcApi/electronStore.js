@@ -49,7 +49,7 @@ export const electronStore = {
     getUserInfo: () =>
       ipcRenderer.invoke('user-store:get-userInfo'),
     setUserInfo: (userInfo) =>
-      ipcRenderer.invoke('user-store:set-userInfo', { userInfo }),
+      ipcRenderer.invoke('user-store:set-userInfo', userInfo),
     getUserToken: () =>
       ipcRenderer.invoke('user-store:get-userToken'),
     setUserToken: (token) =>
@@ -65,7 +65,7 @@ export const electronStore = {
     getTag: () =>
       ipcRenderer.invoke('tag-store:get-tag'),
     setTag: (tag) =>
-      ipcRenderer.invoke('tag-store:set-tag', { tag })
+      ipcRenderer.invoke('tag-store:set-tag', tag )
   },
 
   /**
@@ -75,7 +75,7 @@ export const electronStore = {
     getPlan: () =>
       ipcRenderer.invoke('plan-store:get-plan'),
     setPlan: (plan) =>
-      ipcRenderer.invoke('plan-store:set-plan', { plan })
+      ipcRenderer.invoke('plan-store:set-plan', plan)
   },
 
   /**
@@ -85,7 +85,7 @@ export const electronStore = {
     getDiary: () =>
       ipcRenderer.invoke('diary-store:get-diary'),
     setDiary: (diary) =>
-      ipcRenderer.invoke('diary-store:set-diary', { diary })
+      ipcRenderer.invoke('diary-store:set-diary', diary)
   },
 
   /**
@@ -95,7 +95,7 @@ export const electronStore = {
     getIns: () =>
       ipcRenderer.invoke('ins-store:get-ins'),
     setIns: (ins) =>
-      ipcRenderer.invoke('ins-store:set-ins', { ins })
+      ipcRenderer.invoke('ins-store:set-ins', ins)
   },
 
 

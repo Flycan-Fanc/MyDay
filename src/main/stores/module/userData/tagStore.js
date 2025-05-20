@@ -21,17 +21,18 @@ class TagStore {
    * @returns {any}
    */
   getTag() {
-    return this.store.get('userTag')
+    return this.store.get('userTag',[])
   }
 
   /**
    * 设置用户标签
-   * @param userId
    * @param tag
    * @returns {*}
    */
-  setTag(userId,tag){
-    return this.store.set('userTag',tag)
+  setTag(tag){
+    if(tag){
+      return this.store.set('userTag',tag)
+    }
   }
 }
 

@@ -92,6 +92,8 @@ import PlanList from "../components/PlanList.vue";
 import { locationUtils, weatherUtils } from "../utils/dataUtils";
 import PubSub from "pubsub-js";
 
+import { dataLocalStorage } from "../utils/dataLocalStorage";
+
 const windowControls = window.api.windowControls;
 
 export default {
@@ -150,7 +152,29 @@ export default {
     },
     closeWindow() {
       // ToDo: 后续添加一些确认关闭窗口的提示
-      windowControls.closeWindow();
+      ElMessageBox.confirm(
+        '确认退出?',
+        '警告',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      ).then(async () => {
+        try {
+          await dataLocalStorage()
+          windowControls.closeWindow();
+        } catch(err){
+          ElMessage({
+            message: "数据本地存储失败",
+            type: "error",
+            duration: 2000
+          })
+          throw new Error(`数据本地存储失败:${err}`)
+        }
+      }).catch((err) => {
+        console.log(err)
+      })
     },
     changeWindowSize() {
       this.isMaxWindow = !this.isMaxWindow;
@@ -177,8 +201,18 @@ export default {
         }
       })
     },
-    logout(){
+    async logout(){
       // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等、将用户登陆状态设为false
+      try {
+        await dataLocalStorage()
+      } catch(err){
+        ElMessage({
+          message: "数据本地存储失败",
+          type: "error",
+          duration: 2000
+        })
+        throw new Error(`数据本地存储失败:${err}`)
+      }
       PubSub.publish("logout")
     }
   }

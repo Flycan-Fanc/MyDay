@@ -3,6 +3,7 @@
  */
 import { nanoid } from "nanoid";
 import Tag from "../../models/Tag";
+import store from "../store";
 
 
 const tagApi = {
@@ -65,7 +66,7 @@ const tagAbout = {
     addTag(context,value){
       let tagId = nanoid()
       //TODO: 后面增加用户id
-      let userId = 1
+      let userId = store.getters['userAbout/getUserId']
       let tagName = value.tagName;
       let color = value.color;
       let newTag = new Tag(tagId,userId,tagName,color)

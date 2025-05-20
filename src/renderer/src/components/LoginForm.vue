@@ -23,11 +23,7 @@
     </span>
     <span class="agree-container">
       <input type="checkbox" name="confirmAgreement" id="confirmAgreement" v-model="isAgree" />
-      <span id="agreement"
-        >已阅读并同意<span style="color: #2eafc5">《用户注册协议》</span>与<span
-          style="color: #2eafc5"
-          >《隐私协议》</span
-        >
+      <span id="agreement">已阅读并同意<span style="color: #2eafc5">《用户注册协议》</span>与<span style="color: #2eafc5">《隐私协议》</span>
       </span>
     </span>
   </form>
@@ -81,6 +77,7 @@ export default {
           .login(this.userAccount, this.password)
           .then((res) => {
             console.log(res)
+            // 将token存到localStorage，便于网络请求
             localStorage.setItem('token', res.token)
             this.loading = false
             // 提示成功登录，并跳转

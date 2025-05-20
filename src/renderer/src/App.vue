@@ -40,7 +40,7 @@ onBeforeMount(async ()=>{
     loginUser = store.appStore.findUserById(loginUserId)
     let token = loginUser.token
     try {
-      await authAPI.verifyToken(token)
+      let res = await authAPI.verifyToken(token)
     } catch(err){
       console.log(err)
       isLogin.value = false

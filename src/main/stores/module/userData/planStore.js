@@ -21,7 +21,7 @@ class PlanStore {
    * @returns {*}
    */
   getPlan() {
-    return this.store.get('plan')
+    return this.store.get('plan',[])
   }
 
   /**
@@ -30,7 +30,9 @@ class PlanStore {
    * @returns {*}
    */
   setPlan(plan){
-    return this.store.set('plan',plan)
+    if(plan) {
+      return this.store.set('plan',plan)
+    }
   }
 }
 

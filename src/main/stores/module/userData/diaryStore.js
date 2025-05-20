@@ -21,7 +21,7 @@ class DiaryStore {
    * @returns {*}
    */
   getDiary() {
-    return this.store.get('diary')
+    return this.store.get('diary',[])
   }
 
   /**
@@ -30,7 +30,9 @@ class DiaryStore {
    * @returns {*}
    */
   setDiary(diary){
-    return this.store.set('diary',diary)
+    if(diary) {
+      return this.store.set('diary',diary)
+    }
   }
 }
 

@@ -21,11 +21,11 @@
         >计划、日记、灵感</span
         >
         <ul class="change">
-          <li class="login active" @click="toLogin">
+          <li class="login active" @click="toLogin" ref="loginBtn">
             账号登陆<br />
             <div class="decoration active"></div>
           </li>
-          <li class="register" @click="toRegister">
+          <li class="register" @click="toRegister" ref="registerBtn">
             账号注册<br />
             <div class="decoration"></div>
           </li>
@@ -58,14 +58,23 @@ export default {
   },
   data(){
     return {
-      isLogin:true
+      isLogin:true,
+      isLoginPage:true
     }
   },
   methods:{
     toLogin(){
+      this.$refs.loginBtn.classList.add('active');
+      this.$refs.loginBtn.children[1].classList.add('active');
+      this.$refs.registerBtn.classList.remove('active');
+      this.$refs.registerBtn.children[1].classList.remove('active');
       this.isLogin = true;
     },
     toRegister(){
+      this.$refs.registerBtn.classList.add('active');
+      this.$refs.registerBtn.children[1].classList.add('active');
+      this.$refs.loginBtn.classList.remove('active');
+      this.$refs.loginBtn.children[1].classList.remove('active');
       this.isLogin = false;
     }
   }

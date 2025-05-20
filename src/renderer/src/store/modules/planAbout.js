@@ -6,6 +6,7 @@ import Plan from '../../models/Plan'
 
 import {nanoid} from 'nanoid'
 import { dayjs } from "element-plus";
+import store from "../store";
 
 const planApi = {
   // TODO:置顶的，正常的，完成的，每组按照什么顺序排序？
@@ -158,7 +159,7 @@ const planAbout = {
     addPlan(context,value){
       let planId = nanoid()
       // TODO:后续引入实际用户数据
-      let userId = nanoid()
+      let userId = store.getters['userAbout/getUserId']
       let planContent = value.planInput
       let planTags = []
       let isDone = 0
