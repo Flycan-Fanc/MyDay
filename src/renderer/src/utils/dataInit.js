@@ -11,7 +11,7 @@ import { getUserInsList } from "./api/modules/inspiration";
 export async function dataInit(userData) {
   try {
     // 0.初始化userStore
-    await window.api.electronStore.appStore.setUserStore()
+    await window.api.electronStore.appStore.setUserStore(userData.userId)
 
     // 将用户信息存储到userStore
     await window.api.electronStore.userStore.setUserInfo(userData)

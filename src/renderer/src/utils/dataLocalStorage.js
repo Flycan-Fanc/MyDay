@@ -10,7 +10,6 @@ export async function dataLocalStorage() {
     let tag = JSON.parse(JSON.stringify(store.state.tagAbout.userTags))
     await window.api.electronStore.tagStore.setTag(tag)
 
-
     // 2. 从planAbout中获取planList，存储在planStore
     let plan = JSON.parse(JSON.stringify(store.state.planAbout.planData))
     await window.api.electronStore.planStore.setPlan(plan)

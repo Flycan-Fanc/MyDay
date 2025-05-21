@@ -93,6 +93,7 @@ import { locationUtils, weatherUtils } from "../utils/dataUtils";
 import PubSub from "pubsub-js";
 
 import { dataLocalStorage } from "../utils/dataLocalStorage";
+import store from "../store/store";
 
 const windowControls = window.api.windowControls;
 
@@ -205,6 +206,9 @@ export default {
       // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等、将用户登陆状态设为false
       try {
         await dataLocalStorage()
+        // 清除用户登陆状态
+        let userId = store.getters['userAbout/getUserId']
+        await window.api.electronStore.appStore.changeUserLoginStatus(userId)
       } catch(err){
         ElMessage({
           message: "数据本地存储失败",

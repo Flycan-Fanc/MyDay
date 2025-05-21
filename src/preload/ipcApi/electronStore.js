@@ -23,7 +23,7 @@ export const electronStore = {
    */
   appStore: {
     addUserIndex: (user) =>
-      ipcRenderer.invoke('app-store:add-userIndex', { user }),
+      ipcRenderer.invoke('app-store:add-userIndex', user),
     setUserStore: (userId) =>
       ipcRenderer.invoke('app-store:set-userStore', { userId }),
     getUserStore: () =>
@@ -36,8 +36,8 @@ export const electronStore = {
       ipcRenderer.invoke('app-store:find-user-by-account', { userAccount }),
     getLoginUserId: () =>
       ipcRenderer.invoke('app-store:get-login-user-id'),
-    changeUserLoginStatus: () =>
-      ipcRenderer.invoke('app-store:change-user-login-status'),
+    changeUserLoginStatus: (userId) =>
+      ipcRenderer.invoke('app-store:change-user-login-status', userId),
     deleteUserById: (userId) =>
       ipcRenderer.invoke('app-store:delete-user-by-id', { userId })
   },
@@ -53,7 +53,7 @@ export const electronStore = {
     getUserToken: () =>
       ipcRenderer.invoke('user-store:get-userToken'),
     setUserToken: (token) =>
-      ipcRenderer.invoke('user-store:set-userToken', { token }),
+      ipcRenderer.invoke('user-store:set-userToken', token),
     getUserDataStore: () =>
       ipcRenderer.invoke('user-store:get-userDataStore')
   },

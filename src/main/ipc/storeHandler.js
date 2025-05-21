@@ -9,7 +9,7 @@ export function storeHandler() {
   let insStore = null;
 
   // appStore
-  ipcMain.handle('app-store:add-userIndex',(user)=>{
+  ipcMain.handle('app-store:add-userIndex',(event, user)=>{
     appStore.addUserIndex(user);
   })
   ipcMain.handle('app-store:set-userStore',(userId)=>{
@@ -33,8 +33,8 @@ export function storeHandler() {
   ipcMain.handle('app-store:get-login-user-id',()=>{
     return appStore.getLoginUserId()
   })
-  ipcMain.handle('app-store:change-user-login-status',()=>{
-    appStore.changeUserLoginStatus()
+  ipcMain.handle('app-store:change-user-login-status',(event,userId)=>{
+    appStore.changeUserLoginStatus(userId)
   })
   ipcMain.handle('app-store:delete-user-by-id', ({ userId }) => {
     appStore.deleteUserById(userId)
@@ -61,7 +61,8 @@ export function storeHandler() {
     }
     return userStore.getUserToken()
   })
-  ipcMain.handle('user-store:set-userToken', ({ token }) => {
+  ipcMain.handle('user-store:set-userToken', (event, token) => {
+    console.log('token:'+token)
     if (!userStore) {
       throw new Error('userStore is not exist')
     }

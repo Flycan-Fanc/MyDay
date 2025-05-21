@@ -75,7 +75,7 @@ export default {
         this.loading = true
         authAPI
           .login(this.userAccount, this.password)
-          .then((res) => {
+          .then(async (res) => {
             console.log(res)
             // 将token存到localStorage，便于网络请求
             localStorage.setItem('token', res.token)
@@ -87,7 +87,9 @@ export default {
               number: 60,
               duration: 2000
             })
-            dataInit(res.user)  // 初始化数据
+            await dataInit(res.user)  // 初始化数据
+            await window.api.electronStore.userStore.setUserToken(res.token) // 将token存入userStore
+            await window.api.electronStore.appStore.addUserIndex(res.user) // 将登录用户存入appStore的用户索引
             PubSub.publish('login')  // 跳转页面
           })
           .catch((err) => {

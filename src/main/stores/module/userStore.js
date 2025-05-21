@@ -34,7 +34,7 @@ class UserStore {
   }
 
   getUserToken(){
-    return this.store.get('token')
+    return this.store.get('token', '')
   }
 
   setUserToken(token){

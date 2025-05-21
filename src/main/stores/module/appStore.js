@@ -22,14 +22,17 @@ class AppStore {
   // 添加新用户到索引文件
   addUserIndex(user) {
     const index = this.getUserIndex();
+    console.log('user1:'+JSON.stringify(user))
     if (!index.find(u => u.userId === user.userId)) {
       index.push({
         userId: user.userId,
         userAccount: user.userAccount,
         isLogin: true
       });
-      this.store.set('userIndex', index);
+    } else {
+      index.find(u => u.userId === user.userId).isLogin = true;
     }
+    this.store.set('userIndex', index);
   }
 
   // 挂载userStore
@@ -62,7 +65,8 @@ class AppStore {
 
   // 返回登陆状态的用户id
   getLoginUserId() {
-    return this.getUserIndex().find(u => u.isLogin)?.userId ?? -1;
+    console.log('userIndex:'+JSON.stringify(this.getUserIndex()))
+    return this.getUserIndex().find(u => u.isLogin===true)?.userId ?? -1;
   }
 
   // 根据用户id更改用户登陆状态
@@ -76,6 +80,7 @@ class AppStore {
         u.isLogin = false;
       }
     })
+    this.store.set('userIndex', index);
   }
 
   // 根据用户id删除用户
