@@ -25,7 +25,7 @@
           </el-upload>
         </span>
         <span class="info-box">
-          <span>用户名：{{ userInfo.userAccount }}</span>
+          <span>用户名：{{ userInfo.userAccount || "默认用户名" }}</span>
           <span>创建于：{{ userInfo.createTime }}</span>
         </span>
       </div>
@@ -34,7 +34,7 @@
         <span class="userName-info">
           <span class="userName title">昵 称</span>
           <span class="userName content" @click="changeUserName">
-            <span v-if="!userNameInputVisible">{{ userInfo.userName }}</span>
+            <span v-if="!userNameInputVisible">{{ userInfo.userName || "默认昵称"}}</span>
             <el-input
               ref="userName"
               v-if="userNameInputVisible"
@@ -42,14 +42,14 @@
               :autofocus="false"
               @blur="overChangeUserName"
               style="width: 180px"
-              placeholder="输入邮箱"
+              placeholder="输入昵称"
             />
           </span>
         </span>
         <span class="email-info">
           <span class="email title">邮 箱</span>
           <span class="email content" @click="changeEmail">
-            <span v-if="!emailInputVisible">{{ userInfo.email }}</span>
+            <span v-if="!emailInputVisible">{{ userInfo.email || "未设置邮箱"}}</span>
             <el-input
               ref="email"
               v-if="emailInputVisible"
@@ -64,7 +64,7 @@
         <span class="userProfile-info">
           <span class="userProfile title">签 名</span>
           <span class="userProfile content" @click="changeUserProfile">
-            <span v-if="!userProfileInputVisible">{{ userInfo.userProfile }}</span>
+            <span v-if="!userProfileInputVisible">{{ userInfo.userProfile || "这个人很懒，未设置签名"}}</span>
             <el-input
               ref="userProfile"
               v-if="userProfileInputVisible"
@@ -133,6 +133,7 @@ import { Select, CloseBold, Edit, Delete } from '@element-plus/icons-vue'
 
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import store from "../../store/store";
 
 // TODO: 记录信息是否被修改，从而确定关闭dialog之前是否要弹出确认框
 // TODO: 修改用户信息
@@ -147,7 +148,9 @@ export default {
   components:{
     Plus,
   },
-  mounted() {},
+  mounted() {
+    this.userInfo = store.state.userAbout.userData
+  },
   computed: {
     dialogUserInfoVisible: {
       get() {
@@ -395,5 +398,8 @@ export default {
   display: flex;
   width:100%;
   justify-content: center;
+}
+input {
+  display: inline-block;
 }
 </style>

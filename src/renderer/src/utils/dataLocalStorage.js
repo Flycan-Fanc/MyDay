@@ -6,6 +6,10 @@ import store from '../store/store'
 
 export async function dataLocalStorage() {
   try {
+    // 0. 从userAbout中获取userData，存储在userStore
+    let user = JSON.parse(JSON.stringify(store.state.userAbout.userData))
+    await window.api.electronStore.userStore.setUserInfo(user)
+
     // 1. 从tagABout中获取tagList，存储在tagStore
     let tag = JSON.parse(JSON.stringify(store.state.tagAbout.userTags))
     await window.api.electronStore.tagStore.setTag(tag)

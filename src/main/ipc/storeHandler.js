@@ -12,9 +12,8 @@ export function storeHandler() {
   ipcMain.handle('app-store:add-userIndex',(event, user)=>{
     appStore.addUserIndex(user);
   })
-  ipcMain.handle('app-store:set-userStore',(event, data)=>{
-    console.log("userId:"+JSON.stringify(data.userId))
-    appStore.setUserStore(data.userId)
+  ipcMain.handle('app-store:set-userStore',(event, { userId })=>{
+    appStore.setUserStore(userId)
     userStore = appStore.getUserStore()
     let dataStore = userStore.getUserDataStore()
     planStore = dataStore.planStore
@@ -22,28 +21,28 @@ export function storeHandler() {
     diaryStore = dataStore.diaryStore
     insStore = dataStore.insStore
   })
-  ipcMain.handle('app-store:get-userIndex',()=>{
+  ipcMain.handle('app-store:get-userIndex',(event,args)=>{
     return appStore.getUserIndex()
   })
-  ipcMain.handle('app-store:find-user-by-id',(userId)=>{
+  ipcMain.handle('app-store:find-user-by-id',(event,{userId})=>{
     return userStore.findUserById(userId)
   })
-  ipcMain.handle('app-store:find-user-by-account',(userAccount)=>{
+  ipcMain.handle('app-store:find-user-by-account',(event,{ userAccount })=>{
     return userStore.findUserByAccount(userAccount)
   })
-  ipcMain.handle('app-store:get-login-user-id',()=>{
+  ipcMain.handle('app-store:get-login-user-id',(event,args)=>{
     return appStore.getLoginUserId()
   })
   ipcMain.handle('app-store:change-user-login-status',(event,userId)=>{
     appStore.changeUserLoginStatus(userId)
   })
-  ipcMain.handle('app-store:delete-user-by-id', ({ userId }) => {
+  ipcMain.handle('app-store:delete-user-by-id', (event,{ userId }) => {
     appStore.deleteUserById(userId)
   })
 
 
   // userStore
-  ipcMain.handle('user-store:get-userInfo',()=>{
+  ipcMain.handle('user-store:get-userInfo',(event,args)=>{
     if(!userStore){
       throw new Error('userStore is not exist')
     }
@@ -56,7 +55,7 @@ export function storeHandler() {
     console.log('userInfo:',userInfo)
     userStore.setUserInfo(userInfo)
   })
-  ipcMain.handle('user-store:get-userToken',()=>{
+  ipcMain.handle('user-store:get-userToken',(event,args)=>{
     if(!userStore){
       throw new Error('userStore is not exist')
     }
@@ -69,7 +68,7 @@ export function storeHandler() {
     }
     userStore.setUserToken(token)
   })
-  ipcMain.handle('user-store:get-userDataStore',()=>{
+  ipcMain.handle('user-store:get-userDataStore',(event,args)=>{
     if(!userStore){
       throw new Error('userStore is not exist')
     }
@@ -78,7 +77,7 @@ export function storeHandler() {
 
 
   // tagStore
-  ipcMain.handle('tag-store:get-tag',()=>{
+  ipcMain.handle('tag-store:get-tag',(event,args)=>{
     if(!tagStore){
       throw new Error('tagStore is not exist')
     }
@@ -94,7 +93,7 @@ export function storeHandler() {
 
 
   // planStore
-  ipcMain.handle('plan-store:get-plan',()=>{
+  ipcMain.handle('plan-store:get-plan',(event,args)=>{
     if(!planStore){
       throw new Error('planStore is not exist')
     }
@@ -108,7 +107,7 @@ export function storeHandler() {
   })
 
   // diaryStore
-  ipcMain.handle('diary-store:get-diary',()=>{
+  ipcMain.handle('diary-store:get-diary',(event,args)=>{
     if(!diaryStore){
       throw new Error('diaryStore is not exist')
     }
@@ -122,7 +121,7 @@ export function storeHandler() {
   })
 
   // insStore
-  ipcMain.handle('ins-store:get-ins',()=>{
+  ipcMain.handle('ins-store:get-ins',(event, args)=>{
     if(!insStore){
       throw new Error('insStore is not exist')
     }

@@ -38,7 +38,7 @@
           <div class="img-container">
             <img src="../assets/avatar/useravatar.png" alt="" id="avatar" />
           </div>
-          <span id="username" ref="buttonRef" v-click-outside="onClickOutside">Username</span>
+          <span id="username" ref="buttonRef" v-click-outside="onClickOutside">{{userName}}</span>
         </div>
       </div>
       <el-popover
@@ -103,6 +103,9 @@ export default {
     windowControls.enlargeWindow(1200,675);
   },
   mounted() {
+    // 获取用户昵称
+    this.userName = store.state.userAbout.userData.userName || "默认昵称";
+
     this.buttonRef = this.$refs.buttonRef;
     this.popoverRef = this.$refs.popoverRef;
 
@@ -130,6 +133,7 @@ export default {
   },
   data(){
     return{
+      userName: '默认昵称',
       windowImg:expandWindowImg,
       isMaxWindow:false,
       // dialog
