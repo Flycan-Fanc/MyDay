@@ -21,6 +21,7 @@ class TagStore {
    * @returns {any}
    */
   getTag() {
+    console.log("TagStore:"+JSON.stringify((this.store)))
     return this.store.get('userTag',[])
   }
 

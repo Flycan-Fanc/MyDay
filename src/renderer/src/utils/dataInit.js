@@ -30,6 +30,7 @@ export async function dataInit(userData) {
 
     // 3.获取plan，存储在planAbout
     let planList = await window.api.electronStore.planStore.getPlan()
+    console.log('plan:'+JSON.stringify(planList))
     if(planList.length===0) {
       planList = await planAPI.getUserPlanList(userId)
     }

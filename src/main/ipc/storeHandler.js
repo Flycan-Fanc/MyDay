@@ -12,8 +12,9 @@ export function storeHandler() {
   ipcMain.handle('app-store:add-userIndex',(event, user)=>{
     appStore.addUserIndex(user);
   })
-  ipcMain.handle('app-store:set-userStore',(userId)=>{
-    appStore.setUserStore(userId)
+  ipcMain.handle('app-store:set-userStore',(event, data)=>{
+    console.log("userId:"+JSON.stringify(data.userId))
+    appStore.setUserStore(data.userId)
     userStore = appStore.getUserStore()
     let dataStore = userStore.getUserDataStore()
     planStore = dataStore.planStore
