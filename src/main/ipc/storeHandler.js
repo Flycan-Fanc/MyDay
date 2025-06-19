@@ -52,7 +52,7 @@ export function storeHandler() {
     if (!userStore) {
       throw new Error('userStore is not exist')
     }
-    console.log('userInfo:',userInfo)
+    console.log('保存userInfo:',JSON.stringify(userInfo))
     userStore.setUserInfo(userInfo)
   })
   ipcMain.handle('user-store:get-userToken',(event,args)=>{

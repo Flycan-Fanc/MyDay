@@ -134,6 +134,8 @@ import { Select, CloseBold, Edit, Delete } from '@element-plus/icons-vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import store from "../../store/store";
+import { updateUserInfo } from "../../utils/api/modules/user";
+import * as userApi from "../../utils/api/modules/user";
 
 // TODO: 记录信息是否被修改，从而确定关闭dialog之前是否要弹出确认框
 // TODO: 修改用户信息
@@ -143,13 +145,18 @@ export default {
     showUserInfoDialog: {
       type: Boolean,
       default: false
-    }
+    },
+    user:{
+      type:Object,
+    } //原始用户数据
   },
   components:{
     Plus,
   },
   mounted() {
-    this.userInfo = store.state.userAbout.userData
+    // console.log('userDialog mounted')
+    // this.userInfoOrigin = store.state.userAbout.userData;
+    // this.userInfo = JSON.parse(JSON.stringify(this.userInfoOrigin));
   },
   computed: {
     dialogUserInfoVisible: {
@@ -159,11 +166,27 @@ export default {
       set(val) {
         this.$emit('update:showUserInfoDialog', val)
       }
+    },
+  },
+  watch:{
+    user:{
+      deep:true,
+      immediate: true,
+      handler(newVal){
+        Object.assign(this.userInfo, newVal);
+      }
     }
   },
   methods: {
     // dialog
     beforeCloseUserInfoDialog() {
+      console.log("关闭了对话框")
+      this.anyInfoChanged = false;
+      for(let key in this.userInfo){
+        if (this.userInfo[key] !== this.user[key]) {
+          this.anyInfoChanged = true;
+        }
+      }
       if(this.anyInfoChanged){
         ElMessageBox.confirm(
           '确认要修改信息？',
@@ -172,21 +195,29 @@ export default {
             confirmButtonText: '确认',
             cancelButtonText: '取消',
             type: 'warning',
-            customStyle:'width:240px;'
+            customStyle:'width:240px;z-index: 2002;'
           }
         )
-          .then(() => {
+          .then(async () => {
+            // TODO: 修改信息的逻辑
+            console.log('user:', this.user)
+            console.log('userInfo:', this.userInfo)
+            // 先向远程提交
+            await userApi.updateUserInfo(this.userInfo)
+            // 再修改vuex数据
+            await store.dispatch('userAbout/editUser', this.userInfo)
             ElMessage({
               type: 'success',
               message: '修改成功',
             });
-            // TODO: 修改信息的逻辑
             this.dialogUserInfoVisible = false;
           })
-          .catch(() => {
+          .catch((err) => {
+            console.log("err:",err)
+            Object.assign(this.userInfo, this.user);
             ElMessage({
               type: 'info',
-              message: '放弃修改',
+              message: '修改失败',
             });
             // TODO: 取消修改信息的逻辑
             this.dialogUserInfoVisible = false;
@@ -262,16 +293,17 @@ export default {
       CloseBold,
       Edit,
       Delete,
-      userInfo: {
-        userId: 12312321,
-        userAccount: 'Steve',
-        userPassword: '123456',
-        email: '1234567@gmail.com',
-        userName: 'Steve',
-        avatar: new URL('@renderer/assets/avatar/useravatar.png', import.meta.url).href,
-        userProfile: '计划、日记、灵感',
-        createTime: '2024.12.06'
-      },
+      // userInfo: {
+      //   userId: 12312321,
+      //   userAccount: 'Steve',
+      //   userPassword: '123456',
+      //   email: '1234567@gmail.com',
+      //   userName: 'Steve',
+      //   avatar: new URL('@renderer/assets/avatar/useravatar.png', import.meta.url).href,
+      //   userProfile: '计划、日记、灵感',
+      //   createTime: '2024.12.06'
+      // },
+      userInfo: {},  //克隆的用户数据
       anyInfoChanged:false,
       emailInputVisible: false,
       userProfileInputVisible: false,

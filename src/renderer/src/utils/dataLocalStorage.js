@@ -8,6 +8,7 @@ export async function dataLocalStorage() {
   try {
     // 0. 从userAbout中获取userData，存储在userStore
     let user = JSON.parse(JSON.stringify(store.state.userAbout.userData))
+    console.log("保存用户数据：", JSON.stringify(user))
     await window.api.electronStore.userStore.setUserInfo(user)
 
     // 1. 从tagABout中获取tagList，存储在tagStore

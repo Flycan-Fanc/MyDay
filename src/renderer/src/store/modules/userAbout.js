@@ -14,6 +14,7 @@ const userApi = {
 const userAbout = {
   namespaced:true,
   state:{
+    isDateChanged: false,
     userData:[
       {
         userId: "U001",
@@ -32,12 +33,19 @@ const userAbout = {
   },
   actions:{
     /**
+     * 用户数据改变
+     * @param context
+     */
+    userDataChanged(context){
+      context.commit('userDataChanged')
+    },
+    /**
      * 添加用户
      * @param context
      * @param value
      */
     addUser(context,value){
-      let userId = nanoid()  // TODO: 后续需要修改为后端生成
+      let userId = value.userId  // TODO: 后续需要修改为后端生成
       let userAccount = value.userAccount
       let userPassword = value.userPassword || ''
       let email = value.email
@@ -77,6 +85,7 @@ const userAbout = {
       let user = {
         userId, userAccount, userPassword, email, userName, avatarId, userProfile, userRole, isVip, createTime, isDelete
       }
+      context.commit('editUser',user)
     },
     /**
      * 删除用户
@@ -88,6 +97,9 @@ const userAbout = {
     },
   },
   mutations:{
+    userDataChanged(state) {
+      state.isDateChanged = !state.isDateChanged
+    },
     /**
      * 添加用户
      * @param state
@@ -103,20 +115,7 @@ const userAbout = {
      * @param value
      */
     editUser(state,value){
-      state.userData.forEach(item=>{
-        if(item.userId === value.userId){
-          item.userAccount = value.userAccount
-          item.userPassword = value.userPassword
-          item.email = value.email
-          item.userName = value.userName
-          item.avatarId = value.avatarId
-          item.userProfile = value.userProfile
-          item.userRole = value.userRole
-          item.isVip = value.isVip
-          item.createTime = value.createTime
-          item.isDelete = value.isDelete
-        }
-      })
+      Object.assign(state.userData,value)
     },
     /**
      * 删除用户

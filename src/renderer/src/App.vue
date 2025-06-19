@@ -44,6 +44,27 @@ onBeforeMount(async ()=>{
     // 验证token
     let token = await window.api.electronStore.userStore.getUserToken()
     try {
+      // let res = await authAPI.verifyToken(token).catch(err => {
+      //   // 如果是网络错误，返回一个特殊标记（如 {networkError: true}）
+      //   if (err.message.includes('Network Error') || err.code === 'ERR_INTERNET_DISCONNECTED') {
+      //     return { networkError: true };
+      //   }
+      //   throw err; // 其他错误继续抛出
+      // });  // 为了后续改造支持离线使用
+
+      // 如果是网络错误，跳过验证，使用本地数据
+      // if (res.networkError) {
+      //   console.log('网络不可用，使用本地缓存 Token');
+      //   const localUser = await window.api.electronStore.userStore.getUserInfo(); // 尝试读取本地用户数据
+      //   if (localUser) {
+      //     isLogin.value = true;
+      //     return; // 直接返回，不执行后续初始化
+      //   } else {
+      //     isLogin.value = false; // 无本地数据则视为未登录
+      //     return;
+      //   }
+      // }
+
       let res = await authAPI.verifyToken(token)
       console.log('res:'+JSON.stringify(res))
       await dataInit(res.user)

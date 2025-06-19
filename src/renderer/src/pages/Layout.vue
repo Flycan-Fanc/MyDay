@@ -32,7 +32,7 @@
         </ul>
       </div>
       <UserTagManager v-model:showTagDialog.async="showTagDialog"></UserTagManager>
-      <UserInfoManager v-model:showUserInfoDialog.async="showUserInfoDialog"></UserInfoManager>
+      <UserInfoManager v-model:showUserInfoDialog.async="showUserInfoDialog" :user="user"></UserInfoManager>
       <div class="person-area">
         <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
           <div class="img-container">
@@ -51,7 +51,7 @@
         hide-after=0
         >
         <span style="display:flex;justify-content: center;align-items: center;font-size:0;">
-          <el-link @click="showUserInfoDialog = !showUserInfoDialog">修改资料</el-link>
+          <el-link @click="openUserDialog()">修改资料</el-link>
           <el-divider direction="vertical" style="height:25px;"/>
           <el-link @click="logout">退出登录</el-link>
         </span>
@@ -104,7 +104,7 @@ export default {
   },
   mounted() {
     // 获取用户昵称
-    this.userName = store.state.userAbout.userData.userName || "默认昵称";
+    this.user = store.state.userAbout.userData;
 
     this.buttonRef = this.$refs.buttonRef;
     this.popoverRef = this.$refs.popoverRef;
@@ -133,7 +133,7 @@ export default {
   },
   data(){
     return{
-      userName: '默认昵称',
+      user: {},
       windowImg:expandWindowImg,
       isMaxWindow:false,
       // dialog
@@ -147,6 +147,15 @@ export default {
     // showTagDialog(val){
     //   console.log("showTagDialog changed:"+val)
     // }
+  },
+  computed:{
+    userName() {
+      const name = this.user?.userName;
+      if (name && name.length >= 10) {
+        return name.slice(0, 10);
+      }
+      return name || '默认昵称';
+    }
   },
   directives:{
     clickOutside: vClickOutside,
@@ -205,6 +214,9 @@ export default {
           item.classList.add("selected")
         }
       })
+    },
+    openUserDialog(){
+      this.showUserInfoDialog = !this.showUserInfoDialog
     },
     async logout(){
       // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等、将用户登陆状态设为false

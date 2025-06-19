@@ -30,6 +30,7 @@ class UserStore {
   }
 
   setUserInfo(userInfo){
+    console.log("userStore:userInfo",JSON.stringify(userInfo))
     this.store.set('userInfo',userInfo)
   }
 

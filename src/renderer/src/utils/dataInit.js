@@ -22,7 +22,6 @@ export async function dataInit(userData) {
 
     // 2.获取tag，存储在tagAbout
     let userTag = await window.api.electronStore.tagStore.getTag()
-    console.log('tag:'+JSON.stringify(userTag))
     if(userTag.length===0) {
       userTag = await tagAPI.getUserTagList(userId)
     }
@@ -30,7 +29,6 @@ export async function dataInit(userData) {
 
     // 3.获取plan，存储在planAbout
     let planList = await window.api.electronStore.planStore.getPlan()
-    console.log('plan:'+JSON.stringify(planList))
     if(planList.length===0) {
       planList = await planAPI.getUserPlanList(userId)
     }
