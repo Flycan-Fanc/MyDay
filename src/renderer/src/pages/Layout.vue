@@ -32,7 +32,7 @@
         </ul>
       </div>
       <UserTagManager v-model:showTagDialog.async="showTagDialog"></UserTagManager>
-      <UserInfoManager v-model:showUserInfoDialog.async="showUserInfoDialog" :user="user"></UserInfoManager>
+      <UserInfoManager v-model:showUserInfoDialog.async="showUserInfoDialog" :user="user" :logout="logout"></UserInfoManager>
       <div class="person-area">
         <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
           <div class="img-container">
@@ -231,7 +231,7 @@ export default {
           type: "error",
           duration: 2000
         })
-        throw new Error(`数据本地存储失败:${err}`)
+        // throw new Error(`数据本地存储失败:${err}`)
       }
       PubSub.publish("logout")
     }

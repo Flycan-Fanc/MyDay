@@ -96,7 +96,7 @@ export default {
             console.log(err)
             this.loading = false
             ElMessage({
-              message: err.message,
+              message: err.response.data.message,
               type: 'error'
             })
           })

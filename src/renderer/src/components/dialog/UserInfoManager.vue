@@ -148,7 +148,10 @@ export default {
     },
     user:{
       type:Object,
-    } //原始用户数据
+    }, //原始用户数据
+    logout:{
+      type: Function,
+    }
   },
   components:{
     Plus,
@@ -277,9 +280,38 @@ export default {
     handelEditPassword(){
       this.editPasswordVisible = true;
     },
-    confirmEditPassword(){
+    async confirmEditPassword(){
       // TODO:确认修改密码的逻辑
-      this.editPasswordVisible = false;
+      if(this.password.confirmNewPassword !== this.password.newPassword){
+        ElMessage({
+          type: 'error',
+          message: '两次输入的新密码不一致',
+        });
+      } else if(this.password.oldPassword === this.password.newPassword){
+        ElMessage({
+          type: 'error',
+          message: '新密码不能与旧密码相同',
+        });
+      } else{
+        try {
+          await userApi.updatePassword(this.user.userId, this.password.oldPassword, this.password.newPassword)
+          ElMessage({
+            type: 'success',
+            message: '密码修改成功，请重新登录',
+          });
+          this.password.oldPassword = '';
+          this.password.newPassword = '';
+          this.password.confirmNewPassword = '';
+          this.editPasswordVisible = false;
+          this.logout();
+        } catch(err) {
+          console.log("密码修改err",err)
+          ElMessage({
+            type: 'error',
+            message: '密码修改失败',
+          });
+        }
+      }
     },
     cancelEditPassword(){
       // TODO:取消修改密码的逻辑
