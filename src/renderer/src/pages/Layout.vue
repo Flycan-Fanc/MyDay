@@ -36,7 +36,7 @@
       <div class="person-area">
         <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
           <div class="img-container">
-            <img src="../assets/avatar/useravatar.png" alt="" id="avatar" />
+            <img src="../assets/avatar/useravatar.png" alt="用户头像" id="avatar" />
           </div>
           <span id="username" ref="buttonRef" v-click-outside="onClickOutside">{{userName}}</span>
         </div>

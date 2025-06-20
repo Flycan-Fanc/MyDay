@@ -7,6 +7,7 @@ import { tagAPI, planAPI, diaryAPI, insAPI } from '../utils/api'
 import { getUserPlanList } from "./api/modules/plan";
 import { getUserDiaryList } from "./api/modules/diary";
 import { getUserInsList } from "./api/modules/inspiration";
+import { pictureInit } from "./pictureInit";
 
 export async function dataInit(userData) {
   try {
@@ -47,6 +48,9 @@ export async function dataInit(userData) {
       insList = await insAPI.getUserInsList(userId)
     }
     await store.dispatch('insAbout/setData',insList)
+
+    // 6.初始化图片基本数据
+    await pictureInit(userId)
   } catch(err) {
     throw new Error('数据初始化失败')
   }

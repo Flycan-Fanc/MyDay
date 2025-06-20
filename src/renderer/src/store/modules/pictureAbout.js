@@ -42,8 +42,8 @@ const pictureAbout = {
     /**
      * 获取图片列表
      */
-    fetchData(){
-      // TODO: 从本地或者远程获取图片列表
+    setData(context,value){
+      context.commit('setData',value)
     },
     /**
      * 存储图片列表到本地
@@ -86,8 +86,8 @@ const pictureAbout = {
     /**
      * 获取图片列表
      */
-    fetchData(){
-      // TODO: 从本地或者远程获取图片列表
+    setData(state,value){
+      state.pictureData = value
     },
     /**
      * 存储图片列表到本地
