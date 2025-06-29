@@ -15,12 +15,12 @@
         <span class="avatar-box">
           <el-upload
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
+            :http-request="customUpload"
           >
-            <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar" alt="" />
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" alt="" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
         </span>
@@ -136,6 +136,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import store from "../../store/store";
 import { updateUserInfo } from "../../utils/api/modules/user";
 import * as userApi from "../../utils/api/modules/user";
+import * as pictureApi from "../../utils/api/modules/picture";
+import { imageUtils } from "../../utils/dataUtils";
 
 // TODO: 记录信息是否被修改，从而确定关闭dialog之前是否要弹出确认框
 // TODO: 修改用户信息
@@ -170,6 +172,23 @@ export default {
         this.$emit('update:showUserInfoDialog', val)
       }
     },
+    uploadParams: { // 需要随文件一起上传的额外参数
+      get() {
+        return {
+          userId: this.user.userId,
+          diaryId: '',
+          insId: '',
+          isAvatar: 1,
+          isCover: 0,
+          fileScale: 1.0
+        }
+      }
+    },
+    imageUrl:{
+      get(){
+        return this.userInfo.avatarId ? imageUtils.getImageUrl(this.userInfo.avatarId) : ''
+      },
+    }
   },
   watch:{
     user:{
@@ -233,20 +252,60 @@ export default {
       }, 500);
     },
     // avatar
-    handleAvatarSuccess(res, file) {
-      this.userInfo.avatar = URL.createObjectURL(file.raw);
+    async customUpload(file){
+      console.log('自定义上传')
+      try {
+        return await pictureApi.uploadPicture(
+          this.uploadParams,  // 参数对象
+          [file.file]         // 文件数组（即使单文件也需包装成数组）
+        );
+      } catch (error) {
+        ElMessage({
+          type: 'error',
+          message: '头像上传失败'
+        })
+        throw error; // 触发 el-upload 的 on-error
+      }
+    },
+    async handleAvatarSuccess(res) {
+      this.userInfo.avatarId = res.data[0].pictureId;
+      console.log(this.userInfo.avatarId)
+      console.log(this.imageUrl)
+      try{
+        // 先向远程提交
+        await userApi.updateUserInfo(this.userInfo)
+        // 再修改vuex数据
+        await store.dispatch('userAbout/editUser', this.userInfo)
+      } catch(error){
+        ElMessage({
+          type: 'error',
+          message: '头像上传失败'
+        })
+      }
+      ElMessage({
+        type:"success",
+        message: '头像上传成功'
+      })
     },
     beforeAvatarUpload(file) {
-      const isJPG = file.type === 'image/jpeg';
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      console.log('before upload')
+      const isImage = ["image/jpeg", "image/png"].includes(file.type);
+      const isLt2MB = file.size / 1024 / 1024 < 5;
 
-      if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG 格式!');
+      if (!isImage) {
+        ElMessage({
+        type: 'error',
+          message: '只能上传 JPG/PNG 图片！'
+        })
       }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
+      if (!isLt2MB){
+       ElMessage({
+          type: 'error',
+          message: '图片大小不能超过 5MB！'
+        })
       }
-      return isJPG && isLt2M;
+
+      return isImage && isLt2MB;
     },
     // modifyInfo
     changeUserName() {
@@ -346,7 +405,16 @@ export default {
         oldPassword:'',
         newPassword:'',
         confirmNewPassword:'',
-      }
+      },
+      // 图片相关
+      // uploadParams: { // 需要随文件一起上传的额外参数
+      //   userId: this.user.userId,
+      //   diaryId: '',
+      //   insId: '',
+      //   isAvatar: true,
+      //   isCover: false,
+      //   fileScale: 1.0
+      // }
     }
   }
 }
@@ -432,6 +500,7 @@ export default {
   width: 60px;
   height: 60px;
   display: block;
+  object-fit: cover;
 }
 .passwordEdit-box{
   flex:3;

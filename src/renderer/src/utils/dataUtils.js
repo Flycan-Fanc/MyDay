@@ -3,6 +3,10 @@ import store from "../store/store";
 const weather = require('weather-js');
 
 const imageUtils = {
+  getImageUrl(pictureId){
+    let baseURL = import.meta.env.VITE_APP_API_URL;
+    return `${baseURL}/api/picture/${pictureId}?token=${localStorage.getItem('token')}`
+  },
   /**
    * 压缩图片文件对象（严格保持输入输出结构一致）
    * @param {Object} fileObj - 原始文件对象 { miniurl, _name }

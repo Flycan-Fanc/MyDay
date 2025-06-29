@@ -36,7 +36,7 @@
       <div class="person-area">
         <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
           <div class="img-container">
-            <img src="../assets/avatar/useravatar.png" alt="用户头像" id="avatar" />
+            <img :src="avatarUrl" alt="用户头像" id="avatar" />
           </div>
           <span id="username" ref="buttonRef" v-click-outside="onClickOutside">{{userName}}</span>
         </div>
@@ -90,6 +90,7 @@ import { ClickOutside as vClickOutside } from 'element-plus'
 import PlanList from "../components/PlanList.vue";
 
 import { locationUtils, weatherUtils } from "../utils/dataUtils";
+import { imageUtils } from "../utils/dataUtils";
 import PubSub from "pubsub-js";
 
 import { dataLocalStorage } from "../utils/dataLocalStorage";
@@ -155,7 +156,13 @@ export default {
         return name.slice(0, 10);
       }
       return name || '默认昵称';
-    }
+    },
+    avatarUrl: {
+      get(){
+        console.log("get avatar url:",this.user.avatarId)
+        return this.user.avatarId ? imageUtils.getImageUrl(this.user.avatarId) : ''
+      },
+    },
   },
   directives:{
     clickOutside: vClickOutside,
@@ -355,6 +362,7 @@ html,body {
 }
 .person-area .img-container #avatar {
   height: 100%;
+  width: 100%;
   object-fit: cover;
 }
 .person-area #username {

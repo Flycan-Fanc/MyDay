@@ -51,7 +51,7 @@ const userAbout = {
       let email = value.email
       let userName = value.userName
       // TODO:后续增加修改头像功能
-      let avatarId = ""
+      let avatarId = value.avatarId || ''
       let userProfile = value.userProfile
       // TODO：后续增加管理员功能以及vip功能
       let userRole = 0
@@ -75,7 +75,7 @@ const userAbout = {
       let email = value.email
       let userName = value.userName
       // TODO:后续增加修改头像功能
-      let avatarId = ""
+      let avatarId = value.avatarId || ''
       let userProfile = value.userProfile
       // TODO：后续增加管理员功能以及vip功能
       let userRole = 0

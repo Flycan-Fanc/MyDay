@@ -79,7 +79,7 @@ function createWindow() {
         "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com http://localhost:3000", // 允许连接到后端和 WebSocket
         `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ""}`,
         "style-src 'self' 'unsafe-inline'",                 // 允许内联样式
-        "img-src 'self' data:"                             // 允许图片和 data URL
+        "img-src 'self' http://localhost:3000"                             // 允许图片和 data URL
       ].filter(Boolean).join('; ');
 
       // 通过 webRequest 修改响应头

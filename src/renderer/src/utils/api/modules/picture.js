@@ -32,6 +32,8 @@ export const uploadPicture = (params, files) => {
     formData.append('files', file);
   });
 
+  console.log('upload api')
+
   return httpClient.post('/picture/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
