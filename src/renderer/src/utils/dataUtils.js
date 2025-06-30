@@ -2,6 +2,9 @@ import store from "../store/store";
 
 const weather = require('weather-js');
 
+/**
+ * 图片相关工具函数类
+ */
 const imageUtils = {
   getImageUrl(pictureId){
     let baseURL = import.meta.env.VITE_APP_API_URL;
@@ -68,6 +71,10 @@ const imageUtils = {
   }
 }
 
+
+/**
+ * 字符串相关工具函数类
+ */
 const stringUtils = {
   /**
    * 检查字符串是否为空
@@ -98,6 +105,11 @@ const stringUtils = {
   },
 }
 
+
+
+/**
+ * 位置相关工具函数类
+ */
 const locationUtils = {
   /**
    * 通过IP获取地理位置信息，使用 ip-api.com API
@@ -158,6 +170,11 @@ const locationUtils = {
   },
 }
 
+
+
+/**
+ * 天气相关工具函数类
+ */
 const weatherUtils = {
   // async getWeatherInfo() {
   //   let pos = await locationUtils.fetchLocationByIP()

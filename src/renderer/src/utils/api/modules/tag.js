@@ -20,7 +20,7 @@ export const getUserTagList = (userId) => {
 }
 
 // 修改标签
-export const updateTag = (tagId, tagData) => {
+export const updateTag = (tagData) => {
   return httpClient.post(`/tag/update`, { ...tagData })
 }
 
