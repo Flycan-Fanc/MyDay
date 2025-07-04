@@ -95,6 +95,7 @@ import PubSub from "pubsub-js";
 
 import { dataLocalStorage } from "../utils/dataLocalStorage";
 import store from "../store/store";
+import { dataRemoteStorage } from "../utils/dataRemoteStorage";
 
 const windowControls = window.api.windowControls;
 
@@ -182,9 +183,9 @@ export default {
           type: 'warning',
         }
       ).then(async () => {
+        // 数据本地存储
         try {
           await dataLocalStorage()
-          windowControls.closeWindow();
         } catch(err){
           ElMessage({
             message: "数据本地存储失败",
@@ -193,6 +194,18 @@ export default {
           })
           throw new Error(`数据本地存储失败:${err}`)
         }
+        // 数据远程同步
+        try {
+          await dataRemoteStorage()
+        }  catch(err){
+          ElMessage({
+            message: "数据远程同步失败",
+            type: "error",
+            duration: 2000
+          })
+          throw new Error(`数据远程同步失败:${err}`)
+        }
+        // windowControls.closeWindow();
       }).catch((err) => {
         console.log(err)
       })
