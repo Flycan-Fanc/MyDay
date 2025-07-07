@@ -218,6 +218,12 @@ const planAbout = {
       context.commit('editPlanTag',value)
     },
     /**
+     * 删除计划单个标签
+     */
+    deletePlanTag(context,value){
+      context.commit('deletePlanTag',value)
+    },
+    /**
      * 排序计划
      */
     sortPlan(){},
@@ -303,6 +309,14 @@ const planAbout = {
           // TODO:后续可以优化一下，只修改变化的标签部分
           item.planTags = value.selectedTag
         }
+      })
+    },
+    /**
+     * 删除计划单个标签
+     */
+    deletePlanTag(state,value){
+      state.planData.forEach(plan => {
+        plan.planTags = plan?.planTags.filter(tag => tag.tagId !== value) || []
       })
     },
     /**

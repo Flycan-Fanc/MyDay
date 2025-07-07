@@ -210,6 +210,12 @@ const insAbout = {
       newIns.insCover = value.insCover
       context.commit('editIns',newIns)
     },
+    /**
+     * 删除灵感单个标签
+     */
+    deleteInsTag(context, value){
+      context.commit('deleteInsTag',value)
+    }
   },
   mutations:{
     /**
@@ -267,6 +273,14 @@ const insAbout = {
         }
       })
     },
+    /**
+     * 删除灵感单个标签
+     */
+    deleteInsTag(state, value){
+      state.insData.forEach(ins => {
+        ins.insTags = ins?.insTags.filter(tag => tag.tagId !== value) || []
+      })
+    }
   },
   getters:{
     /**

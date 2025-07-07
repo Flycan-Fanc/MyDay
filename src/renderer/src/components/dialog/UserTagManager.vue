@@ -119,9 +119,32 @@ export default {
       this.dialogTagVisible = false
     },
     // tag 操作
-    deleteRow(index) {
-      // TODO：级联删除所有数据中的该标签
-      store.dispatch('tagAbout/deleteTag',index)
+    deleteRow(tagId) {
+      ElMessageBox.confirm(
+        '删除该标签会导致 计划和灵感 与该标签的关联关系被解除，确认删除？',
+        'Warning',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
+        .then(() => {
+          // TODO：级联删除所有数据中的该标签
+          store.dispatch('planAbout/deletePlanTag',tagId)
+          store.dispatch('insAbout/deleteInsTag',tagId)
+          store.dispatch('tagAbout/deleteTag',tagId)
+          ElMessage({
+            type: 'success',
+            message: '删除成功',
+          })
+        })
+        .catch(() => {
+          ElMessage({
+            type: 'info',
+            message: '删除取消',
+          })
+        })
     },
     editRow(scope){
       console.log('scope:'+scope)
