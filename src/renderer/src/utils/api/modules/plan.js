@@ -6,7 +6,7 @@ import httpClient from "../httpClient";
 
 // 创建计划
 export const createPlan = (planData) => {
-  return httpClient.post('/plan', { ...planData })
+  return httpClient.post('/plan/create', { ...planData })
 }
 
 // 获取单个计划

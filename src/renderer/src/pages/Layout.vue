@@ -205,7 +205,7 @@ export default {
           })
           throw new Error(`数据远程同步失败:${err}`)
         }
-        // windowControls.closeWindow();
+        windowControls.closeWindow();
       }).catch((err) => {
         console.log(err)
       })
@@ -252,6 +252,17 @@ export default {
           duration: 2000
         })
         // throw new Error(`数据本地存储失败:${err}`)
+      }
+      // 数据远程同步
+      try {
+        await dataRemoteStorage()
+      }  catch(err){
+        ElMessage({
+          message: "数据远程同步失败",
+          type: "error",
+          duration: 2000
+        })
+        //throw new Error(`数据远程同步失败:${err}`)
       }
       PubSub.publish("logout")
     }
