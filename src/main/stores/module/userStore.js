@@ -42,6 +42,14 @@ class UserStore {
     this.store.set('token',token )
   }
 
+  getUserSyncMeta(){
+    return this.store.get('syncMeta', undefined)
+  }
+
+  setUserSyncMeta(syncMeta){
+    this.store.set('syncMeta',syncMeta)
+  }
+
   getUserDataStore(){
     // 返回浅拷贝，保证操作同一个dataStore
     return {

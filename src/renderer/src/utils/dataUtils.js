@@ -1,6 +1,7 @@
 import store from "../store/store";
 
 const weather = require('weather-js');
+const createHash = require('crypto').createHash;
 
 /**
  * 图片相关工具函数类
@@ -214,4 +215,12 @@ const weatherUtils = {
   }
 }
 
-export { imageUtils,stringUtils,locationUtils,weatherUtils };
+const hashUtils = {
+  generateHash(data) {
+    return createHash('sha256')
+      .update(JSON.stringify(data))
+      .digest('hex');
+  }
+}
+
+export { imageUtils,stringUtils,locationUtils,weatherUtils, hashUtils };

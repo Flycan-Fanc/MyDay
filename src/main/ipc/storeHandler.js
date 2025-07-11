@@ -68,6 +68,18 @@ export function storeHandler() {
     }
     userStore.setUserToken(token)
   })
+  ipcMain.handle('user-store:get-userSyncMeta', (event,args)=>{
+    if(!userStore){
+      throw new Error('userStore is not exist')
+    }
+    return userStore.getUserSyncMeta()
+  })
+  ipcMain.handle('user-store:set-userSyncMeta', (event, syncMeta) => {
+    if (!userStore) {
+      throw new Error('userStore is not exist')
+    }
+    userStore.setUserSyncMeta(syncMeta)
+  })
   ipcMain.handle('user-store:get-userDataStore',(event,args)=>{
     if(!userStore){
       throw new Error('userStore is not exist')

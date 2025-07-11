@@ -3,6 +3,7 @@
  */
 
 import store from '../store/store'
+import {hashUtils} from './dataUtils'
 
 export async function dataLocalStorage() {
   try {
@@ -26,6 +27,12 @@ export async function dataLocalStorage() {
     // 4. 从insAbout中获取insList，存储在insStore
     let ins = JSON.parse(JSON.stringify(store.state.insAbout.insData))
     await window.api.electronStore.insStore.setIns(ins)
+
+    // TODO：更新本地用户同步元数据
+    let oldSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta'))
+    let newDataHash = hashUtils.generateHash({userId: user.userId, dataVersion: oldSyncMeta.dataVersion + 1})
+    let newSyncMeta = {userId: user.userId, dataVersion: oldSyncMeta.dataVersion + 1, dataHash: newDataHash}
+    await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
   } catch(err) {
     throw new Error(`数据本地存储失败:${err}`)
   }

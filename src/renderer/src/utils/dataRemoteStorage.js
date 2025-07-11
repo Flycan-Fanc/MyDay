@@ -3,7 +3,8 @@
  */
 
 import store from '../store/store'
-import { userAPI, tagAPI, planAPI, diaryAPI, insAPI } from '../utils/api'
+import { userAPI, tagAPI, planAPI, diaryAPI, insAPI, syncMetaAPI } from '../utils/api'
+import * as syncMeta from "./api/modules/syncMeta";
 
 // TODO: 后续前后端同步时用于有针对性地向后端同步数据
 export async function dataRemoteStorage() {
@@ -37,6 +38,10 @@ export async function dataRemoteStorage() {
     let insPromises = ins.map(ins => insAPI.createIns(ins))
     await Promise.all(insPromises);
     console.log('灵感数据同步完毕')
+
+    // TODO：通知服务器更新用户同步元数据
+    await syncMetaAPI.updateSyncMeta(user.userId)
+    console.log('已通知服务器更新用户同步元')
 
     ElMessage({
       type: 'success',

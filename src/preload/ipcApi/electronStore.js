@@ -54,6 +54,10 @@ export const electronStore = {
       ipcRenderer.invoke('user-store:get-userToken'),
     setUserToken: (token) =>
       ipcRenderer.invoke('user-store:set-userToken', token),
+    getUserSyncMeta: () =>
+      ipcRenderer.invoke('user-store:get-userSyncMeta'),
+    setUserSyncMeta: (syncMeta) =>
+      ipcRenderer.invoke('user-store:set-userSyncMeta', syncMeta),
     getUserDataStore: () =>
       ipcRenderer.invoke('user-store:get-userDataStore')
   },

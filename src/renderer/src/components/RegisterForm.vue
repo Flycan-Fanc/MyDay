@@ -47,7 +47,7 @@
 
 <script>
 
-import {authAPI} from '../utils/api'
+import {authAPI, syncMetaAPI} from '../utils/api'
 
 export default {
   name: 'RegisterForm',
@@ -62,7 +62,7 @@ export default {
     }
   },
   methods: {
-    register(){
+    async register(){
       if(this.userAccount === '' || this.password === ''){
         ElMessage({
           message: '用户名或密码不能为空',
@@ -87,24 +87,29 @@ export default {
       } else{
         this.loading = true
         // TODO：注册逻辑
-        authAPI.register(this.userAccount, this.email, this.password).then((res)=>{
-          console.log(res)
-          this.loading = false
-          // TODO:注册成功，跳转？
-          ElMessage({
-            message: '注册成功，请登录',
-            type: 'success',
-            number:60,
-            duration: 2000
-          })
-        }).catch((err)=>{
+        try{
+          let res = await authAPI.register(this.userAccount, this.email, this.password)
+          if(res) {
+            console.log('注册',res)
+            let userSyncMeta = await syncMetaAPI.addSyncMeta(res.user.userId)
+            console.log('userSyncMeta',JSON.stringify(userSyncMeta))
+            this.loading = false
+            // TODO:注册成功，跳转？
+            ElMessage({
+              message: '注册成功，请登录',
+              type: 'success',
+              number:60,
+              duration: 2000
+            })
+          }
+        } catch(err){
           console.log(err)
           this.loading = false
           ElMessage({
-            message:err.message,
+            message:`注册失败:${err.message}`,
             type:'error',
           })
-        })
+        }
       }
     },
   }

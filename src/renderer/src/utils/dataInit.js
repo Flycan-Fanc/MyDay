@@ -3,7 +3,7 @@
  */
 
 import store from '../store/store'
-import { tagAPI, planAPI, diaryAPI, insAPI } from '../utils/api'
+import { tagAPI, planAPI, diaryAPI, insAPI, syncMetaAPI } from '../utils/api'
 import { getUserPlanList } from "./api/modules/plan";
 import { getUserDiaryList } from "./api/modules/diary";
 import { getUserInsList } from "./api/modules/inspiration";
@@ -20,6 +20,14 @@ export async function dataInit(userData) {
     // 1.获取用户信息,存储在userAbout
     let userId = userData.userId
     await store.dispatch('userAbout/addUser',userData)
+
+    // 获取用户同步元数据,存储在localStorage
+    let userSyncMeta = await window.api.electronStore.userStore.getUserSyncMeta()
+    if(!userSyncMeta){
+      userSyncMeta = await syncMetaAPI.getSyncMeta(userData.userId)
+    }
+    localStorage.setItem('userSyncMeta',JSON.stringify(userSyncMeta))
+    console.log('同步元:',JSON.stringify(userSyncMeta))
 
     // 2.获取tag，存储在tagAbout
     let userTag = await window.api.electronStore.tagStore.getTag()

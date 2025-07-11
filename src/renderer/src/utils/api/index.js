@@ -8,3 +8,4 @@ export * as planAPI from './modules/plan';
 export * as insAPI from './modules/inspiration';
 export * as diaryAPI from './modules/diary';
 export * as pictureAPI from './modules/picture';
+export * as syncMetaAPI from './modules/syncMeta'
