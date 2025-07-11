@@ -28,10 +28,11 @@ export async function dataLocalStorage() {
     let ins = JSON.parse(JSON.stringify(store.state.insAbout.insData))
     await window.api.electronStore.insStore.setIns(ins)
 
-    // TODO：更新本地用户同步元数据
+    // 更新本地用户同步元数据
     let oldSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta'))
     let newDataHash = hashUtils.generateHash({userId: user.userId, dataVersion: oldSyncMeta.dataVersion + 1})
     let newSyncMeta = {userId: user.userId, dataVersion: oldSyncMeta.dataVersion + 1, dataHash: newDataHash}
+    localStorage.setItem('userSyncMeta',JSON.stringify(newSyncMeta))
     await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
   } catch(err) {
     throw new Error(`数据本地存储失败:${err}`)
