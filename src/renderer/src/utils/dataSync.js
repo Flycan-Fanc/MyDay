@@ -1,5 +1,6 @@
 import * as syncMetaAPI from "./api/modules/syncMeta";
 import { dataRemoteStorage } from "./dataRemoteStorage";
+import dataRemoteFetch from "./dataRemoteFetch";
 
 
 export default async function dataSync(){
@@ -10,7 +11,7 @@ export default async function dataSync(){
   // 2. 比较本地和远程的dataVersion
   if(localSyncMeta.dataVersion < remoteSyncMeta.dataVersion){
     // 本地dataVersion小于远程dataVersion，需要同步到本地
-
+    await dataRemoteFetch(localSyncMeta.userId)
   } else if(localSyncMeta.dataVersion > remoteSyncMeta.dataVersion){
     // 本地dataVersion大于远程dataVersion，需要同步到远程
     await dataRemoteStorage();
