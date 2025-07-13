@@ -96,6 +96,7 @@ import PubSub from "pubsub-js";
 import { dataLocalStorage } from "../utils/dataLocalStorage";
 import store from "../store/store";
 import { dataRemoteStorage } from "../utils/dataRemoteStorage";
+import { dataSync } from "../utils/dataSync";
 
 const windowControls = window.api.windowControls;
 
@@ -196,7 +197,7 @@ export default {
         }
         // 数据远程同步
         try {
-          await dataRemoteStorage()
+          await dataSync()
         }  catch(err){
           ElMessage({
             message: "数据远程同步失败",
@@ -255,7 +256,7 @@ export default {
       }
       // 数据远程同步
       try {
-        await dataRemoteStorage()
+        await dataSync()
       }  catch(err){
         ElMessage({
           message: "数据远程同步失败",

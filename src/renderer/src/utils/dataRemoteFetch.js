@@ -5,7 +5,7 @@ import { insAPI, diaryAPI, planAPI, tagAPI } from "./api/index";
 import { hashUtils } from "./dataUtils";
 
 
-export default async function dataRemoteFetch(userId) {
+export async function dataRemoteFetch(userId) {
   try {
     // 1.获取tag，存储在tagAbout
     let remoteUserTag = await tagAPI.getUserTagList(userId)
@@ -64,7 +64,15 @@ export default async function dataRemoteFetch(userId) {
     let newSyncMeta = {userId, dataVersion: oldSyncMeta.dataVersion + 1, dataHash: newDataHash}
     localStorage.setItem('userSyncMeta',JSON.stringify(newSyncMeta))
     await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
+    ElMessage({
+      type: 'success',
+      message: '数据获取成功'
+    })
   } catch(err) {
+    ElMessage({
+      type: 'error',
+      message: '数据获取失败'
+    })
     throw new Error('数据拉取失败')
   }
 }
