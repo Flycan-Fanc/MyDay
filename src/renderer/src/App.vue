@@ -10,6 +10,7 @@ import PubSub from "pubsub-js";
 import { authAPI } from './utils/api'
 import { dataInit } from "./utils/dataInit";
 import store from "./store/store";
+import { dataSync } from "./utils/dataSync";
 
 
 
@@ -68,6 +69,7 @@ onBeforeMount(async ()=>{
       let res = await authAPI.verifyToken(token)
       console.log('res:'+JSON.stringify(res))
       await dataInit(res.user)
+      await dataSync()
       await window.api.electronStore.userStore.setUserToken(token) // 将token存入userStore
       await window.api.electronStore.appStore.addUserIndex(res.user) // 将登录用户存入appStore的用户索引
       isLogin.value = true

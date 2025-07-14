@@ -290,7 +290,7 @@ export default {
     beforeAvatarUpload(file) {
       console.log('before upload')
       const isImage = ["image/jpeg", "image/png"].includes(file.type);
-      const isLt2MB = file.size / 1024 / 1024 < 5;
+      const isLt5MB = file.size / 1024 / 1024 < 5;
 
       if (!isImage) {
         ElMessage({
@@ -298,14 +298,14 @@ export default {
           message: '只能上传 JPG/PNG 图片！'
         })
       }
-      if (!isLt2MB){
+      if (!isLt5MB){
        ElMessage({
           type: 'error',
           message: '图片大小不能超过 5MB！'
         })
       }
 
-      return isImage && isLt2MB;
+      return isImage && isLt5MB;
     },
     // modifyInfo
     changeUserName() {

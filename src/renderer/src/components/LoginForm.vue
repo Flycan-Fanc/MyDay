@@ -37,6 +37,7 @@ import store from '../store/store'
 import { dataInit } from '../utils/dataInit'
 
 import { authAPI } from '../utils/api'
+import { dataSync } from "../utils/dataSync";
 
 export default {
   name: 'LoginForm',
@@ -88,6 +89,7 @@ export default {
               duration: 2000
             })
             await dataInit(res.user)  // 初始化数据
+            await dataSync() // 双端数据同步
             await window.api.electronStore.userStore.setUserToken(res.token) // 将token存入userStore
             await window.api.electronStore.appStore.addUserIndex(res.user) // 将登录用户存入appStore的用户索引
             PubSub.publish('login')  // 跳转页面
