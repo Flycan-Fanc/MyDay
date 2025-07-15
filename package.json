@@ -27,6 +27,7 @@
     "electron-store": "^5.2.0",
     "electron-updater": "^6.1.7",
     "element-plus": "^2.9.5",
+    "express": "^5.1.0",
     "interactjs": "^1.10.27",
     "markdown-it": "^14.1.0",
     "markdown-it-image-size": "^14.6.2",
