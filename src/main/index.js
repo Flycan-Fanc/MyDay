@@ -4,11 +4,15 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import storeManager from './stores'
 import { registerIpcHandler } from "./ipc";
+import { imageServer } from './services/image-server';
+
+// 全局window对象
+let mainWindow = null;
 
 // 窗口管理
 function createWindow() {
   // 使用BrowserWindow创建窗口.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     // width: 1000,
     // height: 670, //登录页的值
     width:1300,
@@ -121,6 +125,9 @@ app.whenReady().then(() => {
 
   // 注入IPC通信函数
   registerIpcHandler();
+
+  // 启动本地服务器
+  // imageServer(window);
 
   // // 关闭窗口API
   // ipcMain.on('close-window', () => {

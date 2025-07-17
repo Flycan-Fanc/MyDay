@@ -3,11 +3,13 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 import { electronStore } from "./ipcApi/electronStore";
 import { windowControls } from "./ipcApi/windowControls";
+import { rendererAPI } from "./ipcApi/rendererAPI";
 
 // Custom APIs for renderer
 const api = {
   windowControls,
   electronStore,
+  rendererAPI,
   // /**
   //  * 窗口行为控制
   //  */
