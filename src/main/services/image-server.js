@@ -1,5 +1,5 @@
 // main-process/image-services.js
-import { ipcMain } from "electron";
+import { ipcMain, app as electronApp} from "electron";
 import { deletePicture, getPicture, getUserPictureList } from "../../renderer/src/utils/api/modules/picture";
 
 const express = require('express');
@@ -8,23 +8,42 @@ const fs = require('fs');
 
 const app = express();
 const PORT = 3001;
-const IMAGE_DIR = path.join(app.getPath('userData'), 'images');
+const IMAGE_DIR = path.join(electronApp.getPath('userData'), 'images');
 
 export function imageServer(win) {
   // 启动本地服务
-  app.get('/images/:docId/:filename', (req, res) => {
-    const filePath = path.join(IMAGE_DIR, req.params.docId, req.params.filename);
+  // 获取图片
+  app.get('/images/:userId/:docId/:pictureId', (req, res) => {
+    const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
     if (fs.existsSync(filePath)) {
       res.sendFile(filePath); // 本地存在直接返回
     } else {
-      downloadFromServer(req.params.docId, req.params.filename)
+      downloadFromServer(req.params.userId, req.params.docId, req.params.pictureId)
         .then(savedPath => res.sendFile(savedPath))
         .catch(() => res.status(404).end());
     }
   });
+  // 将图片保存至本地
+  app.post('/images/saveLocal/:userId/:docId/:pictureId', (req, res) => {
+    // const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
+    saveToLocal(req.params.userId, req.params.docId, req.params.pictureId, req.file)
+      .then(savedPath => res.json({
+        success: true,
+        path: savedPath
+      }).catch(() => res.status(500).end()));
+  })
+  // 将图片上传至服务器
+  app.post('/images/saveLocal/:userId/:docId/:pictureId', (req, res) => {
+    const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
+    uploadToServer(req.params.userId, req.params.docId, req.params.pictureId, req.file)
+      .then(() => res.json({
+        success: true,
+      }).catch(() => res.status(500).end()));
+  })
   // 在Electron主进程启动
   app.listen(PORT, () => console.log(`Image server running on ${PORT}`));
 
+  // ※※※※ 注意：以下内部函数参数传入对象
   // 主进程主动调用渲染进程 —— 上传图片
   function uploadPicture(params) {
     win.webContents.send('main-send-upload-picture', params);
@@ -69,19 +88,63 @@ export function imageServer(win) {
       });
     });
   }
-}
+  // 从服务器上获取图片，使用stream流存放到本地
+  function downloadFromServer(userId, docId, pictureId) {
+    return new Promise((resolve, reject) => {
+      const saveDir = path.join(IMAGE_DIR, userId, docId);
+      const savePath = path.join(saveDir, pictureId);
 
-// 从服务器上获取图片
-function downloadFromServer(docId, filename) {
-  return new Promise((resolve, reject) => {
-    const saveDir = path.join(IMAGE_DIR, docId);
-    const savePath = path.join(saveDir, filename);
+      // 调用API获取图片Blob数据
+      getPicture({ pictureId })
+        .then(async (response) => {
+          fs.mkdirSync(saveDir, { recursive: true })
 
-    // 伪代码：实际替换为您的下载逻辑
-    api.downloadImage(docId, filename).then(stream => {
-      fs.mkdirSync(saveDir, { recursive: true });
-      stream.pipe(fs.createWriteStream(savePath))
-        .on('finish', () => resolve(savePath));
-    }).catch(reject);
-  });
+          // 将Blob转换为Buffer并写入文件
+          const arrayBuffer = await response.data.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer)
+          fs.writeFile(savePath, buffer, (err) => {
+            if (err) reject(err)
+            else resolve(savePath)
+          })
+        })
+        .catch(reject)
+    });
+  }
+  // 将图片上传至服务器
+  function uploadToServer(userId, docId, pictureId, params) {
+    return new Promise(async (resolve, reject) => {
+      const fileDir = path.join(IMAGE_DIR, userId, docId);
+      const filePath = path.join(fileDir, pictureId);
+
+      if (fs.existsSync(filePath)) {
+        const file = new FormData();
+        file.append('file', fs.createReadStream(filePath)); // 使用文件流
+        file.append('filename', path.basename(filePath));
+        uploadPicture({ params, file })
+          .then(resolve)
+          .catch(reject)
+      }
+    })
+  }
+  // 将图片保存至本地
+  function saveToLocal(userId, docId, pictureId, file) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const saveDir = path.join(IMAGE_DIR, userId, docId);
+        const savePath = path.join(saveDir, pictureId);
+
+        fs.mkdirSync(saveDir, { recursive: true });
+
+        // 将Blob转换为Buffer并写入文件
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer)
+        fs.writeFile(savePath, buffer, (err) => {
+          if (err) reject(err)
+          else resolve(savePath)
+        })
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 }
