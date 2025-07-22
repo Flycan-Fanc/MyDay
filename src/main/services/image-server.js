@@ -24,7 +24,7 @@ export function imageServer(win) {
     }
   });
   // 将图片保存至本地
-  app.post('/images/saveLocal/:userId/:docId/:pictureId', (req, res) => {
+  app.post('/images/save/:userId/:docId/:pictureId', (req, res) => {
     // const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
     saveToLocal(req.params.userId, req.params.docId, req.params.pictureId, req.file)
       .then(savedPath => res.json({
@@ -33,9 +33,15 @@ export function imageServer(win) {
       }).catch(() => res.status(500).end()));
   })
   // 将图片上传至服务器
-  app.post('/images/saveLocal/:userId/:docId/:pictureId', (req, res) => {
+  app.post('/images/upload/:userId/:docId/:pictureId', (req, res) => {
     const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
     uploadToServer(req.params.userId, req.params.docId, req.params.pictureId, req.file)
+      .then(() => res.json({
+        success: true,
+      }).catch(() => res.status(500).end()));
+  })
+  app.delete('/images/:userId/:docId/:pictureId', (req, res) => {
+    deleteLocal(req.params.userId, req.params.docId, req.params.pictureId)
       .then(() => res.json({
         success: true,
       }).catch(() => res.status(500).end()));
@@ -144,6 +150,25 @@ export function imageServer(win) {
         })
       } catch (err) {
         reject(err);
+      }
+    });
+  }
+  // 删除本地的图片
+  function deleteLocal(userId, docId, pictureId) {
+    return new Promise((resolve, reject) => {
+      const filePath = path.join(IMAGE_DIR, userId, docId, pictureId);
+      try {
+        fs.unlinkSync(filePath);
+        console.log(`文件已删除: ${filePath}`);
+        resolve({ success: true, existed: true }); // 明确返回状态
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          console.log(`文件不存在（无需删除）: ${filePath}`);
+          resolve({ success: true, existed: false }); // 文件不存在视为成功
+        } else {
+          console.error(`删除文件失败: ${filePath}`, err);
+          reject(err); // 其他错误才 reject
+        }
       }
     });
   }
