@@ -15,10 +15,10 @@
         <div class="cover-container">
           <el-upload
             class="avatar-uploader"
-            action="http://localhost:8080/image"
+            :action="`http://localhost:3001/images/save/${userId}/${insId}/${coverId}`"
             :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
+            :on-success="handleCoverSuccess"
+            :before-upload="beforeCoverUpload"
           >
             <img v-if="imageUrl" :src="imageUrl" class="avatar" alt=""/>
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
@@ -47,6 +47,7 @@ import router from "../router";
 import store from "../store/store";
 import { nanoid } from "nanoid";
 import { dayjs } from "element-plus";
+import { imageRequest } from "../utils/fileRequest";
 
 export default {
   name: 'InsEditor',
@@ -54,6 +55,7 @@ export default {
   mounted(){
     this.imageUrl = this.ins.insCover || ''
     this.title = this.ins.insTitle || ''
+    this.userId = store.getters['userAbout/getUserId']
   },
   computed:{
     insId(){
@@ -67,7 +69,9 @@ export default {
     return{
       Check,
       config:editorConfig.insConfig.editor,
-      imageUrl: '', //用户头像url
+      userId: '',
+      imageUrl: '', // 灵感封面url
+      coverId: '', // 灵感封面id
       curTag:'',
       title: '',
       //用户拥有的标签
@@ -79,11 +83,17 @@ export default {
     back(){
       router.back()
     },
-    handleAvatarSuccess(res, file){
+    handleCoverSuccess(res, file){
       this.imageUrl = res[0].url
       console.log(this.imageUrl)
+      store.dispatch("pictureAbout/addPicture", {
+        pictureId: this.coverId,
+        userId: this.userId,
+        insId: this.insId,
+        image: file,
+      });
     },
-    beforeAvatarUpload(file){
+    beforeCoverUpload(file){
       const isJPG = file.type === 'image/jpeg';
       const isLt3M = file.size / 1024 / 1024 < 3;
 
@@ -103,6 +113,8 @@ export default {
           duration:2000,
         })
       }
+
+      this.coverId = nanoid();
       return isJPG && isLt3M;
     },
     handleClose:function(tag){
@@ -142,18 +154,25 @@ export default {
         //this.curTag = ''
       }
     },
-    handleAddCover:function(){
-      //TODO: 添加图片
-    },
     handleSave:function(){
-      //TODO: 保存灵感
+      // 先保存灵感doc中的图片
+      let image = this.$refs.editor.getImage().imgFile
+      let imgId = this.$refs.editor.getImage().imgId
+      image.forEach((file, pos) => {
+        store.dispatch("pictureAbout/addPicture", {
+          pictureId: imgId[pos],
+          userId: this.userId,
+          insId: this.insId,
+          image: file,
+        });
+      })
       this.tag = this.$refs.tagMini.getSelectedTag()
       // 获取tag
       console.log('tag:'+JSON.stringify(this.tag))
       // 将信息汇总保存
       let ins = {
         insId:this.insId || nanoid(),
-        userId:1,  //TODO：后续引入真实用户id
+        userId:this.userId,
         insTitle: this.title,
         insContent:this.$refs.editor.getContent(),
         insDate: dayjs(this.ins?.insDate ?? undefined).format('YYYY-MM-DD'),

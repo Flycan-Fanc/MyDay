@@ -47,6 +47,7 @@ export default {
     console.log('DD'+JSON.stringify(this.diary))
     this.diaryTitle = this.diary?.diaryTitle || ''
     this.diaryDate = this.diary?.diaryDate || ''
+    this.userId = store.getters['userAbout/getUserId']
   },
   computed:{
     diaryId() {
@@ -59,6 +60,7 @@ export default {
   data(){
     return {
       config:editorConfig.insConfig.editor,
+      userId:'',
       diaryTitle:'',
       diaryDate:'',
       // 日期选择器的配置数据
@@ -95,26 +97,22 @@ export default {
       return time.getTime() > Date.now();
     },
     handleSave(){
-      let image = this.$refs.editor.getImage()
+      let image = this.$refs.editor.getImage().imgFile
+      let imgId = this.$refs.editor.getImage().imgId
       let content = this.$refs.editor.getContent()
       // 1.图片本地存储
-      // image.forEach((file, pos) => {
-      //   // TODO:后续改为真实用户id
-      //   imageStorage.saveImage(`user1_diary${this.diaryId}_image.imgJSON`, JSON.stringify(file))
-      // })
-      //TODO:保存的逻辑
       // 2. 保存到store，先保存图片
       image.forEach((file, pos) => {
         store.dispatch("pictureAbout/addPicture", {
-          //TODO:后续使用vuex的userId
-          userId: 1,
+          pictureId: imgId[pos],
+          userId: this.userId,
           diaryId: this.diaryId,
           image: file,
         });
       })
       // 再保存diary date、title、markdown
       store.dispatch("diaryAbout/addDiary", {
-        userId: 1,
+        userId: this.userId,
         diaryId: this.diaryId,
         diaryTitle: this.diaryTitle,
         diaryContent: content,

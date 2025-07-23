@@ -58,7 +58,7 @@ const pictureAbout = {
      */
     addPicture(context,value){
       let picBase64 = pictureApi.toObj(value.image)
-      let pictureId = nanoid()
+      let pictureId = value.pictureId || nanoid()
       let userId = value.userId
       let diaryId = value.diaryId
       let insId = value.insId

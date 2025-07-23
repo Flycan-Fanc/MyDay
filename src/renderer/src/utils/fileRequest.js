@@ -2,8 +2,17 @@ import axios from "axios";
 
 
 const imageRequest = {
+  /**
+   * 单一图片获取
+   * @param url
+   * @returns {Promise<unknown>}
+   */
   get: (url) => {
-
+    return new Promise((resolve, reject) => {
+      axios.get(url)
+        .then(res => resolve(res.data))
+        .catch(error => reject(`获取失败:${error}`));
+    });
   },
   /**
    * 单一图片上传
@@ -33,7 +42,20 @@ const imageRequest = {
         reject("上传失败:"+error);
       });
     })
-  }
+  },
+  /**
+   * 单一图片删除
+   * @param url
+   * @returns {Promise<unknown>}
+   */
+  delete: (url) => {
+    return new Promise((resolve, reject) => {
+      axios.delete(url)
+        .then(res => resolve(res.data))
+        .catch(error => reject(`删除失败:${error}`));
+    });
+  },
+
 }
 
 export { imageRequest };

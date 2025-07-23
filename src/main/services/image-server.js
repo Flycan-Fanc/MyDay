@@ -23,6 +23,21 @@ export function imageServer(win) {
         .catch(() => res.status(404).end());
     }
   });
+  // 将图片暂存在temp目录
+  app.post('/images/temp/:userId/:pictureId', (req, res) => {
+    saveTemp(req.params.userId, req.params.pictureId, req.file)
+      .then(savedPath => res.json({
+        success: true,
+        path: savedPath
+      }).catch(() => res.status(500).end()));
+  });
+  // 删除temp目录的图片
+  app.delete('/images/temp/:userId/:pictureId', (req, res) => {
+    deleteTemp(req.params.userId, req.params.pictureId)
+      .then(() => res.json({
+        success: true,
+      }).catch(() => res.status(500).end()));
+  })
   // 将图片保存至本地
   app.post('/images/save/:userId/:docId/:pictureId', (req, res) => {
     // const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
@@ -40,6 +55,7 @@ export function imageServer(win) {
         success: true,
       }).catch(() => res.status(500).end()));
   })
+  // 删除本地图片
   app.delete('/images/:userId/:docId/:pictureId', (req, res) => {
     deleteLocal(req.params.userId, req.params.docId, req.params.pictureId)
       .then(() => res.json({
@@ -171,5 +187,46 @@ export function imageServer(win) {
         }
       }
     });
+  }
+  // 将图片保存至临时目录
+  function saveTemp(userId, pictureId, file) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const saveDir = path.join(IMAGE_DIR, userId, 'temp');
+        const savePath = path.join(saveDir, pictureId);
+
+        fs.mkdirSync(saveDir, { recursive: true });
+
+        // 将Blob转换为Buffer并写入文件
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer)
+        fs.writeFile(savePath, buffer, (err) => {
+          if (err) reject(err)
+          else resolve(savePath)
+        })
+      } catch (err) {
+        reject(err);
+      }
+    })
+  }
+  // 将图片从临时目录删除
+  function deleteTemp(userId, pictureId) {
+    return new Promise((resolve, reject) => {
+      const filePath = path.join(IMAGE_DIR, userId, 'temp', pictureId);
+      try {
+        fs.unlinkSync(filePath);
+        console.log(`文件已删除: ${filePath}`);
+        resolve({ success: true, existed: true }); // 明确返回状态
+
+      } catch (err){
+        if (err.code === 'ENOENT') {
+          console.log(`文件不存在（无需删除）: ${filePath}`);
+          resolve({ success: true, existed: false }); // 文件不存在视为成功
+        } else {
+          console.error(`删除文件失败: ${filePath}`, err);
+          reject(err); // 其他错误才 reject
+        }
+      }
+    })
   }
 }

@@ -19,6 +19,7 @@ import { mavonEditor }  from 'mavon-editor'
 import store from "../store/store";
 import {imageRequest} from "../utils/fileRequest";
 import {imageUtils} from "../utils/dataUtils";
+import { nanoid } from "nanoid";
 
 
 export default {
@@ -43,6 +44,7 @@ export default {
   },
   mounted(){
     // 初始化数据：根据应用不同，获取不同数据
+    this.userId = store.getters['userAbout/getUserId']
     if(this.from === '日记') {
       // 获取图片
       let img = store.getters['pictureAbout/fetchDiaryImage'](this.diary.diaryId)
@@ -52,8 +54,9 @@ export default {
       } else {
         this.img_file = img
       }
-      // 获取内容
+      // 获取内容和文档id
       this.content = this.diary.diaryContent || '默认内容'
+      this.docId = this.diary.diaryId
     } else if(this.from === '灵感') {
       let img = store.getters['pictureAbout/fetchInsImage'](this.ins.insId)
 
@@ -64,6 +67,7 @@ export default {
       }
       // 获取内容
       this.content = this.ins.insContent || '默认内容'
+      this.docId = this.ins.insId
     }
   },
   data() {
@@ -71,6 +75,9 @@ export default {
       //md,
       markdownIt:mavonEditor.getMarkdownIt(),
       content: '',
+      docId: '',
+      userId: '',
+      pictureMap: new Map(),
       img_file: [{miniurl:'no img at pos 0',_name:'null'}]
     }
   },
@@ -113,27 +120,50 @@ export default {
 
       let newFile = imageUtils.base64ToFile(newFileObj.miniurl, newFileObj._name)
 
-      // 图片缓存
-      this.img_file[pos] = newFile
-      // 图片上传至服务器
-      imageRequest.post('http://localhost:8080/image', newFile)
+      let pictureId = nanoid();
+      // 图片保存到本地
+      imageRequest.post(`http://localhost:3001/images/save/${this.userId}/${this.docId}/${pictureId}`, newFile)
         .then(res=>{
-          console.log('上传成功')  // TODO:后续改为ElMessage？
-          this.$refs.md.$img2Url(pos, res.url);
+          ElMessage({
+            type:'success',
+            message:'图片添加成功'
+          })
+          this.$refs.md.$img2Url(pos, res.path);
+          // 图片缓存
+          this.img_file[pos] = newFile
+          this.pictureMap.set(pos, pictureId);
+
         }).catch(err=>{
           console.log(err)
         })
     },
     // 图片删除
     $imgDel(pos) {
+      // 删除图片本地缓存
+      let pictureId = this.pictureMap.get(pos)
+      imageRequest.delete(`http://localhost:3001/images/delete/${this.userId}/${this.docId}/${pictureId}`)
+        .then(res=>{
+          ElMessage({
+            type:'success',
+            message:'图片删除成功'
+          })
+          // 删除图片数组中对应元素
+        }).catch(err=>{
+          console.log(err)
+        })
+      // 从缓存数组中删除
       delete this.img_file[pos]
+      delete this.pictureMap[pos]
     },
     // 父组件获取数据的3个api
     getData(){
       return { markdown:this.content,image:this.img_file}
     },
     getImage(){
-      return this.img_file.slice(1)
+      return {
+        imgFile:this.img_file.slice(1),
+        imgId:[...this.pictureMap.values()],
+      }
     },
     getContent(){
       return this.content
