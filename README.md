@@ -3,6 +3,7 @@
 一个基于 **Electron + Vue 3** 的桌面端个人效率应用，聚合 **计划管理、日记记录、灵感速记、标签整理** 等功能，面向个人日常信息管理场景。
 
 > 前端仓库：<https://github.com/Flycan-Fanc/MyDay>
+
 > 后端仓库：<https://github.com/Flycan-Fanc/MyDay_backend>
 
 ---
