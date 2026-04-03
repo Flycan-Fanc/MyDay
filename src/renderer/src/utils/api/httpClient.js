@@ -35,7 +35,7 @@ httpClient.interceptors.request.use(config => {
 httpClient.interceptors.response.use(
   response => response.data, // 直接返回data字段
   error => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       // TODO：Token过期/失效，跳转到登陆页面
       // window.location.href = '/login'; // Token过期跳转登录
       PubSub.publish('logout')

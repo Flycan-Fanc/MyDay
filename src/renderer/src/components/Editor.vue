@@ -15,175 +15,271 @@
 </template>
 
 <script>
-import { mavonEditor }  from 'mavon-editor'
-import store from "../store/store";
-import {imageRequest} from "../utils/fileRequest";
-import {imageUtils} from "../utils/dataUtils";
-import { nanoid } from "nanoid";
+import { mavonEditor } from 'mavon-editor'
+import store from '../store/store'
+import { imageUtils } from '../utils/dataUtils'
+import { pictureAPI } from '../utils/api'
 
+const DIARY_SOURCES = new Set(['日记', '鏃ヨ'])
+const INSPIRATION_SOURCES = new Set(['灵感', '鐏垫劅'])
 
 export default {
   name: 'Editor',
   props: {
     config: {
       type: Object,
-      required: true
+      required: true,
     },
-    from:{
-      type:String,
-      required: true
+    from: {
+      type: String,
+      required: true,
     },
-    diary:{
-      type:Object,
-      default: {}
+    diary: {
+      type: Object,
+      default: () => ({}),
     },
-    ins:{
-      type:Object,
-      default: {}
-    }
-  },
-  mounted(){
-    // 初始化数据：根据应用不同，获取不同数据
-    this.userId = store.getters['userAbout/getUserId']
-    if(this.from === '日记') {
-      // 获取图片
-      let img = store.getters['pictureAbout/fetchDiaryImage'](this.diary.diaryId)
-
-      if (img === null) {
-        this.img_file = [{ miniurl: 'no img at pos 0', _name: 'null' }]
-      } else {
-        this.img_file = img
-      }
-      // 获取内容和文档id
-      this.content = this.diary.diaryContent || '默认内容'
-      this.docId = this.diary.diaryId
-    } else if(this.from === '灵感') {
-      let img = store.getters['pictureAbout/fetchInsImage'](this.ins.insId)
-
-      if (img === null) {
-        this.img_file = [{ miniurl: 'no img at pos 0', _name: 'null' }]
-      } else {
-        this.img_file = img
-      }
-      // 获取内容
-      this.content = this.ins.insContent || '默认内容'
-      this.docId = this.ins.insId
-    }
+    ins: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   data() {
     return {
-      //md,
-      markdownIt:mavonEditor.getMarkdownIt(),
+      markdownIt: mavonEditor.getMarkdownIt(),
       content: '',
       docId: '',
       userId: '',
       pictureMap: new Map(),
-      img_file: [{miniurl:'no img at pos 0',_name:'null'}]
+      imgFile: [{ miniurl: 'no img at pos 0', _name: 'null' }],
     }
   },
+  mounted() {
+    this.userId = store.getters['userAbout/getUserId']
+    this.initEditorState()
+  },
   watch: {
-    // 监听 diary 变化并更新 content
     diary: {
-      immediate: true, // 立即触发一次
-      handler(newVal) {
-        if (Object.keys(newVal).length > 0) {
-          this.content = JSON.stringify(newVal.diaryContent);
-        } else {
-          this.content = '默认内容';
+      deep: true,
+      handler() {
+        if (this.isDiarySource()) {
+          this.initEditorState()
         }
-      }
+      },
     },
-    // 监听 ins 变化并更新 content
     ins: {
-      immediate: true,
-      handler(newVal) {
-        if (Object.keys(newVal).length > 0) {
-          this.content = JSON.stringify(newVal.insContent);
+      deep: true,
+      handler() {
+        if (this.isInspirationSource()) {
+          this.initEditorState()
         }
-      }
+      },
     },
   },
   methods: {
-    handleChange(value, render) {
-      // console.log('当前内容:', { markdown, html })
+    isDiarySource() {
+      return DIARY_SOURCES.has(this.from)
     },
-    handleSave(){
-      this.$emit('handleSave',{ markdown:this.content,image:this.img_file})
+    isInspirationSource() {
+      return INSPIRATION_SOURCES.has(this.from)
     },
-    // 图片添加
-    async asyncImgAdd(pos, $file) {
-      let newFileObj = {}
-      //压缩图片
-      await imageUtils.compressImage($file).then(res=>{
-        newFileObj = res
+    getCurrentPictures() {
+      if (this.isDiarySource()) {
+        return store.state.pictureAbout.pictureData.filter(
+          (item) => item.diaryId === String(this.diary?.diaryId) && item.isCover !== true
+        )
+      }
+
+      if (this.isInspirationSource()) {
+        return store.state.pictureAbout.pictureData.filter(
+          (item) => item.insId === String(this.ins?.insId) && item.isCover !== true
+        )
+      }
+
+      return []
+    },
+    getPictureList() {
+      if (this.isDiarySource()) {
+        return store.getters['pictureAbout/fetchDiaryImage'](this.diary?.diaryId)
+      }
+
+      if (this.isInspirationSource()) {
+        return store.getters['pictureAbout/fetchInsImage'](this.ins?.insId)
+      }
+
+      return null
+    },
+    normalizeContentImageUrls(content, pictures) {
+      let normalizedContent = content || ''
+
+      pictures.forEach((picture) => {
+        if (!picture?.pictureId) {
+          return
+        }
+
+        const localUrl = imageUtils.getLocalImageUrl(picture)
+        const escapedPictureId = picture.pictureId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const remotePattern = new RegExp(
+          `https?:\\/\\/[^\\s)]+\\/api\\/picture\\/${escapedPictureId}(\\?[^\\s)]*)?`,
+          'g'
+        )
+
+        normalizedContent = normalizedContent.replace(remotePattern, localUrl)
       })
 
-      let newFile = imageUtils.base64ToFile(newFileObj.miniurl, newFileObj._name)
+      return normalizedContent
+    },
+    initEditorState() {
+      const pictures = this.getCurrentPictures()
+      const pictureList = this.getPictureList()
 
-      let pictureId = nanoid();
-      // 图片保存到本地
-      imageRequest.post(`http://localhost:3001/images/save/${this.userId}/${this.docId}/${pictureId}`, newFile)
-        .then(res=>{
-          ElMessage({
-            type:'success',
-            message:'图片添加成功'
-          })
-          this.$refs.md.$img2Url(pos, res.path);
-          // 图片缓存
-          this.img_file[pos] = newFile
-          this.pictureMap.set(pos, pictureId);
+      if (this.isDiarySource()) {
+        this.content = this.normalizeContentImageUrls(this.diary?.diaryContent || '', pictures)
+        this.docId = this.diary?.diaryId || ''
+      } else if (this.isInspirationSource()) {
+        this.content = this.normalizeContentImageUrls(this.ins?.insContent || '', pictures)
+        this.docId = this.ins?.insId || ''
+      }
 
-        }).catch(err=>{
-          console.log(err)
+      this.imgFile = pictureList || [{ miniurl: 'no img at pos 0', _name: 'null' }]
+      this.pictureMap = new Map()
+      this.imgFile.slice(1).forEach((item, index) => {
+        if (item.pictureId) {
+          this.pictureMap.set(index + 1, item.pictureId)
+        }
+      })
+    },
+    handleChange() {},
+    handleSave() {
+      this.$emit('handleSave', { markdown: this.content, image: this.imgFile })
+    },
+    async asyncImgAdd(pos, file) {
+      try {
+        const normalizedFile = file?.miniurl ? file : await imageUtils.fileToBase64(file)
+        const compressedFileObj = await imageUtils.compressImage(normalizedFile)
+        const uploadFile = imageUtils.base64ToFile(compressedFileObj.miniurl, compressedFileObj._name)
+        const params = {
+          userId: this.userId,
+          diaryId: this.isDiarySource() ? this.docId : '',
+          insId: this.isInspirationSource() ? this.docId : '',
+          isAvatar: 0,
+          isCover: 0,
+          fileScale: 1.0,
+        }
+
+        const response = await pictureAPI.uploadPicture(params, [uploadFile])
+        const picture = response.data?.[0]
+        if (!picture) {
+          throw new Error('图片上传返回为空')
+        }
+
+        if (this.userId && this.docId) {
+          await imageUtils.saveTempImage(this.userId, picture.pictureId, compressedFileObj.miniurl)
+          await imageUtils.saveImageToDoc(this.userId, this.docId, picture.pictureId)
+        }
+
+        const imageUrl = imageUtils.getLocalImageUrl(picture)
+        this.$refs.md.$img2Url(pos, imageUrl)
+        this.imgFile[pos] = {
+          miniurl: imageUrl,
+          _name: picture.pictureName,
+          pictureId: picture.pictureId,
+        }
+        this.pictureMap.set(pos, picture.pictureId)
+        store.dispatch('pictureAbout/addPicture', picture)
+        await window.api.electronStore.pictureStore.setPicture(
+          JSON.parse(JSON.stringify(store.state.pictureAbout.pictureData))
+        )
+
+        ElMessage({
+          type: 'success',
+          message: '图片添加成功',
         })
-    },
-    // 图片删除
-    $imgDel(pos) {
-      // 删除图片本地缓存
-      let pictureId = this.pictureMap.get(pos)
-      imageRequest.delete(`http://localhost:3001/images/delete/${this.userId}/${this.docId}/${pictureId}`)
-        .then(res=>{
-          ElMessage({
-            type:'success',
-            message:'图片删除成功'
-          })
-          // 删除图片数组中对应元素
-        }).catch(err=>{
-          console.log(err)
+      } catch (error) {
+        console.error(error)
+        ElMessage({
+          type: 'error',
+          message: '图片上传失败',
         })
-      // 从缓存数组中删除
-      delete this.img_file[pos]
-      delete this.pictureMap[pos]
-    },
-    // 父组件获取数据的3个api
-    getData(){
-      return { markdown:this.content,image:this.img_file}
-    },
-    getImage(){
-      return {
-        imgFile:this.img_file.slice(1),
-        imgId:[...this.pictureMap.values()],
       }
     },
-    getContent(){
+    async $imgDel(pos) {
+      const pictureId = this.pictureMap.get(pos)
+      if (!pictureId) {
+        delete this.imgFile[pos]
+        return
+      }
+
+      try {
+        await pictureAPI.deletePicture(pictureId)
+        store.dispatch('pictureAbout/deletePicture', pictureId)
+        await window.api.electronStore.pictureStore.setPicture(
+          JSON.parse(JSON.stringify(store.state.pictureAbout.pictureData))
+        )
+        this.pictureMap.delete(pos)
+        delete this.imgFile[pos]
+        ElMessage({
+          type: 'success',
+          message: '图片删除成功',
+        })
+      } catch (error) {
+        console.error(error)
+        ElMessage({
+          type: 'error',
+          message: '图片删除失败',
+        })
+      }
+    },
+    getData() {
+      return { markdown: this.content, image: this.imgFile }
+    },
+    getImage() {
+      return {
+        imgFile: this.imgFile.slice(1),
+        imgId: [...this.pictureMap.values()],
+      }
+    },
+    getContent() {
       return this.content
     },
-  }
+  },
 }
 </script>
 
 <style scoped>
-#editor{
-  min-width: 95%;
+#editor {
+  width: 100%;
+  min-width: 0;
 }
-/* 图片拖拽手柄样式 */
+
 .interact-resize {
   background: #2196f3;
   opacity: 0.5;
 }
-#editor .auto-textarea-wrapper .auto-textarea-input {
-  white-space: nowrap !important;    /* 禁止换行 */
-  overflow-x: auto !important;       /* 横向溢出显示滚动条 */
+
+#editor :deep(.v-note-panel),
+#editor :deep(.v-note-op),
+#editor :deep(.v-note-show),
+#editor :deep(.v-show-content),
+#editor :deep(.markdown-body) {
+  min-width: 0;
 }
 
+#editor :deep(.auto-textarea-wrapper .auto-textarea-input) {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden !important;
+}
+
+#editor :deep(.v-show-content img) {
+  max-width: 100%;
+}
+
+#editor :deep(.v-show-content a),
+#editor :deep(.markdown-body a),
+#editor :deep(.v-show-content p),
+#editor :deep(.markdown-body p) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 </style>

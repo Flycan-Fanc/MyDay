@@ -102,5 +102,12 @@ export const electronStore = {
       ipcRenderer.invoke('ins-store:set-ins', ins)
   },
 
+  pictureStore: {
+    getPicture: () =>
+      ipcRenderer.invoke('picture-store:get-picture'),
+    setPicture: (picture) =>
+      ipcRenderer.invoke('picture-store:set-picture', picture)
+  },
+
 
 }

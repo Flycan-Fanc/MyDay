@@ -26,7 +26,6 @@ export default {
     //鼠标滚动时页面横向滚动
     document.querySelector('#InsList').addEventListener('wheel', function (event) {
       let scrollLength = event.deltaY * 2
-      console.log(scrollLength)
       document.querySelector('#InsList').scrollBy({ left: scrollLength, behavior: 'smooth' })
     })
 

@@ -2,6 +2,7 @@ import planStore from './userData/planStore'
 import diaryStore from './userData/diaryStore'
 import insStore from './userData/insStore';
 import tagStore from './userData/tagStore';
+import pictureStore from './userData/pictureStore';
 
 // const electronStore = window.api.electronStore
 
@@ -21,6 +22,7 @@ class UserStore {
     this.diaryStore = new diaryStore(userId)
     this.insStore = new insStore(userId)
     this.tagStore = new tagStore(userId)
+    this.pictureStore = new pictureStore(userId)
   }
 
   //TODO： 后续可能增加保存用户偏好设置的api
@@ -48,6 +50,10 @@ class UserStore {
   }
 
   setUserSyncMeta(syncMeta){
+    if (syncMeta === undefined || syncMeta === null) {
+      this.store.delete('syncMeta')
+      return
+    }
     this.store.set('syncMeta',syncMeta)
   }
 
@@ -57,7 +63,8 @@ class UserStore {
       planStore:this.planStore,
       diaryStore:this.diaryStore,
       insStore:this.insStore,
-      tagStore:this.tagStore
+      tagStore:this.tagStore,
+      pictureStore:this.pictureStore
     }
   }
 

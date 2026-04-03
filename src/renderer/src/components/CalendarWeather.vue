@@ -1,68 +1,108 @@
 <template>
-  <div id="CalenderWeather-container">
-    <div class="calender-area">
+  <div id="calendar-weather-container">
+    <div class="calendar-area">
       <img
         src="../assets/icon/ic_tools_calendar.png"
-        alt="calender"
-        class="calender"
+        alt="calendar"
+        class="calendar"
       />
-      <VDatePicker v-model="date" mode="date" />
+      <span class="date-text">{{ displayDate }}</span>
     </div>
-    <div class="date-area">2024.12.7</div>
     <div class="weather-area">
-      <img src="../assets/weather/ic_weather_sun.png" alt="" class="weatherImg" />
-      <span class="weather">10℃</span>
+      <img :src="weatherIcon" alt="weather" class="weather-img" />
+      <span class="weather-text">{{ displayTemperature }}</span>
     </div>
   </div>
 </template>
 
 <script>
+import { dayjs } from 'element-plus'
+import store from '../store/store'
+
+import sunIcon from '../assets/weather/ic_weather_sun.png'
+import cloudyIcon from '../assets/weather/ic_weather_cloudy.png'
+import cloudIcon from '../assets/weather/ic_weather_cloud.png'
+import rainIcon from '../assets/weather/ic_weather_rain.png'
 
 export default {
-  name:'CalendarWeather',
+  name: 'CalendarWeather',
+  props: {
+    date: {
+      type: String,
+      default: '',
+    },
+  },
+  computed: {
+    normalizedDate() {
+      return this.date ? dayjs(this.date).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD')
+    },
+    displayDate() {
+      return dayjs(this.normalizedDate).format('YYYY.MM.DD')
+    },
+    weatherInfo() {
+      return store.getters['weatherAbout/getWeatherByDate'](this.normalizedDate)
+    },
+    displayTemperature() {
+      if (!this.weatherInfo?.temperature) {
+        return '-'
+      }
+
+      return `${this.weatherInfo.temperature}℃`
+    },
+    weatherIcon() {
+      const skytext = (this.weatherInfo?.skytext || '').toLowerCase()
+
+      if (skytext.includes('rain') || skytext.includes('shower') || skytext.includes('storm')) {
+        return rainIcon
+      }
+      if (skytext.includes('cloudy') || skytext.includes('overcast')) {
+        return cloudyIcon
+      }
+      if (skytext.includes('cloud')) {
+        return cloudIcon
+      }
+      return sunIcon
+    },
+  },
 }
-
-
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-}
-#CalenderWeather-container {
-  display: grid;
-  grid-template-columns: 1fr 3fr 1fr 1fr;
+#calendar-weather-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   padding: 0 20px;
-  width: 240px;
+  min-width: 240px;
   height: 50px;
   background-color: #fff;
   border-radius: 25px;
   box-shadow: -3px 4px 5px rgba(0, 0, 0, 0.4);
 }
-.calender-area {
-  display: flex;
-  align-items: center;
-  height: 100%;
-}
-.calender-area img {
-  width: 40px;
-}
-.date-area {
-  display: flex;
-  align-items: center;
-  font-size: 17px;
-}
+
+.calendar-area,
 .weather-area {
   display: flex;
   align-items: center;
-  margin-left: 13px;
 }
-.weather-area img {
-  width: 40px;
+
+.calendar,
+.weather-img {
+  width: 32px;
+  height: 32px;
 }
-.weather-area span {
-  font-size: 12px;
+
+.date-text {
+  margin-left: 8px;
+  font-size: 16px;
+  color: #3b3b3b;
+}
+
+.weather-text {
+  margin-left: 6px;
+  font-size: 13px;
+  color: #3b3b3b;
+  white-space: nowrap;
 }
 </style>
-

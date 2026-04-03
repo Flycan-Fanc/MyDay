@@ -3,19 +3,25 @@
     <div class="calender-area">
       <el-popover placement="bottom-start" :width="280" trigger="click">
         <template #reference>
-          <img src="../assets/icon/ic_tools_calendar.png" alt="calender" class="calender" />
+          <img src="../assets/icon/ic_tools_calendar.png" alt="calendar" class="calender" />
         </template>
         <VDatePicker
           v-model="date"
           :max-date="maxDate"
         />
       </el-popover>
-      <!--      <VDatePicker v-model="date" mode="date" />后续使用日历组件-->
     </div>
-    <div class="date-area">{{formatedDate}}</div>
-    <div class="search-area selected">
-      <img src="../assets/icon/ic_tools_search.png" alt="" class="searchImg" @click="fuzzySearch"/>
-      <input type="text" class="search" :placeholder="`查找:输入${from}标题`" v-model="search" @keyup.enter="fuzzySearch"/>
+    <div class="date-area">{{ formatedDate }}</div>
+    <div class="search-area selected" @click="focusSearch">
+      <img src="../assets/icon/ic_tools_search.png" alt="" class="searchImg" @click.stop="fuzzySearch"/>
+      <input
+        ref="searchInput"
+        type="text"
+        class="search"
+        :placeholder="`查找:输入${from}标题`"
+        v-model="search"
+        @keyup.enter="fuzzySearch"
+      />
     </div>
   </div>
 </template>
@@ -28,56 +34,56 @@ import PubSub from "pubsub-js";
 
 export default {
   name: 'CalendarSearch',
-  props:['from'],
-  mounted(){},
+  props: ['from'],
   components: {
     VCalendar,
     VDatePicker,
   },
-  data(){
+  data() {
     return {
       date: null,
       maxDate: dayjs().format('YYYY-MM-DD'),
-      search:''
+      search: ''
     }
   },
-  computed:{
-    formatedDate(){
-      if(this.date === null){
+  computed: {
+    formatedDate() {
+      if (this.date === null) {
         return dayjs().format('YYYY.MM.DD').split('-').join('.')
-      } else {
-        let day = dayjs(this.date).format('YYYY-MM-DD')
-        return day.split('-').join('.')
       }
+      const day = dayjs(this.date).format('YYYY-MM-DD')
+      return day.split('-').join('.')
     }
   },
-  watch:{
-    date:{
+  watch: {
+    date: {
       handler() {
-        let curDate = dayjs(this.date).format('YYYY-MM-DD');
-        if(this.from === '日记'){
-          if(this.date === null){
+        const curDate = dayjs(this.date).format('YYYY-MM-DD');
+        if (this.from === '日记') {
+          if (this.date === null) {
             PubSub.publish('updateDiaryListInit')
-          } else{
-            PubSub.publish('updateDiaryListByDate',curDate)
+          } else {
+            PubSub.publish('updateDiaryListByDate', curDate)
           }
-        } else if(this.from === '灵感'){
-          if(this.date === null){
+        } else if (this.from === '灵感') {
+          if (this.date === null) {
             PubSub.publish('updateInsListInit')
-          } else{
-            PubSub.publish('updateInsListByDate',curDate)
+          } else {
+            PubSub.publish('updateInsListByDate', curDate)
           }
         }
       }
     },
   },
-  methods:{
-    fuzzySearch(){
-      this.data = null
-      if(this.from === '日记'){
-        PubSub.publish('updateDiaryListFuzzySearch',this.search)
-      } else if(this.from === '灵感'){
-        PubSub.publish('updateInsListFuzzySearch',this.search)
+  methods: {
+    focusSearch() {
+      this.$refs.searchInput?.focus()
+    },
+    fuzzySearch() {
+      if (this.from === '日记') {
+        PubSub.publish('updateDiaryListFuzzySearch', this.search)
+      } else if (this.from === '灵感') {
+        PubSub.publish('updateInsListFuzzySearch', this.search)
       }
     }
   },
@@ -134,23 +140,17 @@ export default {
   font-size: 15px;
   transition: width 0.3s ease;
 }
-#CalenderWeather-container:hover {
+#CalenderWeather-container:hover,
+#CalenderWeather-container:focus-within {
   width: 380px;
 }
-#CalenderWeather-container:hover .search-area {
+#CalenderWeather-container:hover .search-area,
+#CalenderWeather-container:focus-within .search-area {
   margin-left: 15px;
 }
-#CalenderWeather-container:hover .search-area input {
+#CalenderWeather-container:hover .search-area input,
+#CalenderWeather-container:focus-within .search-area input {
   visibility: visible;
   width: 160px;
-}
-#aaa {
-  width: 200px;
-  height: 100px;
-  background-color: #fff;
-  transition: height 0.2s ease;
-}
-#aaa:hover {
-  height: 200px;
 }
 </style>

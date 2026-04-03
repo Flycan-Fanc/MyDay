@@ -1,19 +1,7 @@
 <template>
   <form id="register-form" @submit.prevent>
-    <input
-      type="text"
-      name="username"
-      id="username"
-      placeholder="用户名"
-      v-model="userAccount"
-    /><br />
-    <input
-      type="password"
-      name="password"
-      id="password"
-      placeholder="密码"
-      v-model="password"
-    /><br />
+    <input type="text" name="username" id="username" placeholder="用户名" v-model="userAccount" /><br />
+    <input type="password" name="password" id="password" placeholder="密码" v-model="password" /><br />
     <input
       type="password"
       name="checkPassword"
@@ -21,37 +9,26 @@
       placeholder="确认密码"
       v-model="checkPassword"
     /><br />
-    <input
-      type="email"
-      name="email"
-      id="email"
-      placeholder="邮箱"
-      v-model="email"
-    /><br />
-<!--    <button class="register-button" @click="register()">注册</button><br />-->
+    <input type="email" name="email" id="email" placeholder="邮箱" v-model="email" /><br />
     <el-button class="register-button" type="primary" @click="register()" :loading="loading">注册</el-button><br />
     <span class="agree-container">
-            <input
-              type="checkbox"
-              name="confirmAgreement"
-              id="confirmAgreement"
-              v-model="isAgree"
-            />
-            <span id="agreement"
-            >已阅读并同意<span style="color: #2eafc5">《用户注册协议》</span
-            >与<span style="color: #2eafc5">《隐私协议》</span>
-            </span>
-          </span>
+      <input type="checkbox" name="confirmAgreement" id="confirmAgreement" v-model="isAgree" />
+      <span id="agreement">
+        已阅读并同意
+        <span style="color: #2eafc5">《用户注册协议》</span>
+        与
+        <span style="color: #2eafc5">《隐私协议》</span>
+      </span>
+    </span>
   </form>
 </template>
 
 <script>
-
-import {authAPI, syncMetaAPI} from '../utils/api'
+import { authAPI, syncMetaAPI } from '../utils/api'
 
 export default {
   name: 'RegisterForm',
-  data(){
+  data() {
     return {
       userAccount: '',
       password: '',
@@ -62,60 +39,54 @@ export default {
     }
   },
   methods: {
-    async register(){
-      if(this.userAccount === '' || this.password === ''){
+    async register() {
+      if (this.userAccount === '' || this.password === '') {
         ElMessage({
           message: '用户名或密码不能为空',
           type: 'error',
-          number:60,
-          duration: 2000
+          number: 60,
+          duration: 2000,
         })
-      } else if(this.password !== this.checkPassword){
+      } else if (this.password !== this.checkPassword) {
         ElMessage({
           message: '两次输入的密码不一致',
           type: 'error',
           number: 60,
-          duration: 2000
+          duration: 2000,
         })
-      } else if(!this.isAgree){
+      } else if (!this.isAgree) {
         ElMessage({
           message: '请先同意用户注册协议与隐私协议',
           type: 'error',
-          number:60,
-          duration: 2000
+          number: 60,
+          duration: 2000,
         })
-      } else{
+      } else {
         this.loading = true
-        // TODO：注册逻辑
-        try{
-          let res = await authAPI.register(this.userAccount, this.email, this.password)
-          if(res) {
-            console.log('注册',res)
-            let userSyncMeta = await syncMetaAPI.addSyncMeta(res.user.userId)
-            console.log('userSyncMeta',JSON.stringify(userSyncMeta))
+        try {
+          const res = await authAPI.register(this.userAccount, this.email, this.password)
+          if (res) {
+            await syncMetaAPI.addSyncMeta(res.user.userId)
             this.loading = false
-            // TODO:注册成功，跳转？
             ElMessage({
               message: '注册成功，请登录',
               type: 'success',
-              number:60,
-              duration: 2000
+              number: 60,
+              duration: 2000,
             })
           }
-        } catch(err){
+        } catch (err) {
           console.log(err)
           this.loading = false
           ElMessage({
-            message:`注册失败:${err.message}`,
-            type:'error',
+            message: err.response?.data?.message || '注册失败',
+            type: 'error',
           })
         }
       }
     },
-  }
+  },
 }
-
-
 </script>
 
 <style scoped>
@@ -134,15 +105,12 @@ export default {
   color: #aeacac;
 }
 #register-form input:-ms-input-placeholder {
-  /* Internet Explorer 10-11 */
   color: #aeacac;
 }
 #register-form input::-ms-input-placeholder {
-  /* Microsoft Edge */
   color: #aeacac;
 }
 #register-form input::-webkit-input-placeholder {
-  /* Chrome, Safari, Opera */
   color: #aeacac;
 }
 #register-form .register-button {
@@ -164,7 +132,7 @@ export default {
   display: inline-block;
   width: 15px;
   height: 15px;
-  vertical-align: top; /* 垂直居中对齐文本 */
+  vertical-align: top;
 }
 #register-form #agreement {
   display: inline-block;
@@ -172,4 +140,3 @@ export default {
   text-align: left;
 }
 </style>
-

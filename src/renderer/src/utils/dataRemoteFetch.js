@@ -1,77 +1,44 @@
-import store from "../store/store";
-import { pictureInit } from "./pictureInit";
-import { insAPI, diaryAPI, planAPI, tagAPI } from "./api/index";
+import store from '../store/store'
+import { pictureInit } from './pictureInit'
+import { insAPI, diaryAPI, planAPI, tagAPI } from './api/index'
+import * as syncMetaAPI from './api/modules/syncMeta'
+import { hashUtils } from './dataUtils'
 
-import { hashUtils } from "./dataUtils";
+export async function dataRemoteFetch(userId, remoteSyncMeta = null, options = {}) {
+  const { preferRemote = false } = options
 
-
-export async function dataRemoteFetch(userId) {
   try {
-    // 1.获取tag，存储在tagAbout
-    let remoteUserTag = await tagAPI.getUserTagList(userId)
-    let localUserTag = store.state.tagAbout.userTags
-    let mergedTag = []
-    remoteUserTag.forEach(tag => {
-      if(!localUserTag.some(item=> item.tagId === tag.tagId)) {
-        mergedTag.push(tag)
-      }
-    })
-    mergedTag = [...mergedTag, ...localUserTag]
-    await store.dispatch('tagAbout/setData',mergedTag)
+    const remoteUserTag = await tagAPI.getUserTagList(userId)
+    await store.dispatch('tagAbout/setData', preferRemote ? remoteUserTag : [...remoteUserTag])
 
-    // 2.获取plan，存储在planAbout
-    let remotePlanList = await planAPI.getUserPlanList(userId)
-    let localPlanList = store.state.planAbout.planData
-    let mergedPlanList = []
-    remotePlanList.forEach(plan => {
-      if(!localPlanList.some(item=> item.planId === plan.planId)) {
-        mergedPlanList.push(plan)
-      }
-    })
-    mergedPlanList = [...mergedPlanList, ...localPlanList]
-    await store.dispatch('planAbout/setData',mergedPlanList)
+    const remotePlanList = await planAPI.getUserPlanList(userId)
+    await store.dispatch('planAbout/setData', preferRemote ? remotePlanList : [...remotePlanList])
 
-    // 3.获取diary，存储在diaryAbout
-    let remoteDiaryList = await diaryAPI.getUserDiaryList(userId)
-    let localDiaryList = store.state.diaryAbout.diaryData
-    let mergedDiaryList = []
-    remoteDiaryList.forEach(diary => {
-      if(!localDiaryList.some(item=> item.diaryId === diary.diaryId)) {
-        mergedDiaryList.push(diary)
-      }
-    })
-    mergedDiaryList = [...mergedDiaryList, ...localDiaryList]
-    await store.dispatch('diaryAbout/setData',mergedDiaryList)
+    const remoteDiaryList = await diaryAPI.getUserDiaryList(userId)
+    await store.dispatch('diaryAbout/setData', preferRemote ? remoteDiaryList : [...remoteDiaryList])
 
-    // 4.获取ins，存储在insAbout
-    let remoteInsList = await insAPI.getUserInsList(userId)
-    let localInsList = store.state.insAbout.insData
-    let mergedInsList = []
-    remoteInsList.forEach(ins => {
-      if(!localInsList.some(item=> item.insId === ins.insId)) {
-        mergedInsList.push(ins)
-      }
-    })
-    mergedInsList = [...mergedInsList, ...localInsList]
-    await store.dispatch('insAbout/setData',mergedInsList)
+    const remoteInsList = await insAPI.getUserInsList(userId)
+    await store.dispatch('insAbout/setData', preferRemote ? remoteInsList : [...remoteInsList])
 
-    // 5.更新图片基本数据
-    await pictureInit(userId)
+    await pictureInit(userId, { preferRemote })
 
-    // 更新本地用户同步元数据
-    let oldSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta'))
-    let newDataHash = hashUtils.generateHash({userId, dataVersion: oldSyncMeta.dataVersion + 1})
-    let newSyncMeta = {userId, dataVersion: oldSyncMeta.dataVersion + 1, dataHash: newDataHash}
-    localStorage.setItem('userSyncMeta',JSON.stringify(newSyncMeta))
+    const latestRemoteSyncMeta = remoteSyncMeta || (await syncMetaAPI.getSyncMeta(userId))
+    const newSyncMeta = {
+      userId,
+      dataVersion: latestRemoteSyncMeta?.data_version || 1,
+      dataHash: latestRemoteSyncMeta?.data_hash || hashUtils.generateHash({ userId, dataVersion: 1 }),
+    }
+    localStorage.setItem('userSyncMeta', JSON.stringify(newSyncMeta))
     await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
+
     ElMessage({
       type: 'success',
-      message: '数据获取成功'
+      message: '数据获取成功',
     })
-  } catch(err) {
+  } catch (err) {
     ElMessage({
       type: 'error',
-      message: '数据获取失败'
+      message: '数据获取失败',
     })
     throw new Error('数据拉取失败')
   }

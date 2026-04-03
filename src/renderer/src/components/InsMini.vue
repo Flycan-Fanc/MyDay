@@ -1,7 +1,7 @@
 <template>
   <div id="InsMini-container" ref="container">
     <span class="insCover">
-      <img :src="insCover" alt="" />
+      <img :src="displayCover" alt="" @error="handleCoverError" />
     </span>
     <span class="insTitle">{{ title }}</span>
     <span class="insDate">{{ date }}</span>
@@ -14,71 +14,92 @@
         style="position: absolute; right: 0; top: 0"
       />
     </span>
-
   </div>
 </template>
 
 <script>
 import store from '../store/store'
+import { imageUtils } from '../utils/dataUtils'
 import PubSub from "pubsub-js";
 
 export default {
   name: 'InsMini',
   props: {
     insId: {
-      type: Number,
+      type: [String, Number],
       required: true
     }
   },
-  mounted() {},
   data() {
     return {
-      selected: false
+      selected: false,
+      useRemoteFallback: false,
     }
   },
-  watch:{
-    selected:{
-      handler(val){
-        if(val){
+  watch: {
+    insCover() {
+      this.useRemoteFallback = false
+    },
+    selected: {
+      handler(val) {
+        if (val) {
           this.$refs.container.classList.add('select')
-        }else{
-          if([...this.$refs.container.classList].indexOf('select')!==-1){
-            this.$refs.container.classList.remove('select')
-          }
+        } else if ([...this.$refs.container.classList].includes('select')) {
+          this.$refs.container.classList.remove('select')
         }
       }
     }
   },
   computed: {
     ins() {
-      return store.state.insAbout.insData.filter((item) => item.insId === this.insId)[0]
+      return store.state.insAbout.insData.filter(item => item.insId === this.insId)[0] || {}
     },
-    date(){
-      return this.ins.insDate.split('-').join('.')
+    date() {
+      return this.ins?.insDate ? this.ins.insDate.split('-').join('.') : ''
     },
-    title(){
-      if(this.ins.insTitle.length <= 8){
-        return this.ins.insTitle
-      }else{
-        return this.ins.insTitle.slice(0,5) + '...'
+    title() {
+      if (!this.ins?.insTitle) {
+        return ''
       }
+      return this.ins.insTitle.length <= 8 ? this.ins.insTitle : `${this.ins.insTitle.slice(0, 5)}...`
     },
-    insCover(){
-      return  this.ins.insCover || new URL("../assets/background/plouzane-1758197.jpg", import.meta.url).href;
+    insCover() {
+      return this.coverPicture ? imageUtils.getLocalImageUrl(this.coverPicture) : (this.ins?.insCover || '')
+    },
+    coverPicture() {
+      return store.getters['pictureAbout/fetchInsCoverPicture'](this.insId)
+    },
+    remoteCover() {
+      if (this.coverPicture?.pictureId) {
+        return imageUtils.getImageUrl(this.coverPicture.pictureId)
+      }
+
+      return this.ins?.insCover || ''
+    },
+    defaultCover() {
+      return new URL("../assets/background/plouzane-1758197.jpg", import.meta.url).href
+    },
+    displayCover() {
+      if (this.useRemoteFallback) {
+        return this.remoteCover || this.defaultCover
+      }
+
+      return this.insCover || this.remoteCover || this.defaultCover
     }
   },
   methods: {
-    changeSelectState(e){
-      this.$emit('changeSelectState',this.insId)
-      PubSub.publish('changeInsSwitchState') // 每选择一个，都要检测是否要变更为全选状态
+    handleCoverError() {
+      this.useRemoteFallback = true
+    },
+    changeSelectState(e) {
+      this.$emit('changeSelectState', this.insId)
+      PubSub.publish('changeInsSwitchState')
       e.stopPropagation()
     },
-    // 选择
-    select(){
+    select() {
       this.selected = true
     },
-    // 取消选择
-    unSelect(){
+    unSelect() {
       this.selected = false
     }
   }
@@ -110,6 +131,7 @@ export default {
 }
 .insCover {
   flex: 2;
+  width: 75%;
   margin-top: 15px;
   transition: margin-top 0.15s ease-in-out;
 }
@@ -119,6 +141,7 @@ export default {
 .insCover img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 .insTitle {
   flex: 1;
@@ -138,15 +161,10 @@ export default {
   opacity: 0;
   transition: visibility 0s,opacity 0.3s linear;
 }
-.hidden{
-  visibility: hidden;
-  opacity: 0;
-}
 #ins-selector.visible {
   visibility: visible;
   opacity: 1;
 }
-
 #InsMini-container:hover #ins-selector {
   visibility: visible;
   opacity: 1;

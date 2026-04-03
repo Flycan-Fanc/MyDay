@@ -1,129 +1,106 @@
-/**
- * @description: 图片store
- */
+import { imageUtils } from '../../utils/dataUtils'
 
-import Picture from '../../models/Picture'
-
-import {nanoid} from 'nanoid'
-
-const pictureApi = {
-  // TODO:将md收集到的图片数据转为后端可以读取的形式
-  toObj(data){
-    return {
-      miniurl:data._miniurl,
-      _name:data._name,
-    }
-  },
-
-  //TODO:将后端返回的数据转为md可以使用的格式
-  toMd(data){
-    let tempArr = data.map(item => {
-      return {
-        miniurl:item.pictureContent,
-        _name:item.pictureName
-      }
-    })
-    if(tempArr.length === 0){
-      return null
-    } else{
-      tempArr.unshift({miniurl:'no img at pos 0',_name:'null'})
-      return tempArr
-    }
-
+function normalizePicture(picture) {
+  if (!picture) {
+    return picture
   }
+
+  return {
+    ...picture,
+    pictureId: picture.pictureId ? String(picture.pictureId) : picture.pictureId,
+    userId: picture.userId ? String(picture.userId) : picture.userId,
+    diaryId: picture.diaryId ? String(picture.diaryId) : picture.diaryId,
+    insId: picture.insId ? String(picture.insId) : picture.insId,
+    isAvatar: picture.isAvatar === true || picture.isAvatar === 1 || picture.isAvatar === '1',
+    isCover: picture.isCover === true || picture.isCover === 1 || picture.isCover === '1',
+  }
+}
+
+function toMarkdownImageList(data) {
+  const items = data.map(item => ({
+    miniurl: imageUtils.getLocalImageUrl(item),
+    _name: item.pictureName,
+    pictureId: item.pictureId,
+  }))
+
+  if (items.length === 0) {
+    return null
+  }
+
+  items.unshift({ miniurl: 'no img at pos 0', _name: 'null' })
+  return items
 }
 
 const pictureAbout = {
-  namespaced:true,
-  state:{
-    pictureData:[]
+  namespaced: true,
+  state: {
+    pictureData: []
   },
-  actions:{
-    /**
-     * 获取图片列表
-     */
-    setData(context,value){
-      context.commit('setData',value)
+  actions: {
+    setData(context, value) {
+      context.commit('setData', value)
     },
-    /**
-     * 存储图片列表到本地
-     */
-    saveDataLocal(){},
-    /**
-     * 存储图片列表到远程数据库
-     */
-    saveDataRemote(){},
-    /**
-     * 添加图片
-     */
-    addPicture(context,value){
-      let picBase64 = pictureApi.toObj(value.image)
-      let pictureId = value.pictureId || nanoid()
-      let userId = value.userId
-      let diaryId = value.diaryId
-      let insId = value.insId
-      let pictureName = picBase64._name
-      let pictureContent = picBase64.miniurl
-      let isAvatar = value.isAvatar
-      let isCover = value.isCover
-      let picture = new Picture(pictureId,userId,diaryId,insId,pictureName,pictureContent,isAvatar,isCover)
-      context.commit('addPicture',picture)
+    saveDataLocal() {},
+    saveDataRemote() {},
+    addPicture(context, value) {
+      context.commit('addPicture', value)
     },
-    /**
-     * 删除图片
-     */
-    deletePicture(context,value){
-
+    deletePicture(context, value) {
+      context.commit('deletePicture', value)
     },
-    /**
-     * 批量删除图片
-     */
-    deletePictureBatch(context,value){
-
+    deletePictureBatch(context, value) {
+      context.commit('deletePictureBatch', value)
     },
   },
-  mutations:{
-    /**
-     * 获取图片列表
-     */
-    setData(state,value){
-      state.pictureData = value
+  mutations: {
+    setData(state, value) {
+      state.pictureData = Array.isArray(value) ? value.map(normalizePicture) : []
     },
-    /**
-     * 存储图片列表到本地
-     */
-    saveDataLocal(){},
-    /**
-     * 存储图片列表到远程数据库
-     */
-    saveDataRemote(){},
-    /**
-     * 添加图片
-     */
-    addPicture(state,value){
-      state.pictureData.push(value)
+    saveDataLocal() {},
+    saveDataRemote() {},
+    addPicture(state, value) {
+      const normalizedValue = normalizePicture(value)
+      if (normalizedValue.isCover === true && normalizedValue.insId) {
+        state.pictureData = state.pictureData.filter(
+          item => !(item.insId === normalizedValue.insId && item.isCover === true && item.pictureId !== normalizedValue.pictureId)
+        )
+      }
+      const existingIndex = state.pictureData.findIndex(item => item.pictureId === normalizedValue.pictureId)
+      if (existingIndex >= 0) {
+        state.pictureData.splice(existingIndex, 1, normalizedValue)
+      } else {
+        state.pictureData.push(normalizedValue)
+      }
     },
-    /**
-     * 删除图片
-     */
-    deletePicture(state,value){
-
+    deletePicture(state, value) {
+      state.pictureData = state.pictureData.filter(item => item.pictureId !== value)
     },
-    /**
-     * 批量删除图片
-     */
-    deletePictureBatch(state,value){
-
+    deletePictureBatch(state, value) {
+      state.pictureData = state.pictureData.filter(item => !value.includes(item.pictureId))
     },
   },
-  getters:{
-    fetchDiaryImage:(state) => (id) => {
-      return pictureApi.toMd(state.pictureData.filter(item => item.diaryId === id))
+  getters: {
+    fetchDiaryImage: (state) => (id) => {
+      return toMarkdownImageList(state.pictureData.filter(item => item.diaryId === String(id) && item.isCover !== true))
     },
-    fetchInsImage:(state) => (id) => {
-      return pictureApi.toMd(state.pictureData.filter(item => item.insId === id))
+    fetchInsImage: (state) => (id) => {
+      return toMarkdownImageList(state.pictureData.filter(item => item.insId === String(id) && item.isCover !== true))
+    },
+    fetchInsCoverPicture: (state) => (id) => {
+      return [...state.pictureData]
+        .reverse()
+        .find(item => item.insId === String(id) && item.isCover === true) || null
+    },
+    fetchInsCover: (state) => (id) => {
+      const cover = [...state.pictureData]
+        .reverse()
+        .find(item => item.insId === String(id) && item.isCover === true)
+      return cover ? imageUtils.getLocalImageUrl(cover) : ''
+    },
+    fetchPictureById: (state) => (pictureId) => {
+      return state.pictureData.find(item => item.pictureId === String(pictureId)) || null
     },
   }
 }
 
-export default pictureAbout;
+export default pictureAbout

@@ -95,7 +95,6 @@ import PubSub from "pubsub-js";
 
 import { dataLocalStorage } from "../utils/dataLocalStorage";
 import store from "../store/store";
-import { dataRemoteStorage } from "../utils/dataRemoteStorage";
 import { dataSync } from "../utils/dataSync";
 
 const windowControls = window.api.windowControls;
@@ -245,7 +244,6 @@ export default {
         await dataLocalStorage()
         // 清除用户登陆状态
         let userId = store.getters['userAbout/getUserId']
-        await window.api.electronStore.appStore.changeUserLoginStatus(userId)
       } catch(err){
         ElMessage({
           message: "数据本地存储失败",
@@ -425,4 +423,3 @@ html,body {
   margin-left:28%;
 }
 </style>
-

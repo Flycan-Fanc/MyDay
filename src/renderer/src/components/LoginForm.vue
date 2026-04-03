@@ -1,6 +1,5 @@
 <template>
   <form id="login-form" @submit.prevent>
-    <!-- 阻止默认提交行为 -->
     <input
       type="text"
       name="username"
@@ -15,15 +14,18 @@
       placeholder="密码"
       v-model="password"
     /><br />
-    <el-button class="login-button" type="primary" @click="login" :loading="loading">登录</el-button
-    ><br />
+    <el-button class="login-button" type="primary" @click="login" :loading="loading">登录</el-button><br />
     <span class="rememberMe-container">
       <input type="checkbox" name="rememberMe" id="rememberMe" v-model="isRemember" />
       <span id="remember">记住我(30天免登录)</span>
     </span>
     <span class="agree-container">
       <input type="checkbox" name="confirmAgreement" id="confirmAgreement" v-model="isAgree" />
-      <span id="agreement">已阅读并同意<span style="color: #2eafc5">《用户注册协议》</span>与<span style="color: #2eafc5">《隐私协议》</span>
+      <span id="agreement">
+        已阅读并同意
+        <span style="color: #2eafc5">《用户注册协议》</span>
+        与
+        <span style="color: #2eafc5">《隐私协议》</span>
       </span>
     </span>
   </form>
@@ -31,11 +33,7 @@
 
 <script>
 import PubSub from 'pubsub-js'
-//import appStore from "../utils/localStores/appStore";
-import userAbout from '../store/modules/userAbout'
-import store from '../store/store'
 import { dataInit } from '../utils/dataInit'
-
 import { authAPI } from '../utils/api'
 import { dataSync } from "../utils/dataSync";
 
@@ -53,7 +51,6 @@ export default {
   },
   methods: {
     login() {
-      // 测试用户，仅在开发环境使用
       if (this.userAccount === '@testAdmin' && import.meta.env.MODE === 'development') {
         PubSub.publish('login')
         return
@@ -77,33 +74,32 @@ export default {
         authAPI
           .login(this.userAccount, this.password)
           .then(async (res) => {
-            console.log(res)
-            // 将token存到localStorage，便于网络请求
             localStorage.setItem('token', res.token)
             this.loading = false
-            // 提示成功登录，并跳转
             ElMessage({
               message: '登录成功',
               type: 'success',
               number: 60,
               duration: 2000
             })
-            await dataInit(res.user)  // 初始化数据
-            await dataSync() // 双端数据同步
-            await window.api.electronStore.userStore.setUserToken(res.token) // 将token存入userStore
-            await window.api.electronStore.appStore.addUserIndex(res.user) // 将登录用户存入appStore的用户索引
-            PubSub.publish('login')  // 跳转页面
+            await dataInit(res.user)
+            await window.api.electronStore.userStore.setUserToken(res.token)
+            await window.api.electronStore.appStore.addUserIndex(res.user)
+            try {
+              await dataSync()
+            } catch (syncErr) {
+              console.error(syncErr)
+            }
+            PubSub.publish('login')
           })
           .catch((err) => {
             console.log(err)
             this.loading = false
             ElMessage({
-              message: err.response.data.message,
+              message: err.response?.data?.message || '登录失败',
               type: 'error'
             })
           })
-
-        // 若失败则提示
       }
     }
   }
@@ -126,15 +122,12 @@ export default {
   color: #aeacac;
 }
 #login-form input:-ms-input-placeholder {
-  /* Internet Explorer 10-11 */
   color: #aeacac;
 }
 #login-form input::-ms-input-placeholder {
-  /* Microsoft Edge */
   color: #aeacac;
 }
 #login-form input::-webkit-input-placeholder {
-  /* Chrome, Safari, Opera */
   color: #aeacac;
 }
 #login-form .login-button {
@@ -149,39 +142,44 @@ export default {
   cursor: pointer;
 }
 #login-form .rememberMe-container {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   width: 250px;
   margin: 10px 45px 0;
   line-height: 1.5;
   text-align: left;
+  gap: 8px;
 }
 #login-form #rememberMe {
   display: inline-block;
+  flex: 0 0 auto;
   width: 15px;
   height: 15px;
-  vertical-align: middle; /* 垂直居中对齐文本 */
-  margin-left: 2px;
+  margin: 0;
 }
 #login-form #remember {
   display: inline-block;
-  width: 90%;
+  flex: 1 1 auto;
   text-align: left;
 }
 #login-form .agree-container {
-  display: inline-block;
+  display: inline-flex;
+  align-items: flex-start;
   margin: 0 45px;
   line-height: 1.5;
   width: 250px;
+  gap: 8px;
 }
 #login-form #confirmAgreement {
   display: inline-block;
+  flex: 0 0 auto;
   width: 15px;
   height: 15px;
-  vertical-align: top; /* 垂直居中对齐文本 */
+  margin: 2px 0 0;
 }
 #login-form #agreement {
   display: inline-block;
-  width: 90%;
+  flex: 1 1 auto;
   text-align: left;
 }
 </style>

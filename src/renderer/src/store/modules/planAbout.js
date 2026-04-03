@@ -1,340 +1,148 @@
-/**
- * @description: 计划store
- */
-
 import Plan from '../../models/Plan'
+import { nanoid } from 'nanoid'
+import { dayjs } from 'element-plus'
+import store from '../store'
 
-import {nanoid} from 'nanoid'
-import { dayjs } from "element-plus";
-import store from "../store";
+async function persistPlanData(state) {
+  await window.api.electronStore.planStore.setPlan(JSON.parse(JSON.stringify(state.planData)))
+}
 
 const planApi = {
-  // TODO:置顶的，正常的，完成的，每组按照什么顺序排序？
-  sortPlanList(planList){
-    let newPlanList = [];
-    let topPlans = planList.filter(item=>item.isTop===1)
-    let normalPlans = planList.filter(item=>item.isTop===0 && item.isDone===0)
-    let donePlans = planList.filter(item=>item.isDone===1)
-    return newPlanList = [...topPlans,...normalPlans,...donePlans]
+  sortPlanList(planList) {
+    const topPlans = planList.filter(item => item.isTop === 1)
+    const normalPlans = planList.filter(item => item.isTop === 0 && item.isDone === 0)
+    const donePlans = planList.filter(item => item.isDone === 1)
+    return [...topPlans, ...normalPlans, ...donePlans]
   }
 }
 
 const planAbout = {
-  namespaced:true,
-  state:{
-    planData:[
-      {
-        planId: '1',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 0,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '2',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 0,
-        isTop: 1,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '3',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '4',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '5',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '6',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '7',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      },
-      {
-        planId: '8',
-        userId: 1,
-        planContent: '制作活动策划书',
-        planTags: [
-          { tagId: '1', tagName: '#工作', color: '#ff0000' },
-          { tagId: '2', tagName: '#学习', color: '#00ff00' },
-          { tagId: '3', tagName: '#娱乐', color: '#0000ff' }
-        ],
-        isDone: 1,
-        isTop: 0,
-        startTime: '2023-04-01',
-        endTime: '2023-04-05'
-      }
-    ]
+  namespaced: true,
+  state: {
+    planData: []
   },
-  actions:{
-    /**
-     * 获取计划列表
-     */
-    setData(context,value){
-      // TODO: 从本地或者远程获取计划列表
-      context.commit('setData',value)
+  actions: {
+    setData(context, value) {
+      context.commit('setData', value)
     },
-    /**
-     * 存储计划列表到本地
-     */
-    saveDataLocal(){},
-    /**
-     * 存储计划列表到远程数据库
-     */
-    saveDataRemote(){},
-    /**
-     * 添加计划
-     */
-    addPlan(context,value){
-      let planId = nanoid()
-      // TODO:后续引入实际用户数据
-      let userId = store.getters['userAbout/getUserId']
-      let planContent = value.planInput
-      let planTags = []
-      let isDone = 0
-      let isTop = 0
-      // TODO:后续增加计划起止时间的功能
-      let startTime = value.curDate || dayjs().format('YYYY-MM-DD')
-      let endTime = ''
-      let plan = new Plan(
-        planId,userId,planContent,planTags,isDone,isTop,startTime,endTime
-      );
-      context.commit('addPlan',plan)
+    saveDataLocal() {},
+    saveDataRemote() {},
+    addPlan(context, value) {
+      const planId = value.planId || nanoid()
+      const userId = store.getters['userAbout/getUserId']
+      const planContent = value.planInput
+      const planTags = value.planTags || []
+      const isDone = value.isDone ?? 0
+      const isTop = value.isTop ?? 0
+      const startTime = value.curDate || value.startTime || dayjs().format('YYYY-MM-DD')
+      const endTime = value.endTime || ''
+      const plan = new Plan(planId, userId, planContent, planTags, isDone, isTop, startTime, endTime)
+      context.commit('addPlan', plan)
     },
-    /**
-     * 删除计划
-     */
-    deletePlan(context,value){
-      let index = context.state.planData.findIndex(item=>item.planId === value)
-      context.commit('deletePlan',index)
+    async deletePlan(context, value) {
+      const index = context.state.planData.findIndex(item => item.planId === value)
+      context.commit('deletePlan', index)
+      await persistPlanData(context.state)
     },
-    /**
-     * 批量删除计划
-     */
-    deletePlanBatch(context,value){
+    async deletePlanBatch(context, value) {
       let newPlanList = []
-      if(value!==''){
+      if (value !== '') {
         newPlanList = context.state.planData.filter(item => !(item.isDone === 1 && item.startTime === value))
-      } else{
-        // 删除特定日期的完成计划
+      } else {
         newPlanList = context.state.planData.filter(item => item.isDone === 0)
       }
-      context.commit('deletePlanBatch',newPlanList)
+      context.commit('deletePlanBatch', newPlanList)
+      await persistPlanData(context.state)
     },
-    /**
-     * 修改计划置顶状态
-     */
-    changeTopStatus(context,value){
-      context.commit('changeTopStatus',value)
+    changeTopStatus(context, value) {
+      context.commit('changeTopStatus', value)
     },
-    /**
-     * 修改计划完成状态
-     */
-    changeDoneStatus(context,value){
-      context.commit('changeDoneStatus',value)
+    changeDoneStatus(context, value) {
+      context.commit('changeDoneStatus', value)
     },
-    /**
-     * 编辑计划内容
-     */
-    editPlanContent(context,value){
-      context.commit('editPlanContent',value)
+    editPlanContent(context, value) {
+      context.commit('editPlanContent', value)
     },
-    /**
-     * 编辑计划标签
-     */
-    editPlanTag(context,value){
-      console.log('冬瓜！！！')
-      context.commit('editPlanTag',value)
+    editPlanTag(context, value) {
+      context.commit('editPlanTag', value)
     },
-    /**
-     * 删除计划单个标签
-     */
-    deletePlanTag(context,value){
-      context.commit('deletePlanTag',value)
+    deletePlanTag(context, value) {
+      context.commit('deletePlanTag', value)
     },
-    /**
-     * 排序计划
-     */
-    sortPlan(){},
+    sortPlan() {},
+    resetData(context) {
+      context.commit('resetData')
+    },
   },
-  mutations:{
-    /**
-     * 设置计划列表
-     */
-    setData(state,value){
+  mutations: {
+    setData(state, value) {
+      state.planData = Array.isArray(value) ? value : []
+    },
+    saveDataLocal() {},
+    saveDataRemote() {},
+    addPlan(state, value) {
+      state.planData.unshift(value)
+      state.planData = planApi.sortPlanList(state.planData)
+    },
+    deletePlan(state, value) {
+      if (value >= 0) {
+        state.planData.splice(value, 1)
+      }
+    },
+    deletePlanBatch(state, value) {
       state.planData = value
     },
-    /**
-     * 存储计划列表到本地
-     */
-    saveDataLocal(){},
-    /**
-     * 存储计划列表到远程数据库
-     */
-    saveDataRemote(){},
-    /**
-     * 添加计划
-     */
-    addPlan(state,value){
-      state.planData.unshift(value);
-      // TODO:重新排序列表
-      state.planData = planApi.sortPlanList(state.planData)
-      console.log("sorted:"+JSON.stringify(state.planData))
-    },
-    /**
-     * 删除计划
-     */
-    deletePlan(state,value){
-      state.planData.splice(value,1)
-    },
-    /**
-     * 批量删除计划
-     */
-    deletePlanBatch(state,value){
-      state.planData = value;
-    },
-    /**
-     * 修改计划置顶状态
-     */
-    changeTopStatus(state,value){
-      state.planData.map(item=>{
-        if(item.planId === value.planId){
+    changeTopStatus(state, value) {
+      state.planData.forEach(item => {
+        if (item.planId === value.planId) {
           item.isTop = value.isTop
         }
       })
-      console.log("state:"+value.isTop)
-      // TODO:重新排序
       state.planData = planApi.sortPlanList(state.planData)
     },
-    /**
-     * 修改计划完成状态
-     */
-    changeDoneStatus(state,value){
-      state.planData.map(item=>{
-        if(item.planId === value.planId){
+    changeDoneStatus(state, value) {
+      state.planData.forEach(item => {
+        if (item.planId === value.planId) {
           item.isDone = value.isDone
         }
       })
-      // TODO:置顶的，正常的，完成的，每组按照什么顺序排序？
       state.planData = planApi.sortPlanList(state.planData)
     },
-    /**
-     * 编辑计划内容
-     */
-    editPlanContent(state,value){
-      state.planData.forEach(item=>{
-        if(item.planId===value.planId){
+    editPlanContent(state, value) {
+      state.planData.forEach(item => {
+        if (item.planId === value.planId) {
           item.planContent = value.planContent
         }
       })
     },
-    /**
-     * 编辑计划标签
-     */
-    editPlanTag(state,value){
-      console.log("editPlanTag:"+JSON.stringify(value))
-      state.planData.forEach(item=>{
-        if(item.planId === value.planId){
-          // TODO:后续可以优化一下，只修改变化的标签部分
+    editPlanTag(state, value) {
+      state.planData.forEach(item => {
+        if (item.planId === value.planId) {
           item.planTags = value.selectedTag
         }
       })
     },
-    /**
-     * 删除计划单个标签
-     */
-    deletePlanTag(state,value){
+    deletePlanTag(state, value) {
       state.planData.forEach(plan => {
         plan.planTags = plan?.planTags.filter(tag => tag.tagId !== value) || []
       })
     },
-    /**
-     * 排序计划
-     */
-    sortPlan(){},
+    sortPlan() {},
+    resetData(state) {
+      state.planData = []
+    },
   },
-  getters:{
-    sortedPlanList(state){
+  getters: {
+    sortedPlanList(state) {
       return planApi.sortPlanList(state.planData)
     },
     sortedPlanListByDate: (state) => (date) => {
-      return planApi.sortPlanList(state.planData.filter((item) => item.startTime === date))
+      return planApi.sortPlanList(state.planData.filter(item => item.startTime === date))
     },
     getPlanNumByDate: (state) => (date) => {
-      return planApi.sortPlanList(state.planData.filter((item) => item.startTime === date)).length
+      return planApi.sortPlanList(state.planData.filter(item => item.startTime === date)).length
     }
   }
 }
 
-export default planAbout;
+export default planAbout

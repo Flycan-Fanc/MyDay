@@ -1,20 +1,41 @@
-import * as syncMetaAPI from "./api/modules/syncMeta";
-import { dataRemoteStorage } from "./dataRemoteStorage";
-import { dataRemoteFetch } from "./dataRemoteFetch";
+import store from '../store/store'
+import * as syncMetaAPI from './api/modules/syncMeta'
+import { dataRemoteFetch } from './dataRemoteFetch'
 
+function hasLocalBusinessData() {
+  return (
+    store.state.tagAbout.userTags.length > 0 ||
+    store.state.planAbout.planData.length > 0 ||
+    store.state.diaryAbout.diaryData.length > 0 ||
+    store.state.insAbout.insData.length > 0 ||
+    store.state.pictureAbout.pictureData.length > 0
+  )
+}
 
-export async function dataSync(){
-  // 1. 获取 本地 和 远程 用户同步元信息
-  let localSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta'))
-  let remoteSyncMeta = await syncMetaAPI.getSyncMeta(localSyncMeta.userId)
-
-  console.log(`本地dataVersion:${localSyncMeta.dataVersion}, 远程dataVersion:${JSON.stringify(remoteSyncMeta)}`)
-  // 2. 比较本地和远程的dataVersion
-  if(localSyncMeta.dataVersion < remoteSyncMeta.data_version){
-    // 本地dataVersion小于远程dataVersion，需要同步到本地
-    await dataRemoteFetch(localSyncMeta.userId)
-  } else if(localSyncMeta.dataVersion > remoteSyncMeta.data_version){
-    // 本地dataVersion大于远程dataVersion，需要同步到远程
-    await dataRemoteStorage();
+export async function dataSync() {
+  const localSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta'))
+  if (!localSyncMeta?.userId) {
+    return { status: 'skipped', reason: 'missing_local_meta' }
   }
+
+  const remoteSyncMeta = await syncMetaAPI.getSyncMeta(localSyncMeta.userId)
+  if (!remoteSyncMeta) {
+    return { status: 'skipped', reason: 'missing_remote_meta' }
+  }
+
+  if (localSyncMeta.dataVersion < remoteSyncMeta.data_version) {
+    if (hasLocalBusinessData()) {
+      console.warn('[dataSync] remote data is ahead, but local business data exists; auto-fetch is disabled')
+      return { status: 'skipped', reason: 'remote_ahead_with_local_data' }
+    }
+    await dataRemoteFetch(localSyncMeta.userId, remoteSyncMeta, { preferRemote: true })
+    return { status: 'fetched' }
+  }
+
+  if (localSyncMeta.dataVersion > remoteSyncMeta.data_version) {
+    console.warn('[dataSync] local data is ahead of remote; automatic remote push is disabled')
+    return { status: 'skipped', reason: 'local_ahead' }
+  }
+
+  return { status: 'noop', reason: 'version_equal' }
 }

@@ -1,65 +1,56 @@
-/**
- * 数据初始化：用户数据加载
- */
-
 import store from '../store/store'
 import { tagAPI, planAPI, diaryAPI, insAPI, syncMetaAPI } from '../utils/api'
-import { getUserPlanList } from "./api/modules/plan";
-import { getUserDiaryList } from "./api/modules/diary";
-import { getUserInsList } from "./api/modules/inspiration";
-import { pictureInit } from "./pictureInit";
+import { pictureInit } from './pictureInit'
+
+function shouldFetchRemote(localValue, hasLocalSyncMeta) {
+  if (hasLocalSyncMeta) {
+    return false
+  }
+
+  return !Array.isArray(localValue) || localValue.length === 0
+}
 
 export async function dataInit(userData) {
   try {
-    // 0.初始化userStore
     await window.api.electronStore.appStore.setUserStore(userData.userId)
-
-    // 将用户信息存储到userStore
     await window.api.electronStore.userStore.setUserInfo(userData)
 
-    // 1.获取用户信息,存储在userAbout
-    let userId = userData.userId
-    await store.dispatch('userAbout/addUser',userData)
+    const userId = userData.userId
+    await store.dispatch('userAbout/addUser', userData)
 
-    // 获取用户同步元数据,存储在localStorage
     let userSyncMeta = await window.api.electronStore.userStore.getUserSyncMeta()
-    if(!userSyncMeta){
+    const hasLocalSyncMeta = !!userSyncMeta
+    if (!userSyncMeta) {
       userSyncMeta = await syncMetaAPI.getSyncMeta(userData.userId)
     }
-    localStorage.setItem('userSyncMeta',JSON.stringify(userSyncMeta))
-    console.log('同步元:',JSON.stringify(userSyncMeta))
+    localStorage.setItem('userSyncMeta', JSON.stringify(userSyncMeta))
 
-    // 2.获取tag，存储在tagAbout
     let userTag = await window.api.electronStore.tagStore.getTag()
-    if(userTag.length===0) {
+    if (shouldFetchRemote(userTag, hasLocalSyncMeta)) {
       userTag = await tagAPI.getUserTagList(userId)
     }
-    await store.dispatch('tagAbout/setData',userTag)
+    await store.dispatch('tagAbout/setData', userTag)
 
-    // 3.获取plan，存储在planAbout
     let planList = await window.api.electronStore.planStore.getPlan()
-    if(planList.length===0) {
+    if (shouldFetchRemote(planList, hasLocalSyncMeta)) {
       planList = await planAPI.getUserPlanList(userId)
     }
-    await store.dispatch('planAbout/setData',planList)
+    await store.dispatch('planAbout/setData', planList)
 
-    // 4.获取diary，存储在diaryAbout
     let diaryList = await window.api.electronStore.diaryStore.getDiary()
-    if(diaryList.length===0) {
+    if (shouldFetchRemote(diaryList, hasLocalSyncMeta)) {
       diaryList = await diaryAPI.getUserDiaryList(userId)
     }
-    await store.dispatch('diaryAbout/setData',diaryList)
+    await store.dispatch('diaryAbout/setData', diaryList)
 
-    // 5.获取ins，存储在insAbout
     let insList = await window.api.electronStore.insStore.getIns()
-    if(insList.length===0) {
+    if (shouldFetchRemote(insList, hasLocalSyncMeta)) {
       insList = await insAPI.getUserInsList(userId)
     }
-    await store.dispatch('insAbout/setData',insList)
+    await store.dispatch('insAbout/setData', insList)
 
-    // 6.初始化图片基本数据
-    await pictureInit(userId)
-  } catch(err) {
+    await pictureInit(userId, { trustLocalEmpty: hasLocalSyncMeta })
+  } catch (err) {
     throw new Error('数据初始化失败')
   }
 }

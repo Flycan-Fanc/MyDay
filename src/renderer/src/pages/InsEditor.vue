@@ -1,34 +1,42 @@
 <template>
   <div id="insEditor">
     <div id="insHeader">
-      <span class="calendar-area"><CalendarWeather></CalendarWeather></span>
-      <span class="tools-area" @click="back()">
-        <img src="../assets/icon/ic_tools_return.png" alt="返回" />
+      <span class="calendar-area"><CalendarWeather :date="insDate" /></span>
+      <span class="tools-area" @click="back">
+        <img src="../assets/icon/ic_tools_return.png" alt="back" />
         <span>返回</span>
       </span>
     </div>
     <div id="editor-container">
       <div class="editor-box">
-        <Editor id="editor" ref="editor" :config="config" from="灵感" :ins="ins"></Editor>
+        <Editor id="editor" ref="editor" :config="config" from="灵感" :ins="currentIns" />
       </div>
       <div class="info-box">
         <div class="cover-container">
           <el-upload
             class="avatar-uploader"
-            :action="`http://localhost:3001/images/save/${userId}/${insId}/${coverId}`"
             :show-file-list="false"
-            :on-success="handleCoverSuccess"
             :before-upload="beforeCoverUpload"
+            :http-request="uploadCover"
           >
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" alt=""/>
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" alt="cover" @error="handleCoverError" />
             <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
           </el-upload>
-
+        </div>
+        <div class="date-container">
+          <el-date-picker
+            v-model="insDate"
+            type="date"
+            value-format="YYYY-MM-DD"
+            format="YYYY-MM-DD"
+            placeholder="请选择日期"
+            :disabled-date="disabledDate"
+          />
         </div>
         <div class="title-container">
-          <input type="text" placeholder="请填写标题" v-model="title">
+          <input v-model="title" type="text" placeholder="请填写标题" />
         </div>
-        <TagMini ref="tagMini" originComponent="insTagEditor" :contentId="ins.insId"></TagMini>
+        <TagMini ref="tagMini" originComponent="insTagEditor" :contentId="currentInsId" />
       </div>
       <el-button class="SaveBtn" type="primary" @click="handleSave">Save</el-button>
     </div>
@@ -36,225 +44,228 @@
 </template>
 
 <script>
+import { dayjs } from 'element-plus'
+import { nanoid } from 'nanoid'
+import { Plus } from '@element-plus/icons-vue'
 import Editor from '../components/Editor.vue'
 import CalendarWeather from '../components/CalendarWeather.vue'
 import TagMini from '../components/TagMini.vue'
-import { ref } from 'vue'
-import { Check } from '@element-plus/icons-vue'
-import { Plus } from '@element-plus/icons-vue'
-import editorConfig from "../config/editorConfig";
-import router from "../router";
-import store from "../store/store";
-import { nanoid } from "nanoid";
-import { dayjs } from "element-plus";
-import { imageRequest } from "../utils/fileRequest";
+import editorConfig from '../config/editorConfig'
+import router from '../router'
+import store from '../store/store'
+import { imageUtils } from '../utils/dataUtils'
 
 export default {
   name: 'InsEditor',
-  components: { CalendarWeather, Editor,TagMini,Plus },
-  mounted(){
-    this.imageUrl = this.ins.insCover || ''
-    this.title = this.ins.insTitle || ''
-    this.userId = store.getters['userAbout/getUserId']
-  },
-  computed:{
-    insId(){
-      return this.$route.params.insId
-    },
-    ins(){
-      return JSON.parse(JSON.stringify(store.state.insAbout.insData.filter(item => item.insId === this.insId)[0]||{}))
-    },
-  },
-  data(){
-    return{
-      Check,
-      config:editorConfig.insConfig.editor,
+  components: { CalendarWeather, Editor, TagMini, Plus },
+  data() {
+    return {
+      config: editorConfig.insConfig.editor,
       userId: '',
-      imageUrl: '', // 灵感封面url
-      coverId: '', // 灵感封面id
-      curTag:'',
+      imageUrl: '',
       title: '',
-      //用户拥有的标签
-      tags:[],
-      selectedTag:[] //用户选择赋予灵感的标签
+      insDate: '',
+      coverPictureId: '',
+      currentInsId: '',
     }
   },
-  methods:{
-    back(){
-      router.back()
-    },
-    handleCoverSuccess(res, file){
-      this.imageUrl = res[0].url
-      console.log(this.imageUrl)
-      store.dispatch("pictureAbout/addPicture", {
-        pictureId: this.coverId,
-        userId: this.userId,
-        insId: this.insId,
-        image: file,
-      });
-    },
-    beforeCoverUpload(file){
-      const isJPG = file.type === 'image/jpeg';
-      const isLt3M = file.size / 1024 / 1024 < 3;
+  created() {
+    this.currentInsId = this.$route.params.insId || nanoid()
+  },
+  mounted() {
+    this.userId = store.getters['userAbout/getUserId']
+    this.title = this.currentIns.insTitle || ''
+    this.insDate = this.currentIns.insDate || dayjs().format('YYYY-MM-DD')
 
-      if (!isJPG && !isPng) {
-        // this.$message.error('上传头像图片只能是 JPG/PNG 格式!');
-        ElMessage({
-          message: '上传头像图片只能是 JPG 格式!',
-          type: 'warning',
-          duration:2000,
-        })
-      }
-      if (!isLt3M) {
-        // this.$message.error('上传头像图片大小不能超过 2MB!');
-        ElMessage({
-          message: '上传头像图片大小不能超过 3MB!',
-          type: 'warning',
-          duration:2000,
-        })
-      }
-
-      this.coverId = nanoid();
-      return isJPG && isLt3M;
-    },
-    handleClose:function(tag){
-      console.log(tag)
-      this.selectedTag.splice(this.selectedTag.indexOf(tag), 1)
-    },
-    handleSelect:function(){
-      //生成随机16进制颜色
-      function randomHexColor(){
-        let hex = Math.floor(Math.random() * 16777216).toString(16); //生成ffffff以内16进制数
-        while (hex.length < 6) { //while循环判断hex位数，少于6位前面加0凑够6位
-          hex = '0' + hex;
+    const currentCover = store.getters['pictureAbout/fetchInsCoverPicture'](this.currentInsId)
+    this.coverPictureId = currentCover?.pictureId || ''
+    this.imageUrl = currentCover ? imageUtils.getLocalImageUrl(currentCover) : this.currentIns.insCover || ''
+  },
+  computed: {
+    currentIns() {
+      return (
+        store.state.insAbout.insData.find((item) => item.insId === this.currentInsId) || {
+          insId: this.currentInsId,
+          insTags: [],
         }
-        return '#' + hex; //返回‘#'开头16进制颜色
+      )
+    },
+  },
+  methods: {
+    back() {
+      router.back()
+    },
+    disabledDate(time) {
+      return time.getTime() > Date.now()
+    },
+    beforeCoverUpload(file) {
+      const isImage = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+      const isLt3M = file.size / 1024 / 1024 < 3
+
+      if (!isImage) {
+        ElMessage({ message: '封面只支持 JPG、PNG 或 WEBP', type: 'warning', duration: 2000 })
       }
-      let randomColor = randomHexColor()
-      console.log("this.selectedTag:"+JSON.stringify(Object.values(this.selectedTag)))
-      console.log("this.curTag:"+this.curTag)
-      if(this.curTag===''){
-        ElMessage({
-          message: '请选择标签',
-          type: 'warning',
-          duration:2000,
-        })
-      } else if(this.selectedTag.some(item=>item.label===this.curTag)){
-        ElMessage({
-          message: '不能重复添加标签',
-          type: 'warning',
-          duration:2000,
-        })
-      }else{
-        this.selectedTag.push({
-          value: this.curTag,
-          label: this.curTag,
-          color: randomColor,
-        })
-        //this.curTag = ''
+
+      if (!isLt3M) {
+        ElMessage({ message: '封面大小不能超过 3MB', type: 'warning', duration: 2000 })
+      }
+
+      return isImage && isLt3M
+    },
+    async uploadCover(uploadRequest) {
+      try {
+        const normalizedFile = await imageUtils.fileToBase64(uploadRequest.file)
+        const pictureId = nanoid()
+        const picture = {
+          pictureId,
+          userId: this.userId,
+          diaryId: '',
+          insId: this.currentInsId,
+          pictureName: uploadRequest.file.name,
+          pictureContent: '',
+          isAvatar: false,
+          isCover: true,
+          syncStatus: 'local',
+        }
+
+        await imageUtils.saveTempImage(this.userId, pictureId, normalizedFile.miniurl)
+        store.dispatch('pictureAbout/addPicture', picture)
+        await window.api.electronStore.pictureStore.setPicture(
+          JSON.parse(JSON.stringify(store.state.pictureAbout.pictureData))
+        )
+        this.coverPictureId = pictureId
+        this.imageUrl = imageUtils.getLocalTempImageUrl(this.userId, pictureId)
+        uploadRequest.onSuccess?.({ data: [picture] })
+
+        ElMessage({ type: 'success', message: '封面上传成功' })
+      } catch (error) {
+        console.error(error)
+        uploadRequest.onError?.(error)
+        ElMessage({ type: 'error', message: '封面上传失败' })
       }
     },
-    handleSave:function(){
-      // 先保存灵感doc中的图片
-      let image = this.$refs.editor.getImage().imgFile
-      let imgId = this.$refs.editor.getImage().imgId
-      image.forEach((file, pos) => {
-        store.dispatch("pictureAbout/addPicture", {
-          pictureId: imgId[pos],
-          userId: this.userId,
-          insId: this.insId,
-          image: file,
-        });
-      })
-      this.tag = this.$refs.tagMini.getSelectedTag()
-      // 获取tag
-      console.log('tag:'+JSON.stringify(this.tag))
-      // 将信息汇总保存
-      let ins = {
-        insId:this.insId || nanoid(),
-        userId:this.userId,
-        insTitle: this.title,
-        insContent:this.$refs.editor.getContent(),
-        insDate: dayjs(this.ins?.insDate ?? undefined).format('YYYY-MM-DD'),
-        insTags: this.tag,
-        insCover: this.imageUrl,
+    handleCoverError() {
+      if (!this.coverPictureId) {
+        return
       }
-      console.log('save ins:'+JSON.stringify(ins))
-      store.dispatch('insAbout/addIns',ins)
-      router.back()
-    }
-  },
 
+      const coverPicture = store.getters['pictureAbout/fetchPictureById'](this.coverPictureId)
+      this.imageUrl = coverPicture ? imageUtils.getLocalImageUrl(coverPicture) : ''
+    },
+    async handleSave() {
+      const tag = this.$refs.tagMini.getSelectedTag()
+      let finalCoverUrl = this.currentIns.insCover || ''
+
+      if (this.coverPictureId) {
+        const coverPicture = store.getters['pictureAbout/fetchPictureById'](this.coverPictureId)
+        if (coverPicture) {
+          finalCoverUrl = imageUtils.getLocalImageUrl(coverPicture)
+          await imageUtils.saveImageToDoc(this.userId, this.currentInsId, this.coverPictureId)
+        }
+      }
+
+      store.dispatch('insAbout/addIns', {
+        insId: this.currentInsId,
+        userId: this.userId,
+        insTitle: this.title,
+        insContent: this.$refs.editor.getContent(),
+        insDate: this.insDate || dayjs().format('YYYY-MM-DD'),
+        insTags: tag,
+        insCover: finalCoverUrl,
+      })
+
+      await window.api.electronStore.insStore.setIns(
+        JSON.parse(JSON.stringify(store.state.insAbout.insData))
+      )
+      await window.api.electronStore.pictureStore.setPicture(
+        JSON.parse(JSON.stringify(store.state.pictureAbout.pictureData))
+      )
+      ElMessage({
+        type: 'success',
+        message: '保存成功',
+      })
+
+      router.back()
+    },
+  },
 }
 </script>
 
 <style scoped>
-#insHeader{
-  display:flex;
+#insHeader {
+  display: flex;
   justify-content: space-between;
   align-items: center;
   padding-top: 45px;
 }
-.calendar-area{
+
+.calendar-area {
   align-self: flex-start;
-  padding-left:10px;
+  padding-left: 10px;
 }
-.tools-area{
-  display:flex;
+
+.tools-area {
+  display: flex;
   justify-content: center;
   align-items: center;
-  margin-right:40px;
-  cursor:pointer;
+  margin-right: 40px;
+  cursor: pointer;
 }
-.tools-area>img{
+
+.tools-area > img {
   width: 40px;
   height: 40px;
 }
-#editor-container{
-  position:relative;
-  display:flex;
-  width:95%;
-  height:78vh;
-  margin:30px 0;
+
+#editor-container {
+  position: relative;
+  display: flex;
+  width: 95%;
+  height: 78vh;
+  margin: 30px 0;
   background-color: rgba(255, 255, 255, 0.4);
-  border-radius:15px;
+  border-radius: 15px;
 }
-.editor-box{
-  flex:2;
+
+.editor-box {
+  flex: 2;
+  min-width: 0;
 }
-#editor{
-  width:100%;
-  height:100%;
-  border-radius:10px;
+
+#editor {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
 }
-.info-box{
-  flex:1;
-  display:flex;
+
+.info-box {
+  flex: 1;
+  display: flex;
   flex-direction: column;
 }
-.cover-container{
-  flex:4;
-  display:flex;
+
+.cover-container {
+  flex: 4;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
-.cover-box{
-  display:flex;
+
+.date-container {
+  flex: 1;
+  display: flex;
   justify-content: center;
   align-items: center;
-  width:75%;
-  height:75%;
-  background-color: #ededed;
-  font-size: 20px;
-  color: rgba(94, 94, 94, 0.4)
 }
-.title-container{
-  flex:1;
-  display:flex;
+
+.title-container {
+  flex: 1;
+  display: flex;
   justify-content: center;
   align-items: flex-start;
 }
-.title-container input{
+
+.title-container input {
   width: 80%;
   height: 60%;
   text-indent: 2em;
@@ -263,34 +274,37 @@ export default {
   font-size: 15px;
 }
 
-.SaveBtn{
+.SaveBtn {
   position: absolute;
-  transform:scale(1.2);
+  transform: scale(1.2);
   right: 3%;
   bottom: 3%;
 }
 
 .avatar-uploader .avatar {
-  width:100%;
-  height:100%;
+  width: 100%;
+  height: 100%;
   display: block;
   object-fit: cover;
 }
+
 .avatar-uploader {
   display: flex;
   justify-content: center;
   align-items: center;
-  width:75%;
-  height:75%;
+  width: 75%;
+  height: 75%;
   border: 1px dashed var(--el-border-color);
   border-radius: 6px;
   position: relative;
   overflow: hidden;
   transition: var(--el-transition-duration-fast);
 }
+
 .avatar-uploader:hover {
   border-color: var(--el-color-primary);
 }
+
 .el-icon.avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;

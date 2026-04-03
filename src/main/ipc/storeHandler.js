@@ -7,6 +7,7 @@ export function storeHandler() {
   let tagStore = null;
   let diaryStore = null;
   let insStore = null;
+  let pictureStore = null;
 
   // appStore
   ipcMain.handle('app-store:add-userIndex',(event, user)=>{
@@ -20,6 +21,7 @@ export function storeHandler() {
     tagStore = dataStore.tagStore
     diaryStore = dataStore.diaryStore
     insStore = dataStore.insStore
+    pictureStore = dataStore.pictureStore
   })
   ipcMain.handle('app-store:get-userIndex',(event,args)=>{
     return appStore.getUserIndex()
@@ -144,5 +146,19 @@ export function storeHandler() {
       throw new Error('insStore is not exist')
     }
     insStore.setIns(ins)
+  })
+
+  // pictureStore
+  ipcMain.handle('picture-store:get-picture', () => {
+    if (!pictureStore) {
+      throw new Error('pictureStore is not exist')
+    }
+    return pictureStore.getPicture()
+  })
+  ipcMain.handle('picture-store:set-picture', (event, picture) => {
+    if (!pictureStore) {
+      throw new Error('pictureStore is not exist')
+    }
+    pictureStore.setPicture(picture)
   })
 }

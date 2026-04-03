@@ -1,232 +1,205 @@
-// main-process/image-services.js
-import { ipcMain, app as electronApp} from "electron";
-import { deletePicture, getPicture, getUserPictureList } from "../../renderer/src/utils/api/modules/picture";
+import express from 'express'
+import fs from 'fs'
+import path from 'path'
+import { app as electronApp } from 'electron'
+import appStore from '../stores/module/appStore'
 
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
+const serverApp = express()
+const PORT = 3001
+const IMAGE_DIR = path.join(electronApp.getPath('userData'), 'images')
 
-const app = express();
-const PORT = 3001;
-const IMAGE_DIR = path.join(electronApp.getPath('userData'), 'images');
+let serverStarted = false
 
-export function imageServer(win) {
-  // 启动本地服务
-  // 获取图片
-  app.get('/images/:userId/:docId/:pictureId', (req, res) => {
-    const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
-    if (fs.existsSync(filePath)) {
-      res.sendFile(filePath); // 本地存在直接返回
-    } else {
-      downloadFromServer(req.params.userId, req.params.docId, req.params.pictureId)
-        .then(savedPath => res.sendFile(savedPath))
-        .catch(() => res.status(404).end());
+serverApp.use(express.json({ limit: '20mb' }))
+serverApp.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204)
+    return
+  }
+
+  next()
+})
+
+function getApiBaseUrl() {
+  return (process.env.VITE_APP_API_URL || 'http://localhost:3000').replace(/\/$/, '')
+}
+
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true })
+}
+
+function logImageServer(event, payload = {}) {
+  console.log(`[image-server] ${event}`, payload)
+}
+
+function getLocalImagePath(userId, docId, pictureId) {
+  return path.join(IMAGE_DIR, String(userId), String(docId), String(pictureId))
+}
+
+function getTempImagePath(userId, pictureId) {
+  return path.join(IMAGE_DIR, String(userId), 'temp', String(pictureId))
+}
+
+function getCurrentToken() {
+  const loginUserId = appStore.getLoginUserId()
+  if (!loginUserId || loginUserId === -1) {
+    return ''
+  }
+
+  appStore.setUserStore(loginUserId)
+  return appStore.getUserStore().getUserToken() || ''
+}
+
+async function downloadFromServer(pictureId) {
+  const token = getCurrentToken()
+  if (!token) {
+    throw new Error('Missing token for picture download')
+  }
+
+  const response = await fetch(
+    `${getApiBaseUrl()}/api/picture/${pictureId}?token=${encodeURIComponent(token)}`
+  )
+
+  if (!response.ok) {
+    throw new Error(`Picture download failed: ${response.status}`)
+  }
+
+  const arrayBuffer = await response.arrayBuffer()
+  return Buffer.from(arrayBuffer)
+}
+
+function writeBase64Image(filePath, dataUrl) {
+  const matches = String(dataUrl).match(/^data:(.+);base64,(.+)$/)
+  if (!matches) {
+    throw new Error('Invalid image payload')
+  }
+
+  ensureDir(path.dirname(filePath))
+  fs.writeFileSync(filePath, Buffer.from(matches[2], 'base64'))
+}
+
+function sendLocalFile(res, filePath) {
+  if (!fs.existsSync(filePath)) {
+    logImageServer('file-miss', { filePath })
+    res.status(404).json({
+      message: 'Image not found',
+      errorType: 'ImageServerError',
+    })
+    return
+  }
+
+  res.sendFile(filePath)
+}
+
+export function imageServer() {
+  if (serverStarted) {
+    return
+  }
+
+  serverStarted = true
+
+  serverApp.get('/images/temp/:userId/:pictureId', (req, res) => {
+    const filePath = getTempImagePath(req.params.userId, req.params.pictureId)
+    logImageServer('temp-get', { filePath })
+    sendLocalFile(res, filePath)
+  })
+
+  serverApp.post('/images/temp/:userId/:pictureId', (req, res) => {
+    try {
+      const filePath = getTempImagePath(req.params.userId, req.params.pictureId)
+      writeBase64Image(filePath, req.body.dataUrl)
+      logImageServer('temp-save-success', {
+        filePath,
+        userId: req.params.userId,
+        pictureId: req.params.pictureId,
+      })
+      res.json({ success: true })
+    } catch (error) {
+      logImageServer('temp-save-failed', {
+        userId: req.params.userId,
+        pictureId: req.params.pictureId,
+        message: error.message,
+      })
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      })
     }
-  });
-  // 将图片暂存在temp目录
-  app.post('/images/temp/:userId/:pictureId', (req, res) => {
-    saveTemp(req.params.userId, req.params.pictureId, req.file)
-      .then(savedPath => res.json({
-        success: true,
-        path: savedPath
-      }).catch(() => res.status(500).end()));
-  });
-  // 删除temp目录的图片
-  app.delete('/images/temp/:userId/:pictureId', (req, res) => {
-    deleteTemp(req.params.userId, req.params.pictureId)
-      .then(() => res.json({
-        success: true,
-      }).catch(() => res.status(500).end()));
   })
-  // 将图片保存至本地
-  app.post('/images/save/:userId/:docId/:pictureId', (req, res) => {
-    // const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
-    saveToLocal(req.params.userId, req.params.docId, req.params.pictureId, req.file)
-      .then(savedPath => res.json({
-        success: true,
-        path: savedPath
-      }).catch(() => res.status(500).end()));
-  })
-  // 将图片上传至服务器
-  app.post('/images/upload/:userId/:docId/:pictureId', (req, res) => {
-    const filePath = path.join(IMAGE_DIR, req.params.userId, req.params.docId, req.params.pictureId);
-    uploadToServer(req.params.userId, req.params.docId, req.params.pictureId, req.file)
-      .then(() => res.json({
-        success: true,
-      }).catch(() => res.status(500).end()));
-  })
-  // 删除本地图片
-  app.delete('/images/:userId/:docId/:pictureId', (req, res) => {
-    deleteLocal(req.params.userId, req.params.docId, req.params.pictureId)
-      .then(() => res.json({
-        success: true,
-      }).catch(() => res.status(500).end()));
-  })
-  // 在Electron主进程启动
-  app.listen(PORT, () => console.log(`Image server running on ${PORT}`));
 
-  // ※※※※ 注意：以下内部函数参数传入对象
-  // 主进程主动调用渲染进程 —— 上传图片
-  function uploadPicture(params) {
-    win.webContents.send('main-send-upload-picture', params);
+  serverApp.post('/images/save/:userId/:docId/:pictureId', (req, res) => {
+    const tempPath = getTempImagePath(req.params.userId, req.params.pictureId)
+    const targetPath = getLocalImagePath(req.params.userId, req.params.docId, req.params.pictureId)
 
-    // 监听渲染进程的回复
-    return new Promise(resolve => {
-      ipcMain.once('renderer-response-upload-picture', (event, result) => {
-        resolve(result);
-      });
-    });
-  }
-  // 主进程主动调用渲染进程 —— 获取图片数据
-  function getPicture(params) {
-    win.webContents.send('main-send-get-picture', params);
+    try {
+      ensureDir(path.dirname(targetPath))
 
-    // 监听渲染进程的回复
-    return new Promise(resolve => {
-      ipcMain.once('renderer-response-get-picture', (event, result) => {
-        resolve(result);
-      });
-    });
-  }
-  // 主进程主动调用渲染进程 —— 获取用户图片列表
-  function getUserPictureList(params) {
-    win.webContents.send('main-send-get-user-picture-list', params);
-
-    // 监听渲染进程的回复
-    return new Promise(resolve => {
-      ipcMain.once('renderer-response-get-user-picture-list', (event, result) => {
-        resolve(result);
-      });
-    });
-  }
-  // 主进程主动调用渲染进程 —— 删除图片
-  function deletePicture(params) {
-    win.webContents.send('main-send-delete-picture', params);
-
-    // 监听渲染进程的回复
-    return new Promise(resolve => {
-      ipcMain.once('renderer-response-delete-picture', (event, result) => {
-        resolve(result);
-      });
-    });
-  }
-  // 从服务器上获取图片，使用stream流存放到本地
-  function downloadFromServer(userId, docId, pictureId) {
-    return new Promise((resolve, reject) => {
-      const saveDir = path.join(IMAGE_DIR, userId, docId);
-      const savePath = path.join(saveDir, pictureId);
-
-      // 调用API获取图片Blob数据
-      getPicture({ pictureId })
-        .then(async (response) => {
-          fs.mkdirSync(saveDir, { recursive: true })
-
-          // 将Blob转换为Buffer并写入文件
-          const arrayBuffer = await response.data.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer)
-          fs.writeFile(savePath, buffer, (err) => {
-            if (err) reject(err)
-            else resolve(savePath)
-          })
+      if (fs.existsSync(tempPath)) {
+        fs.copyFileSync(tempPath, targetPath)
+        fs.unlinkSync(tempPath)
+        logImageServer('doc-save-success', {
+          tempPath,
+          targetPath,
+          userId: req.params.userId,
+          docId: req.params.docId,
+          pictureId: req.params.pictureId,
         })
-        .catch(reject)
-    });
-  }
-  // 将图片上传至服务器
-  function uploadToServer(userId, docId, pictureId, params) {
-    return new Promise(async (resolve, reject) => {
-      const fileDir = path.join(IMAGE_DIR, userId, docId);
-      const filePath = path.join(fileDir, pictureId);
-
-      if (fs.existsSync(filePath)) {
-        const file = new FormData();
-        file.append('file', fs.createReadStream(filePath)); // 使用文件流
-        file.append('filename', path.basename(filePath));
-        uploadPicture({ params, file })
-          .then(resolve)
-          .catch(reject)
+      } else if (!fs.existsSync(targetPath)) {
+        throw new Error('Temp image not found')
       }
-    })
-  }
-  // 将图片保存至本地
-  function saveToLocal(userId, docId, pictureId, file) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const saveDir = path.join(IMAGE_DIR, userId, docId);
-        const savePath = path.join(saveDir, pictureId);
 
-        fs.mkdirSync(saveDir, { recursive: true });
+      res.json({ success: true })
+    } catch (error) {
+      logImageServer('doc-save-failed', {
+        tempPath,
+        targetPath,
+        userId: req.params.userId,
+        docId: req.params.docId,
+        pictureId: req.params.pictureId,
+        message: error.message,
+      })
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      })
+    }
+  })
 
-        // 将Blob转换为Buffer并写入文件
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer)
-        fs.writeFile(savePath, buffer, (err) => {
-          if (err) reject(err)
-          else resolve(savePath)
-        })
-      } catch (err) {
-        reject(err);
+  serverApp.get('/images/:userId/:docId/:pictureId', async (req, res) => {
+    const { userId, docId, pictureId } = req.params
+    const filePath = getLocalImagePath(userId, docId, pictureId)
+
+    try {
+      if (!fs.existsSync(filePath)) {
+        logImageServer('doc-miss-download-start', { filePath, userId, docId, pictureId })
+        const buffer = await downloadFromServer(pictureId)
+        ensureDir(path.dirname(filePath))
+        fs.writeFileSync(filePath, buffer)
+        logImageServer('doc-miss-download-success', { filePath, userId, docId, pictureId })
       }
-    });
-  }
-  // 删除本地的图片
-  function deleteLocal(userId, docId, pictureId) {
-    return new Promise((resolve, reject) => {
-      const filePath = path.join(IMAGE_DIR, userId, docId, pictureId);
-      try {
-        fs.unlinkSync(filePath);
-        console.log(`文件已删除: ${filePath}`);
-        resolve({ success: true, existed: true }); // 明确返回状态
-      } catch (err) {
-        if (err.code === 'ENOENT') {
-          console.log(`文件不存在（无需删除）: ${filePath}`);
-          resolve({ success: true, existed: false }); // 文件不存在视为成功
-        } else {
-          console.error(`删除文件失败: ${filePath}`, err);
-          reject(err); // 其他错误才 reject
-        }
-      }
-    });
-  }
-  // 将图片保存至临时目录
-  function saveTemp(userId, pictureId, file) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const saveDir = path.join(IMAGE_DIR, userId, 'temp');
-        const savePath = path.join(saveDir, pictureId);
 
-        fs.mkdirSync(saveDir, { recursive: true });
+      logImageServer('doc-get-success', { filePath, userId, docId, pictureId })
+      res.sendFile(filePath)
+    } catch (error) {
+      logImageServer('doc-get-failed', {
+        filePath,
+        userId,
+        docId,
+        pictureId,
+        message: error.message,
+      })
+      res.status(404).json({
+        message: 'Image not found',
+        errorType: 'ImageServerError',
+      })
+    }
+  })
 
-        // 将Blob转换为Buffer并写入文件
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer)
-        fs.writeFile(savePath, buffer, (err) => {
-          if (err) reject(err)
-          else resolve(savePath)
-        })
-      } catch (err) {
-        reject(err);
-      }
-    })
-  }
-  // 将图片从临时目录删除
-  function deleteTemp(userId, pictureId) {
-    return new Promise((resolve, reject) => {
-      const filePath = path.join(IMAGE_DIR, userId, 'temp', pictureId);
-      try {
-        fs.unlinkSync(filePath);
-        console.log(`文件已删除: ${filePath}`);
-        resolve({ success: true, existed: true }); // 明确返回状态
-
-      } catch (err){
-        if (err.code === 'ENOENT') {
-          console.log(`文件不存在（无需删除）: ${filePath}`);
-          resolve({ success: true, existed: false }); // 文件不存在视为成功
-        } else {
-          console.error(`删除文件失败: ${filePath}`, err);
-          reject(err); // 其他错误才 reject
-        }
-      }
-    })
-  }
+  serverApp.listen(PORT, () => {
+    console.log(`Image server running on http://localhost:${PORT}`)
+  })
 }

@@ -2,6 +2,7 @@ import store from "../store/store";
 
 const weather = require('weather-js');
 const createHash = require('crypto').createHash;
+const LOCAL_IMAGE_BASE_URL = 'http://localhost:3001'
 
 /**
  * 图片相关工具函数类
@@ -10,6 +11,33 @@ const imageUtils = {
   getImageUrl(pictureId){
     let baseURL = import.meta.env.VITE_APP_API_URL;
     return `${baseURL}/api/picture/${pictureId}?token=${localStorage.getItem('token')}`
+  },
+  getLocalImageUrl(picture) {
+    const docId = picture?.diaryId || picture?.insId
+
+    if (!picture?.pictureId || !picture?.userId || !docId) {
+      return picture?.pictureId ? imageUtils.getImageUrl(picture.pictureId) : ''
+    }
+
+    return `${LOCAL_IMAGE_BASE_URL}/images/${picture.userId}/${docId}/${picture.pictureId}`
+  },
+  getLocalTempImageUrl(userId, pictureId) {
+    return `${LOCAL_IMAGE_BASE_URL}/images/temp/${userId}/${pictureId}`
+  },
+  fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+
+      reader.onload = () => {
+        resolve({
+          miniurl: reader.result,
+          _name: file.name,
+        })
+      }
+
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   },
   /**
    * 压缩图片文件对象（严格保持输入输出结构一致）
@@ -69,6 +97,35 @@ const imageUtils = {
       u8arr[i] = bstr.charCodeAt(i);
     }
     return new File([u8arr], filename, { type: mime });
+  },
+  async saveTempImage(userId, pictureId, dataUrl) {
+    const response = await fetch(`${LOCAL_IMAGE_BASE_URL}/images/temp/${userId}/${pictureId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ dataUrl }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Save temp image failed')
+    }
+
+    return response.json()
+  },
+  async saveImageToDoc(userId, docId, pictureId) {
+    const response = await fetch(`${LOCAL_IMAGE_BASE_URL}/images/save/${userId}/${docId}/${pictureId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Save image to doc failed')
+    }
+
+    return response.json()
   }
 }
 
