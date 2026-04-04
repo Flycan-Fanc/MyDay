@@ -1,5 +1,39 @@
 import store from '../store/store'
 import { userAPI, tagAPI, planAPI, diaryAPI, insAPI, syncMetaAPI } from '../utils/api'
+import { dayjs } from 'element-plus'
+
+function normalizeDateValue(value) {
+  if (!value) {
+    return ''
+  }
+  const parsed = dayjs(value)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : value
+}
+
+function normalizePlanPayload(value = {}) {
+  return {
+    ...value,
+    planTags: Array.isArray(value.planTags) ? value.planTags : [],
+    startTime: normalizeDateValue(value.startTime),
+    endTime: normalizeDateValue(value.endTime),
+  }
+}
+
+function normalizeDiaryPayload(value = {}) {
+  return {
+    ...value,
+    diaryTags: Array.isArray(value.diaryTags) ? value.diaryTags : [],
+    diaryDate: normalizeDateValue(value.diaryDate),
+  }
+}
+
+function normalizeInsPayload(value = {}) {
+  return {
+    ...value,
+    insTags: Array.isArray(value.insTags) ? value.insTags : [],
+    insDate: normalizeDateValue(value.insDate),
+  }
+}
 
 export async function dataRemoteStorage() {
   try {
@@ -8,34 +42,57 @@ export async function dataRemoteStorage() {
       return
     }
 
+    await store.dispatch('syncAbout/setSyncing', {
+      localVersion: Number(store.state.syncAbout.localVersion ?? 0),
+      remoteVersion: Number(store.state.syncAbout.remoteVersion ?? 0),
+    })
+
     await userAPI.updateUserInfo(user)
 
     const tag = JSON.parse(JSON.stringify(store.state.tagAbout.userTags))
     await Promise.all(tag.map(item => tagAPI.createTag(item)))
 
-    const plan = JSON.parse(JSON.stringify(store.state.planAbout.planData))
+    const plan = JSON.parse(JSON.stringify(store.state.planAbout.planData)).map(item => normalizePlanPayload(item))
     await Promise.all(plan.map(item => planAPI.createPlan(item)))
 
-    const diary = JSON.parse(JSON.stringify(store.state.diaryAbout.diaryData))
+    const diary = JSON.parse(JSON.stringify(store.state.diaryAbout.diaryData)).map(item => normalizeDiaryPayload(item))
     await Promise.all(diary.map(item => diaryAPI.createDiary(item)))
 
-    const ins = JSON.parse(JSON.stringify(store.state.insAbout.insData))
+    const ins = JSON.parse(JSON.stringify(store.state.insAbout.insData)).map(item => normalizeInsPayload(item))
     await Promise.all(ins.map(item => insAPI.createIns(item)))
 
     const syncMeta = await syncMetaAPI.updateSyncMeta(user.userId)
+    const currentLocalSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta')) || {}
+    const fallbackVersion = Number(
+      currentLocalSyncMeta.dataVersion ??
+      store.state.syncAbout.localVersion ??
+      store.state.syncAbout.remoteVersion ??
+      0
+    )
+    const resolvedVersion = Number(syncMeta?.data_version ?? syncMeta?.dataVersion ?? fallbackVersion)
     const newSyncMeta = {
       userId: user.userId,
-      dataVersion: syncMeta?.data_version,
-      dataHash: syncMeta?.data_hash,
+      dataVersion: resolvedVersion,
+      dataHash: syncMeta?.data_hash ?? syncMeta?.dataHash ?? currentLocalSyncMeta.dataHash,
     }
     localStorage.setItem('userSyncMeta', JSON.stringify(newSyncMeta))
     await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
+    await store.dispatch('syncAbout/markSynced', {
+      localVersion: resolvedVersion,
+      remoteVersion: resolvedVersion,
+      detail: '\u5df2\u540c\u6b65',
+    })
 
     ElMessage({
       type: 'success',
       message: '数据同步成功'
     })
   } catch (err) {
+    await store.dispatch('syncAbout/markError', {
+      localVersion: Number(store.state.syncAbout.localVersion ?? 0),
+      remoteVersion: Number(store.state.syncAbout.remoteVersion ?? 0),
+      lastError: err?.message || '\u6570\u636e\u540c\u6b65\u5931\u8d25',
+    })
     ElMessage({
       type: 'error',
       message: '数据同步失败'

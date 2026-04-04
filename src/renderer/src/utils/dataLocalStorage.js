@@ -26,11 +26,31 @@ export async function dataLocalStorage() {
     await window.api.electronStore.pictureStore.setPicture(picture)
 
     const oldSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta')) || { dataVersion: 0 }
-    const nextVersion = oldSyncMeta.dataVersion + 1
+    const syncState = store.state.syncAbout || {}
+    const persistedVersion = Number(oldSyncMeta.dataVersion ?? 0)
+    const stateLocalVersion = Number(syncState.localVersion ?? persistedVersion)
+    const stateRemoteVersion = Number(syncState.remoteVersion ?? persistedVersion)
+    const shouldPersistPendingVersion = ['pending', 'error', 'local_only'].includes(syncState.status)
+    const nextVersion = shouldPersistPendingVersion
+      ? Math.max(stateLocalVersion, stateRemoteVersion, persistedVersion)
+      : persistedVersion
     const newDataHash = hashUtils.generateHash({ userId: user.userId, dataVersion: nextVersion })
     const newSyncMeta = { userId: user.userId, dataVersion: nextVersion, dataHash: newDataHash }
     localStorage.setItem('userSyncMeta', JSON.stringify(newSyncMeta))
     await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
+    if (shouldPersistPendingVersion) {
+      await store.dispatch('syncAbout/markPending', {
+        localVersion: nextVersion,
+        remoteVersion: stateRemoteVersion,
+        detail: '\u5f85\u540c\u6b65',
+      })
+    } else {
+      await store.dispatch('syncAbout/markSynced', {
+        localVersion: nextVersion,
+        remoteVersion: stateRemoteVersion,
+        detail: '\u5df2\u540c\u6b65',
+      })
+    }
   } catch (err) {
     throw new Error(`数据本地存储失败:${err}`)
   }

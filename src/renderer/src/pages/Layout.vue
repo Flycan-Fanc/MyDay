@@ -34,6 +34,25 @@
       <UserTagManager v-model:showTagDialog.async="showTagDialog"></UserTagManager>
       <UserInfoManager v-model:showUserInfoDialog.async="showUserInfoDialog" :user="user" :logout="logout"></UserInfoManager>
       <div class="person-area">
+        <div class="sync-entry-area">
+          <el-tooltip :content="syncTooltip" placement="right" effect="light" :show-after="150">
+            <div class="sync-indicator" :class="`is-${syncStatus}`" aria-label="sync-status">
+              <span class="sync-indicator__light"></span>
+            </div>
+          </el-tooltip>
+          <el-tooltip :content="syncActionHint" placement="right" effect="light" :show-after="150">
+            <el-button
+              class="sync-action-btn"
+              size="small"
+              round
+              :loading="isManualSyncing"
+              :disabled="!canManualSync"
+              @click.stop="manualSync"
+            >
+              {{ syncButtonText }}
+            </el-button>
+          </el-tooltip>
+        </div>
         <div class="popover-emit" ref="buttonRef" v-click-outside="onClickOutside">
           <div class="img-container">
             <img :src="avatarUrl" alt="用户头像" id="avatar" />
@@ -96,6 +115,9 @@ import PubSub from "pubsub-js";
 import { dataLocalStorage } from "../utils/dataLocalStorage";
 import store from "../store/store";
 import { dataSync } from "../utils/dataSync";
+import { dataRemoteStorage } from "../utils/dataRemoteStorage";
+import { dataRemoteFetch } from "../utils/dataRemoteFetch";
+import * as syncMetaAPI from "../utils/api/modules/syncMeta";
 
 const windowControls = window.api.windowControls;
 
@@ -143,6 +165,7 @@ export default {
       showUserInfoDialog:false,
       buttonRef:ref(),
       popoverRef:ref(),
+      isManualSyncing:false,
     }
   },
   watch:{
@@ -163,6 +186,30 @@ export default {
         console.log("get avatar url:",this.user.avatarId)
         return this.user.avatarId ? imageUtils.getImageUrl(this.user.avatarId) : ''
       },
+    },
+    syncStatus() {
+      return store.state.syncAbout.status || 'local_only'
+    },
+    syncTooltip() {
+      return store.getters['syncAbout/tooltipText']
+    },
+    syncButtonText() {
+      return '\u540c\u6b65'
+    },
+    canManualSync() {
+      return !!this.user?.userId && this.syncStatus !== 'syncing' && !this.isManualSyncing
+    },
+    syncActionHint() {
+      if (!this.user?.userId) {
+        return '\u672a\u767b\u5f55'
+      }
+      if (this.syncStatus === 'syncing' || this.isManualSyncing) {
+        return '\u540c\u6b65\u4e2d'
+      }
+      if (this.syncStatus === 'pending' || this.syncStatus === 'local_only' || this.syncStatus === 'error') {
+        return '\u624b\u52a8\u540c\u6b65'
+      }
+      return '\u68c0\u67e5\u6700\u65b0\u540c\u6b65\u72b6\u6001'
     },
   },
   directives:{
@@ -237,6 +284,119 @@ export default {
     },
     openUserDialog(){
       this.showUserInfoDialog = !this.showUserInfoDialog
+    },
+    hasLocalBusinessData() {
+      return (
+        store.state.tagAbout.userTags.length > 0 ||
+        store.state.planAbout.planData.length > 0 ||
+        store.state.diaryAbout.diaryData.length > 0 ||
+        store.state.insAbout.insData.length > 0 ||
+        store.state.pictureAbout.pictureData.length > 0
+      )
+    },
+    buildManualSyncPlan(remoteSyncMeta) {
+      const localVersion = Number(store.state.syncAbout.localVersion ?? 0)
+      const remoteVersion = Number(remoteSyncMeta?.data_version ?? store.state.syncAbout.remoteVersion ?? 0)
+      const hasLocalData = this.hasLocalBusinessData()
+
+      if (this.syncStatus === 'local_only' && hasLocalData) {
+        return {
+          action: 'push',
+          title: '\u6570\u636e\u540c\u6b65',
+          message: '\u5c06\u5f53\u524d\u672c\u5730\u6570\u636e\u4e0a\u4f20\u5230\u8fdc\u7aef\u3002\n\n\u98ce\u9669\u63d0\u793a\uff1a\u5f53\u524d\u8fdc\u7aef\u540c\u6b65\u4ecd\u4e3a\u5168\u91cf\u8986\u76d6\u65b9\u6848\uff0c\u5982\u8fdc\u7aef\u5df2\u6709\u65e7\u6570\u636e\uff0c\u672c\u6b21\u63a8\u9001\u4f1a\u4ee5\u672c\u5730\u72b6\u6001\u4e3a\u51c6\u3002',
+          confirmButtonText: '\u4e0a\u4f20\u672c\u5730\u6570\u636e',
+          type: 'warning',
+        }
+      }
+
+      if (localVersion > remoteVersion) {
+        return {
+          action: 'push',
+          title: '\u6570\u636e\u540c\u6b65',
+          message: `\u672c\u5730\u7248\u672c v${localVersion} \u9886\u5148\u4e8e\u8fdc\u7aef v${remoteVersion}\uff0c\u5c06\u628a\u5f53\u524d\u672c\u5730\u6570\u636e\u63a8\u9001\u5230\u8fdc\u7aef\u3002\n\n\u98ce\u9669\u63d0\u793a\uff1a\u8fdc\u7aef\u540c\u6b65\u4ecd\u4e3a\u5168\u91cf\u8986\u76d6\u65b9\u6848\uff0c\u7ee7\u7eed\u540e\u4ee5\u672c\u5730\u6570\u636e\u4e3a\u51c6\u3002`,
+          confirmButtonText: '\u63a8\u9001\u5230\u8fdc\u7aef',
+          type: 'warning',
+        }
+      }
+
+      if (localVersion < remoteVersion) {
+        return {
+          action: 'pull',
+          title: '\u6570\u636e\u540c\u6b65',
+          message: `\u8fdc\u7aef\u7248\u672c v${remoteVersion} \u9886\u5148\u4e8e\u672c\u5730 v${localVersion}\uff0c\u5c06\u62c9\u53d6\u8fdc\u7aef\u6700\u65b0\u6570\u636e\u5230\u672c\u5730\u3002\n\n\u98ce\u9669\u63d0\u793a\uff1a\u5f53\u524d\u672c\u5730\u6570\u636e\u4f1a\u88ab\u8fdc\u7aef\u5185\u5bb9\u8986\u76d6\uff0c\u8bf7\u786e\u8ba4\u5df2\u4e0d\u518d\u4fdd\u7559\u672c\u5730\u672a\u4e0a\u4f20\u53d8\u66f4\u3002`,
+          confirmButtonText: '\u62c9\u53d6\u8fdc\u7aef\u6570\u636e',
+          type: 'warning',
+        }
+      }
+
+      return {
+        action: 'noop',
+        title: '\u6570\u636e\u540c\u6b65',
+        message: '\u5f53\u524d\u672c\u5730\u4e0e\u8fdc\u7aef\u7248\u672c\u4e00\u81f4\uff0c\u65e0\u9700\u624b\u52a8\u540c\u6b65\u3002',
+        confirmButtonText: '\u77e5\u9053\u4e86',
+        type: 'info',
+      }
+    },
+    async manualSync(){
+      if (!this.canManualSync) {
+        return
+      }
+
+      const userId = store.getters['userAbout/getUserId'] || this.user?.userId
+      if (!userId) {
+        ElMessage({
+          message: '\u672a\u767b\u5f55',
+          type: 'warning',
+          duration: 2000
+        })
+        return
+      }
+
+      this.isManualSyncing = true
+      try {
+        const remoteSyncMeta = await syncMetaAPI.getSyncMeta(userId)
+        const plan = this.buildManualSyncPlan(remoteSyncMeta)
+
+        if (plan.action === 'noop') {
+          ElMessage({
+            message: plan.message,
+            type: 'info',
+            duration: 2000
+          })
+          return
+        }
+
+        await ElMessageBox.confirm(
+          plan.message,
+          plan.title,
+          {
+            confirmButtonText: plan.confirmButtonText,
+            cancelButtonText: '\u53d6\u6d88',
+            type: plan.type,
+          }
+        )
+
+        if (plan.action === 'push') {
+          await dataLocalStorage()
+          await dataRemoteStorage()
+          return
+        }
+
+        if (plan.action === 'pull') {
+          await dataRemoteFetch(userId, remoteSyncMeta, { preferRemote: true })
+        }
+      } catch (err) {
+        if (err === 'cancel' || err === 'close') {
+          return
+        }
+        ElMessage({
+          message: '\u624b\u52a8\u540c\u6b65\u5931\u8d25',
+          type: 'error',
+          duration: 2000
+        })
+      } finally {
+        this.isManualSyncing = false
+      }
     },
     async logout(){
       // TODO：退出登录前的收尾工作：数据本地存储以及远程同步等、将用户登陆状态设为false
@@ -371,8 +531,74 @@ html,body {
   display:flex;
   justify-content: center;
   align-items: center;
+  gap: 14px;
   width:100%;
   bottom: 10%;
+}
+.person-area .sync-entry-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.person-area .popover-emit {
+  display: flex;
+  align-items: center;
+}
+.sync-action-btn {
+  min-width: 64px;
+  color: #2c5f88;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(44, 95, 136, 0.18);
+  box-shadow: 0 8px 16px rgba(44, 95, 136, 0.12);
+}
+.sync-action-btn:hover,
+.sync-action-btn:focus {
+  color: #1e4b6f;
+  background: rgba(255, 255, 255, 0.95);
+}
+.sync-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.65);
+}
+.sync-indicator__light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9da5b1;
+  box-shadow: 0 0 10px rgba(157, 165, 177, 0.45);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.sync-indicator.is-local_only .sync-indicator__light,
+.sync-indicator.is-pending .sync-indicator__light,
+.sync-indicator.is-error .sync-indicator__light {
+  background: #e35d5b;
+  box-shadow: 0 0 12px rgba(227, 93, 91, 0.45);
+}
+.sync-indicator.is-syncing .sync-indicator__light {
+  background: #e2b13c;
+  box-shadow: 0 0 12px rgba(226, 177, 60, 0.5);
+  animation: sync-pulse 1.6s ease-in-out infinite;
+}
+.sync-indicator.is-synced .sync-indicator__light {
+  background: #58b16f;
+  box-shadow: 0 0 12px rgba(88, 177, 111, 0.45);
+}
+@keyframes sync-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
 }
 .person-area .img-container {
   display: inline-block;

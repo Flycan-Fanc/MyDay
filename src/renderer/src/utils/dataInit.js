@@ -24,6 +24,11 @@ export async function dataInit(userData) {
       userSyncMeta = await syncMetaAPI.getSyncMeta(userData.userId)
     }
     localStorage.setItem('userSyncMeta', JSON.stringify(userSyncMeta))
+    await store.dispatch('syncAbout/initialize', {
+      localVersion: Number(userSyncMeta?.dataVersion ?? 0),
+      remoteVersion: Number(userSyncMeta?.dataVersion ?? 0),
+      hasRemote: !!userSyncMeta,
+    })
 
     let userTag = await window.api.electronStore.tagStore.getTag()
     if (shouldFetchRemote(userTag, hasLocalSyncMeta)) {

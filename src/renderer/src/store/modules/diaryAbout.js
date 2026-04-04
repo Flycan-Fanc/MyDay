@@ -1,7 +1,24 @@
 import Diary from '../../models/Diary'
 import { stringUtils } from '../../utils/dataUtils'
 import { nanoid } from 'nanoid'
+import { dayjs } from 'element-plus'
 import store from '../store'
+
+function normalizeDiaryDate(value) {
+  if (!value) {
+    return ''
+  }
+  const parsed = dayjs(value)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : value
+}
+
+function normalizeDiaryItem(value = {}) {
+  return {
+    ...value,
+    diaryDate: normalizeDiaryDate(value.diaryDate),
+    diaryTags: Array.isArray(value.diaryTags) ? value.diaryTags : [],
+  }
+}
 
 async function persistDiaryData(state) {
   await window.api.electronStore.diaryStore.setDiary(JSON.parse(JSON.stringify(state.diaryData)))
@@ -55,7 +72,7 @@ const diaryAbout = {
   },
   mutations: {
     setData(state, value) {
-      state.diaryData = Array.isArray(value) ? value : []
+      state.diaryData = Array.isArray(value) ? value.map(item => normalizeDiaryItem(item)) : []
     },
     saveDataLocal() {},
     saveDataRemote() {},

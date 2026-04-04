@@ -1,7 +1,24 @@
 import Inspiration from '../../models/Inspiration'
 import { stringUtils } from '../../utils/dataUtils'
 import { nanoid } from 'nanoid'
+import { dayjs } from 'element-plus'
 import store from '../store'
+
+function normalizeInsDate(value) {
+  if (!value) {
+    return ''
+  }
+  const parsed = dayjs(value)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : value
+}
+
+function normalizeInsItem(value = {}) {
+  return {
+    ...value,
+    insDate: normalizeInsDate(value.insDate),
+    insTags: Array.isArray(value.insTags) ? value.insTags : [],
+  }
+}
 
 async function persistInsData(state) {
   await window.api.electronStore.insStore.setIns(JSON.parse(JSON.stringify(state.insData)))
@@ -60,7 +77,7 @@ const insAbout = {
   },
   mutations: {
     setData(state, value) {
-      state.insData = Array.isArray(value) ? value : []
+      state.insData = Array.isArray(value) ? value.map(item => normalizeInsItem(item)) : []
     },
     saveDataLocal() {},
     saveDataRemote() {},

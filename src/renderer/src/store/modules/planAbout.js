@@ -3,6 +3,23 @@ import { nanoid } from 'nanoid'
 import { dayjs } from 'element-plus'
 import store from '../store'
 
+function normalizePlanDate(value) {
+  if (!value) {
+    return ''
+  }
+  const parsed = dayjs(value)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : value
+}
+
+function normalizePlanItem(value = {}) {
+  return {
+    ...value,
+    planTags: Array.isArray(value.planTags) ? value.planTags : [],
+    startTime: normalizePlanDate(value.startTime),
+    endTime: normalizePlanDate(value.endTime),
+  }
+}
+
 async function persistPlanData(state) {
   await window.api.electronStore.planStore.setPlan(JSON.parse(JSON.stringify(state.planData)))
 }
@@ -76,7 +93,7 @@ const planAbout = {
   },
   mutations: {
     setData(state, value) {
-      state.planData = Array.isArray(value) ? value : []
+      state.planData = Array.isArray(value) ? value.map(item => normalizePlanItem(item)) : []
     },
     saveDataLocal() {},
     saveDataRemote() {},

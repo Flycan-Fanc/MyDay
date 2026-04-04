@@ -1,6 +1,7 @@
 import store from '../store/store'
 
 function resetVuexState() {
+  store.commit('syncAbout/reset')
   store.commit('userAbout/resetUser')
   store.commit('planAbout/resetData')
   store.commit('tagAbout/resetData')
@@ -10,7 +11,7 @@ function resetVuexState() {
   store.commit('weatherAbout/resetWeather')
 }
 
-export async function clearSession({ clearLoginStatus = true } = {}) {
+export async function clearSession({ clearLoginStatus = true, clearSyncMeta = false } = {}) {
   const loginUserId = await window.api.electronStore.appStore.getLoginUserId()
 
   if (loginUserId !== -1) {
@@ -21,7 +22,9 @@ export async function clearSession({ clearLoginStatus = true } = {}) {
     }
 
     await window.api.electronStore.userStore.setUserToken('')
-    await window.api.electronStore.userStore.setUserSyncMeta(undefined)
+    if (clearSyncMeta) {
+      await window.api.electronStore.userStore.setUserSyncMeta(undefined)
+    }
   }
 
   localStorage.removeItem('token')
