@@ -7,16 +7,35 @@ import appStore from '../stores/module/appStore'
 const serverApp = express()
 const PORT = 3001
 const IMAGE_DIR = path.join(electronApp.getPath('userData'), 'images')
+const FALLBACK_RENDERER_ORIGINS = ['http://localhost:5173', 'http://localhost:5174']
 
 let serverStarted = false
 
 serverApp.use(express.json({ limit: '20mb' }))
 serverApp.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  const rendererOrigin = process.env.ELECTRON_RENDERER_URL
+    ? new URL(process.env.ELECTRON_RENDERER_URL).origin
+    : null
+  const allowedOrigins = new Set([
+    ...FALLBACK_RENDERER_ORIGINS,
+    rendererOrigin,
+    'null',
+  ].filter(Boolean))
+  const requestOrigin = req.headers.origin
+
+  if (requestOrigin && allowedOrigins.has(requestOrigin)) {
+    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
+    res.setHeader('Vary', 'Origin')
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
   if (req.method === 'OPTIONS') {
+    if (requestOrigin && !allowedOrigins.has(requestOrigin)) {
+      res.sendStatus(403)
+      return
+    }
     res.sendStatus(204)
     return
   }

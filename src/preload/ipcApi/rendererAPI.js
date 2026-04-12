@@ -2,7 +2,6 @@
  * renderer API
  */
 import { ipcRenderer } from "electron";
-import { uploadPicture } from "../../renderer/src/utils/api/modules/picture";
 
 export const rendererAPI = {
   /**

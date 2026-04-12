@@ -22,9 +22,9 @@ function createWindow() {
       sandbox: false,
       scrollBounce: false,
       scrollbarOverlayStyle: 'none',
-      webSecurity: false,
-      nodeIntegration: true,
-      contextIsolation: false,
+      webSecurity: true,
+      nodeIntegration: false,
+      contextIsolation: true,
       enableBlinkFeatures: 'Geolocation',
     },
   })
@@ -47,28 +47,28 @@ function createWindow() {
       ? mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
       : mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
 
-  loadPromise.then(() => {
-    setupCSPHeaders(mainWindow)
+  setupCSPHeaders(mainWindow)
+
+  loadPromise.catch((error) => {
+    console.error('Failed to load renderer entry:', error)
   })
 }
 
 function setupCSPHeaders(window) {
-  window.webContents.on('did-finish-load', () => {
-    const isDev = process.env.NODE_ENV === 'development'
-    const cspHeader = [
-      "default-src 'self'",
-      "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com http://localhost:3000 http://localhost:3001",
-      `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ''}`,
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: http://localhost:3000 http://localhost:3001",
-    ]
-      .filter(Boolean)
-      .join('; ')
+  const isDev = process.env.NODE_ENV === 'development'
+  const cspHeader = [
+    "default-src 'self'",
+    "connect-src 'self' http://localhost:8080 ws://localhost:* http://ip-api.com https://nominatim.openstreetmap.org http://weather.service.msn.com http://localhost:3000 http://localhost:3001",
+    `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ''}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: http://localhost:3000 http://localhost:3001",
+  ]
+    .filter(Boolean)
+    .join('; ')
 
-    window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-      details.responseHeaders['Content-Security-Policy'] = [cspHeader]
-      callback({ responseHeaders: details.responseHeaders })
-    })
+  window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    details.responseHeaders['Content-Security-Policy'] = [cspHeader]
+    callback({ responseHeaders: details.responseHeaders })
   })
 }
 

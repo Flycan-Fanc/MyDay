@@ -7,7 +7,6 @@ import pictureStore from './userData/pictureStore';
 // const electronStore = window.api.electronStore
 
 import electronStore from '../index'
-import { hashUtils } from "../../../renderer/src/utils/dataUtils";
 
 class UserStore {
   constructor(userId) {

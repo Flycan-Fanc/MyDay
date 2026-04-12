@@ -1,8 +1,7 @@
 import store from "../store/store";
-
-const weather = require('weather-js');
-const createHash = require('crypto').createHash;
+import { hashUtils } from "../../../shared/utils/hash";
 const LOCAL_IMAGE_BASE_URL = 'http://localhost:3001'
+const WEATHER_API_BASE_URL = 'http://weather.service.msn.com/find.aspx'
 
 /**
  * 图片相关工具函数类
@@ -234,49 +233,72 @@ const locationUtils = {
  * 天气相关工具函数类
  */
 const weatherUtils = {
-  // async getWeatherInfo() {
-  //   let pos = await locationUtils.fetchLocationByIP()
-  //   // TODO:后续可能改为和风天气api？
-  //   weather.find({search: pos.city+','+pos.countryCode, degreeType: 'C'}, function(err, result) {
-  //     if(err) console.log(err);
-  //     console.log(JSON.stringify(result, null, 2));
-  //     store.dispatch('weatherAbout/setWeatherData',result)
-  //   });
-  // }
+  parseWeatherResponse(xmlText) {
+    const parser = new DOMParser()
+    const xmlDoc = parser.parseFromString(xmlText, 'text/xml')
+    const weatherNode = xmlDoc.querySelector('weather')
+
+    if (!weatherNode) {
+      throw new Error('missing weather info')
+    }
+
+    const location = {
+      name: weatherNode.getAttribute('weatherlocationname'),
+      zipcode: weatherNode.getAttribute('zipcode'),
+      lat: weatherNode.getAttribute('lat'),
+      long: weatherNode.getAttribute('long'),
+      timezone: weatherNode.getAttribute('timezone'),
+      alert: weatherNode.getAttribute('alert'),
+      degreetype: weatherNode.getAttribute('degreetype'),
+      imagerelativeurl: weatherNode.getAttribute('imagerelativeurl'),
+    }
+
+    const currentNode = weatherNode.querySelector('current')
+    const current = currentNode
+      ? {
+          temperature: currentNode.getAttribute('temperature'),
+          skytext: currentNode.getAttribute('skytext'),
+          skycode: currentNode.getAttribute('skycode'),
+          imageUrl: `${location.imagerelativeurl}law/${currentNode.getAttribute('skycode')}.gif`,
+        }
+      : null
+
+    const forecast = Array.from(weatherNode.querySelectorAll('forecast')).map((item) => ({
+      date: item.getAttribute('date'),
+      day: item.getAttribute('day'),
+      shortday: item.getAttribute('shortday'),
+      skytextday: item.getAttribute('skytextday'),
+      skycodeday: item.getAttribute('skycodeday'),
+      low: item.getAttribute('low'),
+      high: item.getAttribute('high'),
+      precip: item.getAttribute('precip'),
+    }))
+
+    return [{ location, current, forecast }]
+  },
   async getWeatherInfo() {
     try {
       const pos = await locationUtils.fetchLocationByIP();
-      // 将 weather.find 包装为 Promise
-      await new Promise((resolve, reject) => {
-        weather.find(
-          {
-            search: `${pos.city},${pos.countryCode}`,
-            degreeType: 'C'
-          },
-          (err, result) => {
-            if (err) {
-              console.error(err);
-              reject(err);
-            } else {
-              console.log(JSON.stringify(result, null, 2));
-              store.dispatch('weatherAbout/setWeatherData', result);
-              resolve(result); // 完成 Promise
-            }
-          }
-        );
-      });
+      const params = new URLSearchParams({
+        src: 'outlook',
+        weadegreetype: 'C',
+        culture: 'en-US',
+        weasearchstr: `${pos.city},${pos.countryCode}`,
+      })
+      const response = await fetch(`${WEATHER_API_BASE_URL}?${params.toString()}`)
+
+      if (!response.ok) {
+        throw new Error(`Weather request failed: ${response.status}`)
+      }
+
+      const xmlText = await response.text()
+      const weatherData = weatherUtils.parseWeatherResponse(xmlText)
+      store.dispatch('weatherAbout/setWeatherData', weatherData);
+      return weatherData
     } catch (error) {
       console.error("Failed to get weather info:", error);
       throw error; // 抛出错误以便外部捕获
     }
-  }
-}
-
-const hashUtils = {
-  generateHash(data) {
-    return createHash('sha256')
-      .update(JSON.stringify(data))
-      .digest('hex');
   }
 }
 
