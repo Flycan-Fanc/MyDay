@@ -118,6 +118,7 @@ import { dataSync } from "../utils/dataSync";
 import { dataRemoteStorage } from "../utils/dataRemoteStorage";
 import { dataRemoteFetch } from "../utils/dataRemoteFetch";
 import * as syncMetaAPI from "../utils/api/modules/syncMeta";
+import { getSyncMetaVersion } from "../utils/syncMeta";
 
 const windowControls = window.api.windowControls;
 
@@ -296,7 +297,7 @@ export default {
     },
     buildManualSyncPlan(remoteSyncMeta) {
       const localVersion = Number(store.state.syncAbout.localVersion ?? 0)
-      const remoteVersion = Number(remoteSyncMeta?.data_version ?? store.state.syncAbout.remoteVersion ?? 0)
+      const remoteVersion = getSyncMetaVersion(remoteSyncMeta, Number(store.state.syncAbout.remoteVersion ?? 0))
       const hasLocalData = this.hasLocalBusinessData()
 
       if (this.syncStatus === 'local_only' && hasLocalData) {

@@ -1,6 +1,7 @@
 import store from '../store/store'
 import { userAPI, tagAPI, planAPI, diaryAPI, insAPI, syncMetaAPI } from '../utils/api'
 import { dayjs } from 'element-plus'
+import { getSyncMetaVersion, normalizeSyncMeta } from './syncMeta'
 
 function normalizeDateValue(value) {
   if (!value) {
@@ -41,6 +42,7 @@ export async function dataRemoteStorage() {
     if (!user?.userId) {
       return
     }
+    console.info('[dataRemoteStorage] start', { userId: user.userId })
 
     await store.dispatch('syncAbout/setSyncing', {
       localVersion: Number(store.state.syncAbout.localVersion ?? 0),
@@ -61,27 +63,28 @@ export async function dataRemoteStorage() {
     const ins = JSON.parse(JSON.stringify(store.state.insAbout.insData)).map(item => normalizeInsPayload(item))
     await Promise.all(ins.map(item => insAPI.createIns(item)))
 
-    const syncMeta = await syncMetaAPI.updateSyncMeta(user.userId)
-    const currentLocalSyncMeta = JSON.parse(localStorage.getItem('userSyncMeta')) || {}
+    const syncMeta = normalizeSyncMeta(await syncMetaAPI.updateSyncMeta(user.userId))
+    const currentLocalSyncMeta = normalizeSyncMeta(JSON.parse(localStorage.getItem('userSyncMeta'))) || {}
     const fallbackVersion = Number(
       currentLocalSyncMeta.dataVersion ??
       store.state.syncAbout.localVersion ??
       store.state.syncAbout.remoteVersion ??
       0
     )
-    const resolvedVersion = Number(syncMeta?.data_version ?? syncMeta?.dataVersion ?? fallbackVersion)
+    const resolvedVersion = getSyncMetaVersion(syncMeta, fallbackVersion)
     const newSyncMeta = {
       userId: user.userId,
       dataVersion: resolvedVersion,
-      dataHash: syncMeta?.data_hash ?? syncMeta?.dataHash ?? currentLocalSyncMeta.dataHash,
+      dataHash: syncMeta?.dataHash ?? currentLocalSyncMeta.dataHash,
     }
     localStorage.setItem('userSyncMeta', JSON.stringify(newSyncMeta))
     await window.api.electronStore.userStore.setUserSyncMeta(newSyncMeta)
     await store.dispatch('syncAbout/markSynced', {
       localVersion: resolvedVersion,
       remoteVersion: resolvedVersion,
-      detail: '\u5df2\u540c\u6b65',
+      detail: '已同步',
     })
+    console.info('[dataRemoteStorage] completed', { userId: user.userId, dataVersion: resolvedVersion })
 
     ElMessage({
       type: 'success',
@@ -91,7 +94,7 @@ export async function dataRemoteStorage() {
     await store.dispatch('syncAbout/markError', {
       localVersion: Number(store.state.syncAbout.localVersion ?? 0),
       remoteVersion: Number(store.state.syncAbout.remoteVersion ?? 0),
-      lastError: err?.message || '\u6570\u636e\u540c\u6b65\u5931\u8d25',
+      lastError: err?.message || '数据同步失败',
     })
     ElMessage({
       type: 'error',

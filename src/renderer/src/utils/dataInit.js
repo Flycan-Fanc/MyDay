@@ -1,6 +1,7 @@
 import store from '../store/store'
 import { tagAPI, planAPI, diaryAPI, insAPI, syncMetaAPI } from '../utils/api'
 import { pictureInit } from './pictureInit'
+import { normalizeSyncMeta } from './syncMeta'
 
 function shouldFetchRemote(localValue, hasLocalSyncMeta) {
   if (hasLocalSyncMeta) {
@@ -18,7 +19,7 @@ export async function dataInit(userData) {
     const userId = userData.userId
     await store.dispatch('userAbout/addUser', userData)
 
-    let userSyncMeta = await window.api.electronStore.userStore.getUserSyncMeta()
+    let userSyncMeta = normalizeSyncMeta(await window.api.electronStore.userStore.getUserSyncMeta())
     const hasLocalSyncMeta = !!userSyncMeta
     if (!userSyncMeta) {
       userSyncMeta = await syncMetaAPI.getSyncMeta(userData.userId)
